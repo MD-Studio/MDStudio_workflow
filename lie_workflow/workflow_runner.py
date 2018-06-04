@@ -538,6 +538,11 @@ class WorkflowRunner(WorkflowSpec):
         :type validate:  :py:bool
         """
 
+        # Empty workflow, return
+        if self.workflow.empty() or not len(self.workflow.query_nodes(format='task')):
+            logging.info('Workflow contains no tasks')
+            return
+
         # Start from workflow root by default
         tid = tid or self.workflow.root
 
