@@ -34,10 +34,14 @@ class WorkflowRunner(WorkflowSpec):
     :type workflow:    JSON object
     """
 
-    def __init__(self, workflow=None, **kwargs):
+    def __init__(self, workflow=None, project_dir="./mdstudio_workflow", **kwargs):
 
         # Init inherit classes such as the WorkflowSpec
         super(WorkflowRunner, self).__init__(workflow=workflow, **kwargs)
+
+        # Set project directory
+        project_metadata = self.workflow.query_nodes(key='project_metadata')
+        project_metadata.project_dir.set('value', project_dir)
 
         # Define task runner
         self.task_runner = None
