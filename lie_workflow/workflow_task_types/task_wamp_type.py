@@ -7,12 +7,14 @@ Task class for calling a method on a (remote) microservice using the WAMP
 protocol (Web Agnostic Messaging Protocol)
 """
 
+import os
 import logging
 
 from mdstudio.component.session import ComponentSession
 from lie_graph.graph_math_operations import graph_join
 
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
+from lie_workflow.workflow_common import is_file
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = 'workflow_wamp_task.v1.json'
@@ -41,12 +43,24 @@ class WampTask(TaskBase):
             self.task_metadata.task_id.set('value', self.task_metadata.task_id.create())
 
     def get_input(self):
+        """
+        Prepare input dictionary for the WAMP call
+
+        All data is transferred over the network by default in WAMP
+        communication and therefor all file paths are read to string.
+        """
 
         input_dict = super(WampTask, self).get_input()
 
-        meta = self.task_metadata
-        if meta.store_output() and meta.workdir():
-            input_dict['workdir'] = meta.workdir()
+        # If local files are defined as input, read content.
+        for key, value in input_dict.items():
+            if is_file(value) and os.path.isfile(value):
+                with open(value, 'r') as ip:
+                    input_dict[key] = ip.read()
+
+        # meta = self.task_metadata
+        # if meta.store_output() and meta.workdir() and input_dict.get('workdir') is None:
+        #     input_dict['workdir'] = meta.workdir()
 
         return input_dict
 

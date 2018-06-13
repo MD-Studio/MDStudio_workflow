@@ -16,7 +16,7 @@ import os
 from lie_graph.graph_mixin import NodeTools
 from lie_graph.graph_io.io_jsonschema_format import read_json_schema
 
-from lie_workflow.workflow_common import WorkflowError
+from lie_workflow.workflow_common import WorkflowError, collect_data
 
 
 def load_task_schema(schema_name):
@@ -113,7 +113,7 @@ class TaskBase(NodeTools):
 
     def get_input(self):
         """
-        Prepare the input data
+        Base method for preparing task input
 
         If the task is configured to store output to disk (store_output == True)
         the dictionary with input data is serialized to JSON and stored in the
@@ -169,7 +169,8 @@ class TaskBase(NodeTools):
             if os.path.exists(output['$ref']):
                 output = json.load(open(output['$ref']))
             else:
-                raise WorkflowError('Task {0} ({1}), output.json does not exist at: {2}'.format(self.nid, self.key, output['$ref']))
+                raise WorkflowError('Task {0} ({1}), output.json does not exist at: {2}'.format(self.nid, self.key,
+                                                                                                output['$ref']))
 
         return output
 
@@ -185,12 +186,17 @@ class TaskBase(NodeTools):
 
         # Output should be a dictionary for now
         if not isinstance(output, dict):
-            raise WorkflowError('Task {0} ({1}). Output should be a dictionary, got {2}'.format(self.nid, self.key, type(output)))
+            raise WorkflowError('Task {0} ({1}). Output should be a dictionary, got {2}'.format(self.nid, self.key,
+                                                                                                type(output)))
 
         # Store to file or not
         if self.task_metadata.store_output():
             task_dir = self.task_metadata.workdir.get()
             if task_dir and os.path.exists(task_dir):
+
+                # Check for file paths, copy data to workdir
+                output = collect_data(output, task_dir)
+
                 output_json = os.path.join(task_dir, 'output.json')
                 json.dump(output, open(output_json, 'w'), indent=2)
                 output = {'$ref': output_json}
