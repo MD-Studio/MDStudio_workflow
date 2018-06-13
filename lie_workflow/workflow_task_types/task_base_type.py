@@ -165,12 +165,19 @@ class TaskBase(NodeTools):
         """
 
         output = self.task_metadata.output_data.get(default={})
+        project_dir = self._full_graph.query_nodes(key='project_metadata').project_dir()
         if '$ref' in output:
-            if os.path.exists(output['$ref']):
-                output = json.load(open(output['$ref']))
+
+            # $ref should be relative
+            ref_path = output['$ref']
+            if not os.path.isabs(ref_path):
+                ref_path = os.path.join(project_dir, ref_path )
+
+            if os.path.exists(ref_path ):
+                output = json.load(open(ref_path))
             else:
                 raise WorkflowError('Task {0} ({1}), output.json does not exist at: {2}'.format(self.nid, self.key,
-                                                                                                output['$ref']))
+                                                                                                ref_path))
 
         return output
 
@@ -191,6 +198,7 @@ class TaskBase(NodeTools):
 
         # Store to file or not
         if self.task_metadata.store_output():
+            project_dir = self._full_graph.query_nodes(key='project_metadata').project_dir()
             task_dir = self.task_metadata.workdir.get()
             if task_dir and os.path.exists(task_dir):
 
@@ -199,7 +207,8 @@ class TaskBase(NodeTools):
 
                 output_json = os.path.join(task_dir, 'output.json')
                 json.dump(output, open(output_json, 'w'), indent=2)
-                output = {'$ref': output_json}
+
+                output = {'$ref': os.path.relpath(output_json, project_dir)}
             else:
                 raise WorkflowError('Task directory does not exist: {0}'.format(task_dir))
 
