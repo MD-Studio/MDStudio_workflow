@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
+import re
 import logging
 import itertools
+import shutil
 
 from collections import Counter
+
+from lie_graph.graph_io.io_dict_format import read_dict, write_dict
 
 
 class WorkflowError(Exception):
@@ -71,3 +76,39 @@ def validate_workflow(workflow):
             validated = False
 
     return validated
+
+
+def is_file(param):
+
+    if not isinstance(param, (str, unicode)):
+        return False
+
+    if param.count('\n') > 0:
+        return False
+
+    if re.match('^(.+)/([^/]+)$', param):
+        return True
+
+    return False
+
+
+def collect_data(output, task_dir):
+
+    graph = read_dict(output)
+    for node in graph.nodes.values():
+
+        for key, value in node.items():
+            if is_file(value):
+                if os.path.exists(value):
+
+                    # Copy the file
+                    filename = os.path.basename(value)
+                    destination = os.path.join(task_dir, filename)
+                    shutil.copy(value, destination)
+                    node[key] = destination
+
+                    logging.info('Collect file: {0} to {1}'.format(value, destination))
+                else:
+                    logging.debug('Value might be a file but the path does not exist: {0}'.format(value))
+
+    return write_dict(graph)
