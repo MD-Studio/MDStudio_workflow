@@ -234,6 +234,7 @@ class WorkflowSpec(object):
 
         json_string = write_jgf(self.workflow)
         if path:
+            path = os.path.abspath(path)
             pred = os.path.exists(os.path.dirname(path))
             msg = 'Directory does not exist: {0}'.format(os.path.dirname(path))
             assert pred, msg
