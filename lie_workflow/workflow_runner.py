@@ -34,14 +34,10 @@ class WorkflowRunner(WorkflowSpec):
     :type workflow:    JSON object
     """
 
-    def __init__(self, workflow=None, project_dir="./mdstudio_workflow", **kwargs):
+    def __init__(self, workflow=None, **kwargs):
 
         # Init inherit classes such as the WorkflowSpec
         super(WorkflowRunner, self).__init__(workflow=workflow, **kwargs)
-
-        # Set project directory
-        project_metadata = self.workflow.query_nodes(key='project_metadata')
-        project_metadata.project_dir.set('value', project_dir)
 
         # Define task runner
         self.task_runner = None
@@ -520,7 +516,7 @@ class WorkflowRunner(WorkflowSpec):
 
         return output
 
-    def run(self, tid=None, validate=True):
+    def run(self, project_dir="./mdstudio_workflow", tid=None, validate=True):
         """
         Run a workflow specification
 
@@ -553,6 +549,10 @@ class WorkflowRunner(WorkflowSpec):
         # Check if tid exists
         if tid not in self.workflow.nodes:
             raise WorkflowError('Task with tid {0} not in workflow'.format(tid))
+
+        # Set project directory
+        project_metadata = self.workflow.query_nodes(key='project_metadata')
+        project_metadata.project_dir.set('value', project_dir)
 
         # Validate workflow before running?
         if validate:
