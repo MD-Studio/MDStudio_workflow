@@ -98,8 +98,18 @@ def collect_data(output, task_dir):
     for node in graph.nodes.values():
 
         for key, value in node.items():
-            if is_file(value):
-                if os.path.exists(value):
+            if is_file(value):  # It still could be a file or directory
+
+                if os.path.isdir(value):
+
+                    # Copy the full directory
+                    dirname = os.path.basename(value)
+                    destination = os.path.join(task_dir, dirname)
+                    shutil.copytree(value, destination)
+                    node[key] = destination
+
+                    logging.info('Collect directory: {0} to {1}'.format(value, destination))
+                elif os.path.isfile(value):
 
                     # Copy the file
                     filename = os.path.basename(value)
