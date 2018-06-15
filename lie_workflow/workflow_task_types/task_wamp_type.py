@@ -53,8 +53,9 @@ class WampTask(TaskBase):
         input_dict = super(WampTask, self).get_input()
 
         # If local files are defined as input, read content.
+        # TODO: replace with method that uses metadata to assess what is a file
         for key, value in input_dict.items():
-            if is_file(value) and os.path.isfile(value):
+            if is_file(value) and os.path.isfile(value) and not os.access(value, os.X_OK):
                 with open(value, 'r') as ip:
                     input_dict[key] = ip.read()
 
