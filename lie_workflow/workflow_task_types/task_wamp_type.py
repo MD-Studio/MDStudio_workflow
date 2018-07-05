@@ -93,16 +93,14 @@ class WampTask(TaskBase):
             if group_context and not wamp_uri.startswith(group_context):
                 wamp_uri = '{0}.{1}'.format(group_context, wamp_uri)
 
-            with task_runner.group_context(group_context):
+            # Call the service
+            deferred = task_runner.call(wamp_uri, self.get_input())
 
-                # Call the service
-                deferred = task_runner.call(wamp_uri, self.get_input())
+            # Attach error callback
+            deferred.addErrback(errorback, self.nid)
 
-                # Attach error callback
-                deferred.addErrback(errorback, self.nid)
-
-                # Attach callback if needed
-                deferred.addCallback(callback, self.nid)
+            # Attach callback if needed
+            deferred.addCallback(callback, self.nid)
 
         else:
             errorback('task_runner not of type mdstudio.component.session.ComponentSession', self.nid)
