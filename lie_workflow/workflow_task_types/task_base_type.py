@@ -13,6 +13,7 @@ import logging
 import json
 import os
 
+from lie_graph import GraphAxis
 from lie_graph.graph_mixin import NodeTools
 from lie_graph.graph_py2to3 import prepaire_data_dict, PY_STRING
 from lie_graph.graph_io.io_jsonschema_format import read_json_schema
@@ -21,9 +22,25 @@ from lie_workflow.workflow_common import WorkflowError, collect_data
 
 
 def load_task_schema(schema_name):
+    """
+    Load task template graphs from JSON Schema template files
+
+    Template files are located in the package /schemas/endpoints directory
+
+    :param schema_name: task JSON Schema file name to load
+    :type schema_name:  :py:str
+
+    :return:            Directed GraphAxis task template graph
+    :rtype:             :lie_graph:GraphAxis
+    """
+
+    # Set 'is_directed' to True to import JSON schema as directed graph
+    template_graph = GraphAxis()
+    template_graph.is_directed = True
 
     task_schema = pkg_resources.resource_filename('lie_workflow', '/schemas/endpoints/{0}'.format(schema_name))
-    task_template = read_json_schema(task_schema, exclude_args=['title', 'description', 'schema_label'])
+    task_template = read_json_schema(task_schema, graph=template_graph,
+                                     exclude_args=['title', 'description', 'schema_label'])
     task_node = task_template.query_nodes(key='task')
 
     if task_node.empty():

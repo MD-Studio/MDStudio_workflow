@@ -15,11 +15,12 @@ from lie_graph import GraphAxis
 from lie_graph.graph_io.io_jgf_format import write_jgf, read_jgf
 from lie_graph.graph_io.io_jsonschema_format import read_json_schema
 from lie_graph.graph_axis.graph_axis_mixin import NodeAxisTools
+from lie_graph.graph_py2to3 import to_unicode, prepaire_data_dict
 from lie_graph.graph_helpers import renumber_id
 
 from lie_workflow import __version__
 from lie_workflow.workflow_common import WorkflowError
-from lie_workflow.workflow_task_types import WORKFLOW_ORM
+from lie_workflow.workflow_task_types import task_types, WORKFLOW_ORM
 
 # Path to default workflow JSON schema part of the module
 workflow_metadata_template = pkg_resources.resource_filename('lie_workflow',
@@ -113,10 +114,9 @@ class WorkflowSpec(object):
         """
 
         # Task type needs to be supported by ORM
-        supported_task_types = self.workflow.orm.mapped_node_types.get('task_type', [])
-        if task_type not in supported_task_types:
+        if task_type not in task_types:
             raise WorkflowError('Workflow task type "{0}" not supported. Needs to be one of {1}'.format(task_type,
-                                                                                    ', '.join(supported_task_types)))
+                                                                                    ', '.join(task_types)))
 
         # Add the task as node to the workflow graph. The task 'new' method is
         # called for initial task initiation.
@@ -154,7 +154,10 @@ class WorkflowSpec(object):
         assert task2 in self.workflow.nodes, 'Task {0} not in workflow'.format(task2)
         assert task1 != task2, 'Connection to self not allowed'
 
-        eid = self.workflow.add_edge(task1, task2, label='task_link', data_mapping=kwargs, data_select=list(args))
+        eid = self.workflow.add_edge(task1, task2,
+                                     label='task_link',
+                                     data_mapping=prepaire_data_dict(kwargs),
+                                     data_select=[to_unicode(arg) for arg in args])
 
         return eid
 
@@ -179,10 +182,13 @@ class WorkflowSpec(object):
         :param schema: JSON schema
         """
 
-        # Build workflow template from schema
-        template = read_json_schema(schema, exclude_args=['title', 'description', 'schema_label'])
+        # Build workflow template from schema.
+        # Set 'is_directed' to True to import JSON schema as directed graph
+        template_graph = GraphAxis()
+        template_graph.is_directed = True
+        template = read_json_schema(schema, graph=template_graph, exclude_args=['title', 'description', 'schema_label'])
+
         self.workflow = template.query_nodes(key='project_metadata').descendants(include_self=True).copy()
-        self.workflow.is_directed = True
         self.workflow.node_tools = NodeAxisTools
         self.workflow.orm = WORKFLOW_ORM
         renumber_id(self.workflow, 1)
