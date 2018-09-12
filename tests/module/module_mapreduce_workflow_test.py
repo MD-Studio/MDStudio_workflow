@@ -18,7 +18,7 @@ Run it using the following scenarios:
 """
 
 import os
-import unittest2
+import unittest
 import time
 
 from lie_workflow import Workflow, WorkflowSpec
@@ -66,7 +66,7 @@ class BaseWorkflowRunnerTests(object):
         self.assertDictEqual(result, self.expected_output)
 
 
-class TestBuildMapreduceWorkflow(unittest2.TestCase):
+class TestBuildMapreduceWorkflow(unittest.TestCase):
     """
     Build the map-reduce workflow a shown in the file header using the default
     threader PythonTask runner
@@ -126,7 +126,7 @@ class TestBuildMapreduceWorkflow(unittest2.TestCase):
         self.assertTrue(os.path.exists(workflow_file_path))
 
 
-class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow
     """
@@ -141,7 +141,7 @@ class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -173,7 +173,7 @@ class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCas
             time.sleep(1)
 
 
-class TestZcleanup(unittest2.TestCase):
+class TestZcleanup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):

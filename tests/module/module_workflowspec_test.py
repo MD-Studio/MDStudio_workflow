@@ -9,7 +9,7 @@ Unit tests for the WorkflowSpec class
 import os
 import json
 import jsonschema
-import unittest2
+import unittest
 
 from lie_graph.graph_io.io_dict_format import write_dict
 
@@ -20,7 +20,7 @@ from lie_workflow.workflow_spec import workflow_metadata_template
 currpath = os.path.dirname(__file__)
 
 
-class TestWorkflowSpec(unittest2.TestCase):
+class TestWorkflowSpec(unittest.TestCase):
     """
     Test WorkflowSpec class
     """

@@ -9,7 +9,7 @@ Unit tests construction and running the linear workflow:
 """
 
 import os
-import unittest2
+import unittest
 import time
 
 from lie_workflow import Workflow, WorkflowSpec
@@ -19,6 +19,15 @@ workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-linea
 
 
 class BaseWorkflowRunnerTests(object):
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Remove workflow project directory
+        """
+
+        project_metadata = cls.wf.workflow.query_nodes(key='project_metadata')
+        project_metadata.project_dir.remove()
 
     def test1_initial_workflow_status(self):
         """
@@ -57,7 +66,7 @@ class BaseWorkflowRunnerTests(object):
         self.assertDictEqual(result, self.expected_output)
 
 
-class TestBuildLinearWorkflow(unittest2.TestCase):
+class TestBuildLinearWorkflow(unittest.TestCase):
     """
     Build the linear workflow a shown in the file header
     """
@@ -114,7 +123,7 @@ class TestBuildLinearWorkflow(unittest2.TestCase):
         self.assertTrue(os.path.exists(workflow_file_path))
 
 
-class TestRunLinearWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the linear workflow build in TestBuildLinearWorkflow
     """
@@ -128,7 +137,7 @@ class TestRunLinearWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildLinearWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildLinearWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -149,14 +158,14 @@ class TestRunLinearWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
             time.sleep(1)
 
 
-class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to fail at task 'test3'
@@ -171,7 +180,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildLinearWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildLinearWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -196,7 +205,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -219,7 +228,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
         self.assertEqual(self.wf.failed_tasks, [self.wf.workflow.query_nodes(key='test3')])
 
 
-class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to crash at task 'test3'
@@ -234,7 +243,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildLinearWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildLinearWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -259,7 +268,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -282,7 +291,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
         self.assertEqual(self.wf.failed_tasks, [self.wf.workflow.query_nodes(key='test3')])
 
 
-class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to pause at task 'test3' (breakpoint)
@@ -297,7 +306,7 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildLinearWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildLinearWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -322,7 +331,7 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow hits breakpoint
         while self.wf.is_running:
@@ -337,7 +346,7 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestCas
         self.wf.step_breakpoint(bp[0].nid)
 
         # Run the workflow
-        self.wf.run(tid=bp[0].nid)
+        self.wf.run(tid=bp[0].nid, project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -361,7 +370,7 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestCas
         self.assertEqual(self.wf.active_breakpoints, [])
 
 
-class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to fail at task 'test3' after trying 3 times
@@ -376,7 +385,7 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildLinearWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildLinearWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -402,7 +411,7 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -428,7 +437,7 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCas
         self.assertEqual(self.wf.failed_tasks, [bp])
 
 
-class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but cancel it
     at workflow task3
@@ -443,7 +452,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildLinearWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildLinearWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -465,7 +474,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: cancel workflow after 5 seconds
         while self.wf.is_running:
@@ -490,7 +499,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
         self.assertTrue(bp.status == 'aborted')
 
 
-class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Import a finished workflow and run it. Should check all steps but not rerun
     """
@@ -521,14 +530,14 @@ class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
             time.sleep(1)
 
 
-class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Import unfinished workflow and continue
     """
@@ -550,14 +559,14 @@ class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
             time.sleep(1)
 
 
-class TestZcleanup(unittest2.TestCase):
+class TestZcleanup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):

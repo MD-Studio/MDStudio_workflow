@@ -7,7 +7,7 @@ Unit test the Task model API
 """
 
 import os
-import unittest2
+import unittest
 import pkg_resources
 import pytz
 
@@ -21,7 +21,7 @@ from lie_workflow.workflow_task_types import WORKFLOW_ORM
 currpath = os.path.dirname(__file__)
     
 
-class TestTaskObject(unittest2.TestCase):
+class TestTaskObject(unittest.TestCase):
     """
     Test creation and manipulation of Task objects using Task model API methods
     """

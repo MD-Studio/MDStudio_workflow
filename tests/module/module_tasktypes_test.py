@@ -9,7 +9,7 @@ Unit tests for the WorkflowSpec class
 import os
 import json
 import jsonschema
-import unittest2
+import unittest
 import pkg_resources
 
 from lie_graph.graph_io.io_dict_format import write_dict
@@ -75,7 +75,7 @@ class TestTaskBaseClass(object):
         self.assertEqual(task.task_metadata.retry_count.value, 3)
 
 
-class TestWorkflowSpecPythonTask(TestTaskBaseClass, unittest2.TestCase):
+class TestWorkflowSpecPythonTask(TestTaskBaseClass, unittest.TestCase):
     """
     Test addition of Python workflow tasks
     """
@@ -95,7 +95,7 @@ class TestWorkflowSpecPythonTask(TestTaskBaseClass, unittest2.TestCase):
         self.assertRaises(GraphValidationError, self.task.custom_func.set, 'value', 'dummy_task_runners')
 
 
-class TestWorkflowSpecBlockingPythonTask(TestTaskBaseClass, unittest2.TestCase):
+class TestWorkflowSpecBlockingPythonTask(TestTaskBaseClass, unittest.TestCase):
     """
     Test addition of Blocking Python workflow tasks
     """
@@ -104,7 +104,7 @@ class TestWorkflowSpecBlockingPythonTask(TestTaskBaseClass, unittest2.TestCase):
     template_file = 'workflow_python_task.v1.json'
 
 
-class TestWorkflowSpecWampTask(TestTaskBaseClass, unittest2.TestCase):
+class TestWorkflowSpecWampTask(TestTaskBaseClass, unittest.TestCase):
     """
     Test addition of WAMP workflow tasks
     """

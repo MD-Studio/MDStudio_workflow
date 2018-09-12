@@ -7,7 +7,7 @@ Unit tests the local directory structure for saving the output of tasks
 """
 
 import os
-import unittest2
+import unittest
 import time
 import shutil
 
@@ -17,7 +17,7 @@ currpath = os.path.dirname(__file__)
 tmp_project_dir = os.path.abspath(os.path.join(currpath, '../files/test_project'))
 
 
-class TestLocalWorkdir(unittest2.TestCase):
+class TestLocalWorkdir(unittest.TestCase):
 
     def setUp(self):
         """

@@ -7,7 +7,7 @@ Unit tests naming and renaming of task parameters between tasks
 """
 
 import os
-import unittest2
+import unittest
 import time
 
 from lie_workflow import Workflow
@@ -15,7 +15,7 @@ from lie_workflow import Workflow
 currpath = os.path.dirname(__file__)
 
 
-class TestInputOutputMapping(unittest2.TestCase):
+class TestInputOutputMapping(unittest.TestCase):
 
     def setUp(self):
         """

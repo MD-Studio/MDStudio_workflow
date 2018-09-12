@@ -12,8 +12,8 @@ Unit tests construction and running the branched workflow:
                     9 -- 10
 """
 
-import os
-import unittest2
+import os, sys
+import unittest
 import time
 
 from lie_workflow import Workflow, WorkflowSpec
@@ -23,6 +23,15 @@ workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-branc
 
 
 class BaseWorkflowRunnerTests(object):
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Remove workflow project directory
+        """
+
+        project_metadata = cls.wf.workflow.query_nodes(key='project_metadata')
+        project_metadata.project_dir.remove()
 
     def test1_initial_workflow_status(self):
         """
@@ -61,7 +70,7 @@ class BaseWorkflowRunnerTests(object):
         self.assertDictEqual(result, self.expected_output)
 
 
-class TestBuildBranchedWorkflow(unittest2.TestCase):
+class TestBuildBranchedWorkflow(unittest.TestCase):
     """
     Build the branched workflow a shown in the file header using the default
     threader PythonTask runner
@@ -122,7 +131,7 @@ class TestBuildBranchedWorkflow(unittest2.TestCase):
         self.assertTrue(os.path.exists(workflow_file_path))
 
 
-class TestRunBranchedWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunBranchedWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow
     """
@@ -137,7 +146,7 @@ class TestRunBranchedWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCase
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -158,14 +167,14 @@ class TestRunBranchedWorkflowDefault(BaseWorkflowRunnerTests, unittest2.TestCase
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
             time.sleep(1)
 
 
-class TestRunBranchedWorkflowBlocking(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunBranchedWorkflowBlocking(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow but replacing
     the threaded PythonTask for a BlockingPythonTask
@@ -181,7 +190,7 @@ class TestRunBranchedWorkflowBlocking(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -205,7 +214,7 @@ class TestRunBranchedWorkflowBlocking(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -227,7 +236,7 @@ class TestRunBranchedWorkflowBlocking(BaseWorkflowRunnerTests, unittest2.TestCas
         self.assertLessEqual(self.wf.updatetime, self.wf.finishtime)
 
 
-class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow but instruct
     the python function to fail at task 'test4'
@@ -243,7 +252,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -268,7 +277,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -296,7 +305,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest2.TestCase):
         self.assertEqual(self.wf.failed_tasks, [self.wf.workflow.query_nodes(key='test4')])
 
 
-class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow but instruct
     the python function to crash at task 'test4'
@@ -312,7 +321,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -338,7 +347,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -366,7 +375,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest2.TestCase):
         self.assertEqual(self.wf.failed_tasks, [self.wf.workflow.query_nodes(key='test4')])
 
 
-class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow but instruct
     the python function to pause at task 'test4' (breakpoint)
@@ -382,7 +391,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestC
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -408,7 +417,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestC
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow hits breakpoint
         while self.wf.is_running:
@@ -426,7 +435,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestC
         self.wf.step_breakpoint(bp[0].nid)
 
         # Run the workflow
-        self.wf.run(tid=bp[0].nid)
+        self.wf.run(tid=bp[0].nid, project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -446,7 +455,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest2.TestC
         self.assertIsNotNone(self.wf.updatetime)
 
 
-class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow but instruct
     the python function to fail at task 'test4' after trying 3 times
@@ -462,7 +471,7 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -489,7 +498,7 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCas
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -521,7 +530,7 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest2.TestCas
         self.assertItemsEqual(notcompleted, ['test4', 'test5', 'test9', 'test10'])
 
 
-class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow but instruct
     the python function to fail at task 'test4' after trying 3 times
@@ -537,7 +546,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         if not os.path.exists(workflow_file_path):
-            raise unittest2.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
+            raise unittest.SkipTest('TestBuildBranchedWorkflow failed to build workflow')
 
         cls.wf = Workflow()
         cls.wf.load(workflow_file_path)
@@ -560,7 +569,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -588,7 +597,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest2.TestCase):
         self.assertItemsEqual(completed, ['test1', 'test2', 'test3'])
 
 
-class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Import a finished workflow and run it. Should check all steps but not rerun
     """
@@ -620,14 +629,14 @@ class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
             time.sleep(1)
 
 
-class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
+class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
     """
     Import unfinished workflow and continue
     """
@@ -650,14 +659,14 @@ class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest2.TestCase):
         """
 
         # Run the workflow
-        self.wf.run()
+        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
             time.sleep(1)
 
 
-class TestZcleanup(unittest2.TestCase):
+class TestZcleanup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
