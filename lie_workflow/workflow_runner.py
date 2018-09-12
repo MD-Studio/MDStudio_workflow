@@ -80,8 +80,11 @@ class WorkflowRunner(WorkflowSpec):
                     if value in select:
                         select.remove(value)
 
-                new_dict = {mapper.get(k, k): '${0}.{1}'.format(ptask.nid, k) for k, v in output.items() if k in select}
-                collected_output.append(new_dict)
+                if select:
+                    new_dict = {mapper.get(k, k): '${0}.{1}'.format(ptask.nid, k) for k, v in output.items() if k in select}
+                    collected_output.append(new_dict)
+                else:
+                    collected_output.append(output)
         else:
             logging.info('Task {0} ({1}): Not all output available yet'.format(task.nid, task.key))
             return
