@@ -14,6 +14,7 @@ import json
 import os
 
 from lie_graph.graph_mixin import NodeTools
+from lie_graph.graph_py2to3 import prepaire_data_dict, PY_STRING
 from lie_graph.graph_io.io_jsonschema_format import read_json_schema
 
 from lie_workflow.workflow_common import WorkflowError, collect_data
@@ -125,10 +126,10 @@ class TaskBase(NodeTools):
         for key, value in input_data.items():
 
             # Resolve reference
-            if isinstance(value, str):
+            if isinstance(value, PY_STRING):
                 input_dict[key] = self._process_reference(value)
             elif isinstance(value, list):
-                input_dict[key] = [self._process_reference(v) if isinstance(v, str) else v for v in value]
+                input_dict[key] = [self._process_reference(v) if isinstance(v, PY_STRING) else v for v in value]
             else:
                 input_dict[key] = value
 
@@ -150,7 +151,7 @@ class TaskBase(NodeTools):
         """
 
         data = self.task_metadata.input_data.get(default={})
-        data.update(kwargs)
+        data.update(prepaire_data_dict(kwargs))
         self.task_metadata.input_data.set('value', data)
 
     def get_output(self):
