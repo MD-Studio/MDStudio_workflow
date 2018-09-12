@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
 import threading
 
 from twisted.python.failure import Failure
@@ -228,9 +229,9 @@ class WorkflowRunner(WorkflowSpec):
 
         # Launch new tasks
         for tid in next_task_nids:
-            self._run_task(tid)
+            self.run_task(tid)
 
-    def _run_task(self, tid):
+    def run_task(self, tid):
         """
         Run a task by task ID (tid)
 
@@ -244,7 +245,7 @@ class WorkflowRunner(WorkflowSpec):
           function deal with it.
         * If the task has status 'ready' run it.
         * In all other cases, pass the task data to the output callback
-          function. This is usefull for hopping over finished tasks when
+          function. This is useful for hopping over finished tasks when
           relaunching a workflow for instance.
 
         :param tid: Task node identifier
@@ -278,23 +279,12 @@ class WorkflowRunner(WorkflowSpec):
                     ref = dict([(key, '${0}.{1}'.format(parent.nid, key)) for key in parent.output_data])
                     task.set_input(**ref)
 
-            # Do we need to store data to disk. Switch working directory
-            if task.task_metadata.store_output():
-                project_dir = metadata.project_dir()
-                workdir = task.task_metadata.workdir
-                workdir.set('value', os.path.join(project_dir, 'task-{0}-{1}'.format(task.nid, task.key.replace(' ', '_'))))
-                workdir.makedirs()
-
-                os.chdir(workdir.get())
-
             # Confirm again that the workflow is running
             self.is_running = True
             metadata.update_time.set()
 
-            # Set workflow task meta-data
-            task.status = 'running'
-            task.task_metadata.startedAtTime.set()
-            logging.info('Task {0} ({1}), status: {2}'.format(task.nid, task.key, task.status))
+            # Perform run preparations and tun the task
+            task.prepaire_run()
             task.run_task(self._output_callback, self._error_callback, task_runner=self.task_runner)
 
         # In all other cases, pass task data to default output callback
@@ -554,10 +544,6 @@ class WorkflowRunner(WorkflowSpec):
         if tid not in self.workflow.nodes:
             raise WorkflowError('Task with tid {0} not in workflow'.format(tid))
 
-        # Set project directory and create it if needed
-        project_metadata = self.workflow.query_nodes(key='project_metadata')
-        project_metadata.project_dir.set('value', project_metadata.project_dir.get(default=project_dir))
-
         # Validate workflow before running?
         if validate:
             if not validate_workflow(self.workflow):
@@ -565,6 +551,7 @@ class WorkflowRunner(WorkflowSpec):
 
         # Set is_running flag. Function as a thread-safe signal to indicate
         # that the workflow is running.
+        project_metadata = self.workflow.query_nodes(key='project_metadata')
         if self.is_running:
             logging.warning('Workflow {0} is already running'.format(project_metadata.title()))
             return
@@ -573,7 +560,10 @@ class WorkflowRunner(WorkflowSpec):
         # If there are steps that store results locally (store_output == True)
         # Create a project directory.
         if any(self.workflow.query_nodes(key="store_output").values()):
+            project_metadata.project_dir.set('value', project_metadata.project_dir.get(default=project_dir))
             project_metadata.project_dir.makedirs()
+        else:
+            project_metadata.project_dir.set('value', None)
 
         logging.info('Running workflow: {0}, start task ID: {1}'.format(project_metadata.title(), tid))
 
@@ -583,6 +573,6 @@ class WorkflowRunner(WorkflowSpec):
             project_metadata.start_time.set()
 
         # Spawn a thread
-        self.workflow_thread = threading.Thread(target=self._run_task, args=[tid])
+        self.workflow_thread = threading.Thread(target=self.run_task, args=[tid])
         self.workflow_thread.daemon = True
         self.workflow_thread.start()

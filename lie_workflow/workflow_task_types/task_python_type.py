@@ -6,6 +6,7 @@ file: task_python_type.py
 Task for running a Python function in threaded or blocking mode
 """
 
+import os
 import logging
 
 from importlib import import_module
@@ -105,7 +106,7 @@ class PythonTask(TaskBase):
         # Load python function or fail
         python_func = self.custom_func.load()
         if python_func is None:
-            errorback(None, self.nid)
+            return errorback('No Python path to function or class defined', self.nid)
 
         d = threads.deferToThread(python_func, **self.get_input())
         if errorback:

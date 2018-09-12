@@ -55,16 +55,50 @@ class WampTask(TaskBase):
         # If local files are defined as input, read content.
         # TODO: replace with method that uses metadata to assess what is a file
         for key, value in input_dict.items():
-            if is_file(value) and os.path.isfile(value) and not os.access(value, os.X_OK):
-                with open(value, 'r') as ip:
-                    input_dict[key] = ip.read()
 
-        # meta = self.task_metadata
-        # if meta.store_output() and meta.workdir() and input_dict.get('workdir') is None:
-        #     input_dict['workdir'] = meta.workdir()
+            # If value already create_path_file_obj
+            if not isinstance(value, PY_STRING):
+                continue
+
+            # In case of file as string
+            elif len(value.split('\n')) > 1:
+                input_dict[key] = create_path_file_obj(content=value)
+
+            # In case of a file
+            elif is_file(value) and os.path.isfile(value) and not os.access(value, os.X_OK):
+                input_dict[key] = create_path_file_obj(path=value)
 
         return input_dict
 
+    def validate_input(self, schema):
+        """
+        Validate defined input against MDStudio JSON Schema.
+
+        Type checking is performed by the MDStudio router
+        """
+
+        input = self.task_metadata.input_data.get(default={})
+        request = read_json_schema(schema)
+        request.orm.map_node(FileType, title='path_file')
+        properties = request.query_nodes({'schema_label': u'properties'})
+
+        # Check for parameters not defined in the schema
+        undefined_keys = set(input.keys()).difference(set(properties.keys()))
+        if undefined_keys:
+            raise AttributeError('Undefined arguments: {0}'.format(undefined_keys))
+
+        # Register parameters not defined for provenance
+        for param in properties:
+            if param.key not in input and u'value' in param.nodes:
+                input[param.key] = param.value
+
+        # Check for file types
+        for node in request.query_nodes({'title': u'path_file'}).iternodes():
+            input[node.key] = node.to_dict(input.get(node.key))
+
+        self.set_input(**input)
+
+    @chainable
     def run_task(self, callback, errorback, **kwargs):
         """
         Implements run_task method
@@ -93,13 +127,20 @@ class WampTask(TaskBase):
             if group_context and not wamp_uri.startswith(group_context):
                 wamp_uri = '{0}.{1}'.format(group_context, wamp_uri)
 
+            # Try to get the JSON schemas for the endpoint request and response
+            schemaparser = SchemaParser(task_runner)
+
+            # Check input against schema
+            request = yield schemaparser.get(uri=wamp_uri, request=True)
+            self.validate_input(request)
+
             # Call the service
             deferred = task_runner.call(wamp_uri, self.get_input())
 
             # Attach error callback
             deferred.addErrback(errorback, self.nid)
 
-            # Attach callback if needed
+            # Attach callback
             deferred.addCallback(callback, self.nid)
 
         else:

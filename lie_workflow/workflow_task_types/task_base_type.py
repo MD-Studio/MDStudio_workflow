@@ -62,6 +62,14 @@ class TaskBase(NodeTools):
 
         return
 
+    @abc.abstractmethod
+    def run_task(self, callback, errorback, **kwargs):
+        """
+        A task requires a run_task method with the logic on how to run the task
+        """
+
+        return
+
     @property
     def is_active(self):
         """
@@ -262,3 +270,34 @@ class TaskBase(NodeTools):
                 is_valid = False
 
         return is_valid
+
+    def prepaire_run(self):
+        """
+        Task specific preparations just before running the task.
+
+        This method is used by the workflow manager when scheduling a task.
+        By default the method performs:
+
+        * Set task metadata
+        * Prepare a working directory if `store_output` set and switch to
+          that directory
+
+        A task can overload `prepaire_run` with custom methods but the base
+        method has to be called using `super`:
+
+            super(Task, self).prepaire_run()
+        """
+
+        # Always start of by registering the task as running
+        self.status = 'running'
+        self.task_metadata.startedAtTime.set()
+        logging.info('Task {0} ({1}), status: {2}'.format(self.nid, self.key, self.status))
+
+        # If store_data, create output dir and switch
+        if self.task_metadata.store_output():
+            project_dir = self._full_graph.query_nodes(key='project_dir').get()
+            workdir = self.task_metadata.workdir
+            workdir.set('value', os.path.join(project_dir, 'task-{0}-{1}'.format(self.nid, self.key.replace(' ', '_'))))
+            workdir.makedirs()
+
+            os.chdir(workdir.get())
