@@ -284,6 +284,7 @@ class WorkflowRunner(WorkflowSpec):
                 workdir = task.task_metadata.workdir
                 workdir.set('value', os.path.join(project_dir, 'task-{0}-{1}'.format(task.nid, task.key.replace(' ', '_'))))
                 workdir.makedirs()
+
                 os.chdir(workdir.get())
 
             # Confirm again that the workflow is running
@@ -553,9 +554,9 @@ class WorkflowRunner(WorkflowSpec):
         if tid not in self.workflow.nodes:
             raise WorkflowError('Task with tid {0} not in workflow'.format(tid))
 
-        # Set project directory
+        # Set project directory and create it if needed
         project_metadata = self.workflow.query_nodes(key='project_metadata')
-        project_metadata.project_dir.set('value', project_dir)
+        project_metadata.project_dir.set('value', project_metadata.project_dir.get(default=project_dir))
 
         # Validate workflow before running?
         if validate:
@@ -564,26 +565,22 @@ class WorkflowRunner(WorkflowSpec):
 
         # Set is_running flag. Function as a thread-safe signal to indicate
         # that the workflow is running.
-        metadata = self.workflow.query_nodes(key='project_metadata')
         if self.is_running:
-            logging.warning('Workflow {0} is already running'.format(metadata.title()))
+            logging.warning('Workflow {0} is already running'.format(project_metadata.title()))
             return
         self.is_running = True
 
         # If there are steps that store results locally (store_output == True)
         # Create a project directory.
         if any(self.workflow.query_nodes(key="store_output").values()):
-            if not metadata.project_dir():
-                metadata.project_dir.set(metadata.node_value_tag, os.getcwd())
-            logging.info('Project directory at: {0}'.format(metadata.project_dir.get()))
-            metadata.project_dir.makedirs()
+            project_metadata.project_dir.makedirs()
 
-        logging.info('Running workflow: {0}, start task ID: {1}'.format(metadata.title(), tid))
+        logging.info('Running workflow: {0}, start task ID: {1}'.format(project_metadata.title(), tid))
 
         # Set workflow start time if not defined. Don't rerun to allow
         # continuation of unfinished workflow.
-        if not metadata.start_time():
-            metadata.start_time.set()
+        if not project_metadata.start_time():
+            project_metadata.start_time.set()
 
         # Spawn a thread
         self.workflow_thread = threading.Thread(target=self._run_task, args=[tid])
