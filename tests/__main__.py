@@ -8,7 +8,7 @@ Python runner for lie_workflow module unit tests, run as:
 
 import os
 import sys
-import unittest2
+import unittest
 import logging
 
 # Init basic logging
@@ -23,12 +23,12 @@ def module_test_suite():
     """
     Run lie_workflow module unit tests
     """
-    loader = unittest2.TestLoader()
+    loader = unittest.TestLoader()
     
     print('Running lie_workflow unittests')
     testpath = os.path.join(os.path.dirname(__file__), 'module')
     suite = loader.discover(testpath, pattern='module_*.py')
-    runner = unittest2.TextTestRunner(verbosity=2)
+    runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 
 
