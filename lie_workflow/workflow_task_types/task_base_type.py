@@ -18,7 +18,7 @@ from lie_graph.graph_mixin import NodeTools
 from lie_graph.graph_py2to3 import prepaire_data_dict, PY_STRING
 from lie_graph.graph_io.io_jsonschema_format import read_json_schema
 
-from lie_workflow.workflow_common import WorkflowError, collect_data
+from lie_workflow.workflow_common import WorkflowError, collect_data, concat_dict
 
 
 def load_task_schema(schema_name):
@@ -46,6 +46,75 @@ def load_task_schema(schema_name):
     if task_node.empty():
         raise ImportError('Unable to load {0} task defintions'.format(schema_name))
     return task_node
+
+
+def edge_select_transform(data, edge):
+    """
+    Select and transform output from previous task based on selection and
+    mapping definitions stored in the edge connecting two tasks.
+
+    If there is no selection defined, all output will be forwarded as
+    input to the new task.
+
+    :param data:  output of previous task
+    :type data:   :py:dict
+    :param edge:  edge connecting tasks
+    :type edge:   :lie_graph:Graph
+
+    :return:      currated output
+    :rtype:       :py:dict
+    """
+
+    mapper = edge.get('data_mapping', {})
+    select = edge.get('data_select', default=data.keys())
+
+    transformed_data = {}
+    for key in select:
+
+        if key not in data:
+            logging.warn('Data selection: parameter {0} not in output of task {1}'.format(key, edge.nid))
+            continue
+
+        transformed_data[mapper.get(key, key)] = data[key]
+
+    for key, value in mapper.items():
+        if not key in select:
+            select.append(key)
+        if value in select:
+            select.remove(value)
+
+    return transformed_data
+
+
+def load_referenced_output(output_dict, base_path=None):
+    """
+    Resolve refered output
+
+    Refered output is defined in the output dictionary by the '$ref' keyword
+    that points to a json file on disk.
+
+    :param output_dict:
+    :param base_path:
+    :return:
+    """
+
+    for key, value in output_dict.items():
+
+        if key == '$ref':
+
+            if not os.path.isabs(value):
+                value = os.path.join(base_path, value)
+
+            if os.path.exists(value):
+                output_dict.update(json.load(open(value)))
+                del output_dict[key]
+            else:
+                raise WorkflowError('No such references output file: {0}'.format(value))
+
+        elif isinstance(value, dict):
+            output_dict[key] = load_referenced_output(value, base_path=base_path)
+
+    return output_dict
 
 
 class TaskBase(NodeTools):
@@ -99,7 +168,7 @@ class TaskBase(NodeTools):
 
         self.task_metadata.status.value = state
 
-    def next_task(self, exclude_disabled=True):
+    def next_tasks(self, exclude_disabled=True):
         """
         Get downstream tasks connected to the current task
 
@@ -121,7 +190,7 @@ class TaskBase(NodeTools):
 
         return tasks
 
-    def previous_task(self):
+    def previous_tasks(self):
         """
         Get upstream tasks connected to the current task
 
@@ -141,22 +210,38 @@ class TaskBase(NodeTools):
         """
         Prepare task input
 
+        The final input to a task is a combination of input definitions made on
+        the task using `set_input` and the output of other tasks connected to
+        it.
+        lie_workflows are dynamic and therefore the `get_input` and `get_output`
+        methods are always called even if input/output was previously stored
+        locally.
+
+
         If the task is configured to store output to disk (store_output == True)
         the dictionary with input data is serialized to JSON and stored in the
         task directory.
         """
 
-        input_data = self.task_metadata.input_data.get(default={})
-        input_dict = {}
-        for key, value in input_data.items():
+        # Get output of tasks connected to this task
+        collected_input = []
+        for prev_task in self.previous_tasks():
 
-            # Resolve reference
-            if isinstance(value, PY_STRING):
-                input_dict[key] = self._process_reference(value)
-            elif isinstance(value, list):
-                input_dict[key] = [self._process_reference(v) if isinstance(v, PY_STRING) else v for v in value]
-            else:
-                input_dict[key] = value
+            # Only use output when task finished successfully
+            if prev_task.status == 'completed':
+
+                # Select and transform based on edge definitions
+                task_output = edge_select_transform(prev_task.get_output(),
+                                                    self._full_graph.getedges((prev_task.nid, self.nid)))
+                collected_input.append(task_output)
+
+        # concatenate multiple input dictionaries to a new dict
+        input_dict = {}
+        if collected_input:
+            input_dict = concat_dict(collected_input)
+
+        # Get input defined in current task and update
+        input_dict.update(self.task_metadata.input_data.get(default={}))
 
         # Write input to disc as JSON? Task working directory should exist
         if self.task_metadata.store_output():
@@ -187,19 +272,8 @@ class TaskBase(NodeTools):
         """
 
         output = self.task_metadata.output_data.get(default={})
-        project_dir = self._full_graph.query_nodes(key='project_metadata').project_dir()
-        if '$ref' in output:
-
-            # $ref should be relative
-            ref_path = output['$ref']
-            if not os.path.isabs(ref_path):
-                ref_path = os.path.join(project_dir, ref_path )
-
-            if os.path.exists(ref_path ):
-                output = json.load(open(ref_path))
-            else:
-                raise WorkflowError('Task {0} ({1}), output.json does not exist at: {2}'.format(self.nid, self.key,
-                                                                                                ref_path))
+        output = load_referenced_output(output,
+                                        base_path=self._full_graph.query_nodes(key='project_metadata').project_dir())
 
         return output
 
@@ -237,22 +311,6 @@ class TaskBase(NodeTools):
         outnode = self.task_metadata.output_data
         if outnode.get() is None:
             outnode.set('value', output)
-
-    def _process_reference(self, ref):
-        """
-        Resolve reference
-        """
-
-        if ref.startswith('$'):
-            split = ref.strip('$').split('.')
-            ref_nid = int(split[0])
-            ref_key = split[1]
-
-            reftask = self.getnodes(ref_nid)
-            data = reftask.get_output()
-
-            return data.get(ref_key, None)
-        return ref
 
     def validate(self, key=None):
         """

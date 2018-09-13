@@ -6,7 +6,7 @@ import threading
 
 from twisted.python.failure import Failure
 
-from lie_workflow.workflow_common import WorkflowError, concat_dict, validate_workflow
+from lie_workflow.workflow_common import WorkflowError, validate_workflow
 from lie_workflow.workflow_spec import WorkflowSpec
 
 from twisted.logger import Logger
@@ -46,51 +46,6 @@ class WorkflowRunner(WorkflowSpec):
 
         # Workflow state
         self._is_running = False
-
-    def _collect_input(self, task):
-        
-        # Get all parent task IDs
-        parent_tasks = task.previous_task()
-
-        # Check if there are failed tasks among the ancestors and if we are
-        # allowed to continue with less
-        if [t for t in parent_tasks if t.status in ('failed', 'aborted')]:
-            logging.error('Failed parent tasks detected. Unable to collect all output')
-
-        # Check if the ancestors are all completed
-        collected_output = []
-        if all([t.status in ('completed', 'disabled') for t in parent_tasks]):
-            msg = 'Task {0} ({1}): Output of {2} parent tasks available, continue'
-            logging.info(msg.format(task.nid, task.key, len(parent_tasks)))
-            
-            # Collect output of previous tasks and apply data mapper and data
-            # selection if needed
-            for ptask in parent_tasks:
-                output = ptask.get_output()
-                edge = self.workflow.getedges((ptask.nid, task.nid))
-
-                # Apply data mapping and selection by selecting only parameters
-                # from the previous task that are defined in the edge
-                # data_select list and data_mapping dictionary. In the latter
-                # case the key/value mapping is performed.
-                mapper = edge.get('data_mapping', {})
-                select = edge.get('data_select', default=[])
-                for key, value in mapper.items():
-                    if not key in select:
-                        select.append(key)
-                    if value in select:
-                        select.remove(value)
-
-                if select:
-                    new_dict = {mapper.get(k, k): '${0}.{1}'.format(ptask.nid, k) for k, v in output.items() if k in select}
-                    collected_output.append(new_dict)
-                else:
-                    collected_output.append(output)
-        else:
-            logging.info('Task {0} ({1}): Not all output available yet'.format(task.nid, task.key))
-            return
-
-        return concat_dict(collected_output)
     
     def _error_callback(self, failure, tid):
         """
@@ -170,17 +125,17 @@ class WorkflowRunner(WorkflowSpec):
         if task.status == 'completed':
             
             # Get next task(s) to run
-            next_tasks = task.next_task()
-            logging.info('{0} new tasks to run with output of {1} ({2})'.format(len(next_tasks), task.nid, task.key))
+            next_task_nids.extend([ntask.nid for ntask in task.next_tasks()])
+            logging.info('{0} new tasks to run with output of {1} ({2})'.format(len(next_task_nids), task.nid, task.key))
 
-            for ntask in next_tasks:
-                # Get output from all tasks connected to new task
-                output = self._collect_input(ntask)
-                if output is not None:
-                    data = ntask.task_metadata.input_data.get(default={})
-                    data.update(output)
-                    ntask.set_input(**data)
-                    next_task_nids.append(ntask.nid)
+            # for ntask in next_tasks:
+            #     # Get output from all tasks connected to new task
+            #     output = self._collect_input(ntask)
+            #     if output is not None:
+            #         data = ntask.task_metadata.input_data.get(default={})
+            #         data.update(output)
+            #         ntask.set_input(**data)
+            #         next_task_nids.append(ntask.nid)
 
         # If the task failed, retry if allowed and reset status to "ready"
         if task.status == 'failed' and task.task_metadata.retry_count():
@@ -265,19 +220,6 @@ class WorkflowRunner(WorkflowSpec):
         # Run the task if status is 'ready'
         if task.status == 'ready':
             logging.info('Task {0} ({1}), status: preparing'.format(task.nid, task.key))
-
-            # Check if there is 'input' defined
-            if not task.has_input:
-
-                # Check if previous task has output and use it as input
-                # for the current
-                parent = task.parent()
-                if parent and 'output_data' in parent:
-                    logging.info('Use output of parent task to tid {0} ({1})'.format(task.nid, parent.nid))
-
-                    # Define reference to output
-                    ref = dict([(key, '${0}.{1}'.format(parent.nid, key)) for key in parent.output_data])
-                    task.set_input(**ref)
 
             # Confirm again that the workflow is running
             self.is_running = True
