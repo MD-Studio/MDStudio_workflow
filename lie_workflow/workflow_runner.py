@@ -47,7 +47,7 @@ class WorkflowRunner(WorkflowSpec):
         # Workflow state
         self._is_running = False
     
-    def _error_callback(self, failure, tid):
+    def error_callback(self, failure, tid):
         """
         Process the output of a failed task and stage the next task to run
         if allowed
@@ -58,7 +58,7 @@ class WorkflowRunner(WorkflowSpec):
         :type tid:      :py:int
         """
 
-        task = self.workflow.getnodes(tid)
+        task = self.get_task(tid)
 
         failure_message = ""
         if isinstance(failure, Exception) or isinstance(failure, str):
@@ -71,9 +71,8 @@ class WorkflowRunner(WorkflowSpec):
         logging.error('Task {0} ({1}) crashed with error: {2}'.format(task.nid, task.key, failure_message))
 
         # Update task meta data
-        task_meta = task.task_metadata
-        task_meta.status.value = 'failed'
-        task_meta.endedAtTime.set()
+        task.status = 'failed'
+        task.task_metadata.endedAtTime.set()
 
         # Update workflow metadata
         metadata = self.workflow.query_nodes(key='project_metadata')
@@ -82,9 +81,9 @@ class WorkflowRunner(WorkflowSpec):
 
         return
 
-    def _output_callback(self, output, tid):
+    def output_callback(self, output, tid):
         """
-        Process the output of a task and stage the next task to run.
+        Process the output of a task and stage the next task(s) to run.
 
         A successful task is expected to return some output. If None it
         is considered to have failed by the workflow manager.
@@ -127,15 +126,6 @@ class WorkflowRunner(WorkflowSpec):
             # Get next task(s) to run
             next_task_nids.extend([ntask.nid for ntask in task.next_tasks()])
             logging.info('{0} new tasks to run with output of {1} ({2})'.format(len(next_task_nids), task.nid, task.key))
-
-            # for ntask in next_tasks:
-            #     # Get output from all tasks connected to new task
-            #     output = self._collect_input(ntask)
-            #     if output is not None:
-            #         data = ntask.task_metadata.input_data.get(default={})
-            #         data.update(output)
-            #         ntask.set_input(**data)
-            #         next_task_nids.append(ntask.nid)
 
         # If the task failed, retry if allowed and reset status to "ready"
         if task.status == 'failed' and task.task_metadata.retry_count():
@@ -192,7 +182,7 @@ class WorkflowRunner(WorkflowSpec):
 
         Handles the setup procedure for running a task using a dedicated Task
         runner. The output or errors of a task are handled by the
-        `_output_callback` and `_error_callback` methods respectively.
+        `output_callback` and `error_callback` methods respectively.
 
         Tasks to run are processed using the following rules:
 
@@ -227,16 +217,16 @@ class WorkflowRunner(WorkflowSpec):
 
             # Perform run preparations and run the task
             if task.prepaire_run():
-                task.run_task(self._output_callback, self._error_callback, task_runner=self.task_runner)
+                task.run_task(self.output_callback, self.error_callback, task_runner=self.task_runner)
             else:
-                self._error_callback('Task preparation failed', task.nid)
+                self.error_callback('Task preparation failed', task.nid)
 
         # In all other cases, pass task data to default output callback
         # instructing it to not update the data but decide on the followup
         # workflow step to take.
         else:
             logging.info('Task {0} ({1}), status: {0}'.format(task.nid, task.key, task.status))
-            self._output_callback({}, tid)
+            self.output_callback({}, tid)
 
     @property
     def is_running(self):
