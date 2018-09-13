@@ -139,7 +139,7 @@ class TaskBase(NodeTools):
 
     def get_input(self):
         """
-        Base method for preparing task input
+        Prepare task input
 
         If the task is configured to store output to disk (store_output == True)
         the dictionary with input data is serialized to JSON and stored in the
@@ -158,14 +158,10 @@ class TaskBase(NodeTools):
             else:
                 input_dict[key] = value
 
-        # Write input to disk as JSON?
+        # Write input to disc as JSON? Task working directory should exist
         if self.task_metadata.store_output():
-            task_dir = self.task_metadata.workdir.get()
-            if task_dir and os.path.exists(task_dir):
-                input_json = os.path.join(task_dir, 'input.json')
-                json.dump(input_dict, open(input_json, 'w'), indent=2)
-            else:
-                raise WorkflowError('Task directory does not exist: {0}'.format(task_dir))
+            input_json = os.path.join(self.task_metadata.workdir.get(), 'input.json')
+            json.dump(input_dict, open(input_json, 'w'), indent=2)
 
         return input_dict
 
@@ -286,6 +282,9 @@ class TaskBase(NodeTools):
         method has to be called using `super`:
 
             super(Task, self).prepaire_run()
+
+        :return:    task preparation status
+        :rtype:     :py:bool
         """
 
         # Always start of by registering the task as running
@@ -298,6 +297,8 @@ class TaskBase(NodeTools):
             project_dir = self._full_graph.query_nodes(key='project_dir').get()
             workdir = self.task_metadata.workdir
             workdir.set('value', os.path.join(project_dir, 'task-{0}-{1}'.format(self.nid, self.key.replace(' ', '_'))))
-            workdir.makedirs()
+            path = workdir.makedirs()
 
-            os.chdir(workdir.get())
+            os.chdir(path)
+
+        return True

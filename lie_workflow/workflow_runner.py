@@ -283,9 +283,11 @@ class WorkflowRunner(WorkflowSpec):
             self.is_running = True
             metadata.update_time.set()
 
-            # Perform run preparations and tun the task
-            task.prepaire_run()
-            task.run_task(self._output_callback, self._error_callback, task_runner=self.task_runner)
+            # Perform run preparations and run the task
+            if task.prepaire_run():
+                task.run_task(self._output_callback, self._error_callback, task_runner=self.task_runner)
+            else:
+                self._error_callback('Task preparation failed', task.nid)
 
         # In all other cases, pass task data to default output callback
         # instructing it to not update the data but decide on the followup
