@@ -216,7 +216,7 @@ class WorkflowRunner(WorkflowSpec):
             metadata.update_time.set()
 
             # Perform run preparations and run the task
-            if task.prepaire_run():
+            if task.prepare_run():
                 task.run_task(self.output_callback, self.error_callback, task_runner=self.task_runner)
             else:
                 self.error_callback('Task preparation failed', task.nid)

@@ -9,6 +9,7 @@ import shutil
 from collections import Counter
 
 from lie_graph.graph_io.io_dict_format import read_dict, write_dict
+from lie_graph.graph_py2to3 import PY_STRING
 
 
 class WorkflowError(Exception):
@@ -98,7 +99,20 @@ def collect_data(output, task_dir):
     for node in graph.nodes.values():
 
         for key, value in node.items():
-            if is_file(value):  # It still could be a file or directory
+
+            if isinstance(value, PY_STRING):
+
+                # Serialized file
+                if len(value.split('\n')) > 1:
+                    output_file = os.path.join(task_dir,
+                                               'file_{0}.{1}'.format(node.get('key', key),
+                                                                     node.get('extension', 'out')))
+                    with file(output_file, 'w') as outf:
+                        outf.write(value)
+
+                    logging.info('Store output to file: {0}'.format(output_file))
+
+            elif is_file(value):  # It still could be a file or directory
 
                 if os.path.isdir(value):
 

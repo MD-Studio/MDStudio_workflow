@@ -16,6 +16,8 @@ from lie_graph.graph_io.io_jsonschema_format_drafts import StringType
 from .task_python_type import PythonTask, BlockingPythonTask, LoadCustomFunc
 from .task_wamp_type import WampTask
 
+task_types = ('PythonTask', 'BlockingPythonTask', 'WampTask')
+
 # Define the workflow Task ORM
 WORKFLOW_ORM = GraphORM(inherit=False)
 WORKFLOW_ORM.map_node(PythonTask, task_type='PythonTask')

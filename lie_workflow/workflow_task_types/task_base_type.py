@@ -66,7 +66,9 @@ def edge_select_transform(data, edge):
     """
 
     mapper = edge.get('data_mapping', {})
-    select = edge.get('data_select', default=data.keys())
+    select = edge.get('data_select')
+    if not select:
+        select = data.keys()
 
     transformed_data = {}
     for key in select:
@@ -88,10 +90,10 @@ def edge_select_transform(data, edge):
 
 def load_referenced_output(output_dict, base_path=None):
     """
-    Resolve refered output
+    Resolve referred output
 
-    Refered output is defined in the output dictionary by the '$ref' keyword
-    that points to a json file on disk.
+    Referred output is defined in the output dictionary using the JSON Schema
+    '$ref' keyword that points to a json file on disk.
 
     :param output_dict:
     :param base_path:
@@ -135,6 +137,11 @@ class TaskBase(NodeTools):
     def run_task(self, callback, errorback, **kwargs):
         """
         A task requires a run_task method with the logic on how to run the task
+
+        :param callback:    WorkflowRunner callback method called with the
+                            results of the task and the task ID.
+        :param errorback:   WorkflowRunner errorback method called when the
+                            task failed with the failure message and task ID.
         """
 
         return
@@ -145,7 +152,7 @@ class TaskBase(NodeTools):
         Is the task currently active or not
         """
 
-        return self.status in ("submitted","running")
+        return self.status in ('submitted', 'running')
 
     @property
     def has_input(self):
@@ -160,11 +167,25 @@ class TaskBase(NodeTools):
 
     @property
     def status(self):
+        """
+        Return the current status of the task
+
+        :return: status as 'ready', 'submitted', 'running', 'failed', 'aborted',
+                 'completed' or 'disabled'
+        :rtype:  :py:str
+        """
 
         return self.task_metadata.status.get()
 
     @status.setter
     def status(self, state):
+        """
+        Set the status of the task
+
+        :param state: status as 'ready', 'submitted', 'running', 'failed',
+                      'aborted', 'completed' or 'disabled'
+        :type state:  :py:str
+        """
 
         self.task_metadata.status.value = state
 
@@ -206,7 +227,7 @@ class TaskBase(NodeTools):
 
         return [self.getnodes(nid) for nid in task_nid]
 
-    def get_input(self):
+    def get_input(self, **kwargs):
         """
         Prepare task input
 
@@ -216,7 +237,6 @@ class TaskBase(NodeTools):
         lie_workflows are dynamic and therefore the `get_input` and `get_output`
         methods are always called even if input/output was previously stored
         locally.
-
 
         If the task is configured to store output to disk (store_output == True)
         the dictionary with input data is serialized to JSON and stored in the
@@ -243,7 +263,7 @@ class TaskBase(NodeTools):
         # Get input defined in current task and update
         input_dict.update(self.task_metadata.input_data.get(default={}))
 
-        # Write input to disc as JSON? Task working directory should exist
+        # Write input to disk as JSON? Task working directory should exist
         if self.task_metadata.store_output():
             input_json = os.path.join(self.task_metadata.workdir.get(), 'input.json')
             json.dump(input_dict, open(input_json, 'w'), indent=2)
@@ -253,14 +273,13 @@ class TaskBase(NodeTools):
     def set_input(self, **kwargs):
         """
         Register task input
-        :return:
         """
 
         data = self.task_metadata.input_data.get(default={})
         data.update(prepaire_data_dict(kwargs))
         self.task_metadata.input_data.set('value', data)
 
-    def get_output(self):
+    def get_output(self, **kwargs):
         """
         Get task output
 
@@ -277,7 +296,7 @@ class TaskBase(NodeTools):
 
         return output
 
-    def set_output(self, output):
+    def set_output(self, output, **kwargs):
         """
         Set the output of the task.
 
@@ -325,7 +344,7 @@ class TaskBase(NodeTools):
 
         return is_valid
 
-    def prepaire_run(self):
+    def prepare_run(self, **kwargs):
         """
         Task specific preparations just before running the task.
 
@@ -336,10 +355,10 @@ class TaskBase(NodeTools):
         * Prepare a working directory if `store_output` set and switch to
           that directory
 
-        A task can overload `prepaire_run` with custom methods but the base
+        A task can overload `prepare_run` with custom methods but the base
         method has to be called using `super`:
 
-            super(Task, self).prepaire_run()
+            super(Task, self).prepare_run()
 
         :return:    task preparation status
         :rtype:     :py:bool
