@@ -207,6 +207,13 @@ class WorkflowRunner(WorkflowSpec):
             logging.debug('Task {0} ({1}) already active'.format(task.nid, task.key))
             return
 
+        # Only continue if all connected tasks are done
+        unfinished_prev_tasks = [t.nid for t in task.previous_tasks() if t.status != 'completed']
+        if unfinished_prev_tasks:
+            logging.info('Task {0} ({1}): output of tasks {2} not available'.format(task.nid, task.key,
+                                                                                    unfinished_prev_tasks))
+            return
+
         # Run the task if status is 'ready'
         if task.status == 'ready':
             logging.info('Task {0} ({1}), status: preparing'.format(task.nid, task.key))
