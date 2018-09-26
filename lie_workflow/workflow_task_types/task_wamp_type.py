@@ -12,6 +12,7 @@ import re
 import json
 import logging
 
+from tempfile import mktemp
 from mdstudio.component.session import ComponentSession
 from mdstudio.deferred.chainable import chainable
 from mdstudio.deferred.return_value import return_value
@@ -19,6 +20,7 @@ from mdstudio.deferred.return_value import return_value
 from lie_graph.graph_math_operations import graph_join
 from lie_graph.graph_axis.graph_axis_mixin import NodeAxisTools
 from lie_graph.graph_io.io_jsonschema_format import read_json_schema
+from lie_graph.graph_io.io_dict_format import write_dict
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
 from lie_workflow.workflow_common import is_file
 
@@ -31,25 +33,101 @@ mdstudio_urischema = (u'type', u'group', u'component', u'name', u'version')
 wamp_urischema = (u'group', u'component', u'type', u'name')
 
 
-class FileType(NodeAxisTools):
+def to_file_obj(data, inline_files=True):
 
-    def to_dict(self, data):
+    fileobj = {u'extension': 'smi', u'encoding': 'utf8', u'content': None}
 
-        if isinstance(data, dict):
-            if data.keys() == [u'content', u'path', u'extension', u'encoding']:
-                return data
+    if is_file(data):
+        fileobj[u'path'] = os.path.abspath(data)
+        fileobj[u'extension'] = data.split('.')[-1]
 
-        desc = self.descendants()
-        fileobj = dict(desc.items())
-
-        fileobj[u'extension'] = 'smi'
-        if is_file(data):
-            fileobj[u'path'] = os.path.abspath(data)
-            fileobj[u'extension'] = data.split('.')[-1]
+        # Add content of file inline of the WAMP message if inline_files
+        if inline_files:
             with open(data, 'r') as df:
                 fileobj[u'content'] = df.read()
+    else:
+        fileobj[u'content'] = data
+
+    return fileobj
+
+
+class FileType(NodeAxisTools):
+
+    def to_dict(self, data, inline_files=True, workdir=None):
+        """
+        Create a path_file object for communication of files in a WAMP message
+
+        A path_file object contains information on local path where the file
+        is stored, the file extension, the encoding and the contents of the
+        file.
+        Not all of this data is required, availability depends on:
+
+        * If `inline_files` is True (default) the content of the file is
+          send inline to the WAMP endpoint. If `inline_files` is False, the
+          `path` parameter needs to be set to a local file system path that is
+          also accessible by the endpoint the WAMP message is send to.
+
+        :param data:         file related information to construct path_file
+                             object from. Either an existing path_file object,
+                             a file path or the content of the file.
+        :type data:          :py:dict or :py:str
+        :param inline_files: include content of file inline to the WAMP message
+        :type inline_files:  :py:bool
+        :param workdir:      local working directory to store files to
+        :type workdir:       :py:str
+
+        :return:             path_file obejct
+        :rtype:              :py:dict
+        """
+
+        # Data could already be a path_file object from a previous WAMP task
+        if isinstance(data, dict) and data.keys() == [u'content', u'path', u'extension', u'encoding']:
+            fileobj = data
+
+        # Data could be the content of the file or a path
         else:
-            fileobj[u'content'] = data
+            fileobj = to_file_obj(data, inline_files=inline_files)
+
+        # post-process
+        # 1) No inline file content, ensure valid file path
+        if not inline_files and fileobj[u'content'] and workdir:
+
+            if fileobj[u'path']:
+
+                # If local path does not exists, store content in workdir
+                # else use path
+                if not os.path.exists(fileobj[u'path']):
+                    newfile = os.path.join(workdir, os.path.basename(fileobj[u'path']))
+                    with open(newfile, 'w') as outfile:
+                        outfile.write(fileobj[u'content'])
+                    fileobj[u'path'] = newfile
+                    fileobj[u'content'] = None
+
+            # No path, make one using a unique filename.
+            else:
+
+                tmpfilename = os.path.basename(mktemp())
+                newfile = os.path.join(workdir, '{0}.{1}'.format(tmpfilename, fileobj[u'extension'] or 'txt'))
+                with open(newfile, 'w') as outfile:
+                    outfile.write(fileobj[u'content'])
+                fileobj[u'path'] = newfile
+                fileobj[u'content'] = None
+
+        elif not inline_files and fileobj[u'content'] and not workdir:
+            raise IOError('Unable to store output in local task directory.'
+                          'Set store_output to True for this task.')
+
+        # 2) Inline file content
+        elif inline_files and not fileobj[u'content']:
+
+            if fileobj[u'path'] and os.path.exists(fileobj[u'path']):
+
+                with open(fileobj[u'path'], 'r') as infile:
+                    fileobj[u'content'] = infile.read()
+
+        # 3) Remove dot from extension
+        if fileobj[u'extension']:
+            fileobj[u'extension'] = fileobj[u'extension'].lstrip('.')
 
         return fileobj
 
@@ -273,36 +351,88 @@ class WampTask(TaskBase):
         schemaparser = SchemaParser(kwargs.get('task_runner'))
         request = yield schemaparser.get(uri=self.uri(), request=True)
 
-        # Check input against schema
+        # Retrieve JSON schemas for the endpoint request
         request = read_json_schema(request)
         request.orm.map_node(FileType, title='path_file')
-        properties = request.query_nodes({'schema_label': u'properties'})
 
-        # Check for parameters not defined in the schema
-        # Warn about it and remove.
-        undefined_keys = set(input_dict.keys()).difference(set(properties.keys()))
-        for undefined in undefined_keys:
-            logging.warn('Undefined argument removed: {0}'.format(undefined))
-            del input_dict[undefined]
-        
-        # Register parameters (first level) not defined for provenance
-        for param in properties.children():
-            if param.key not in input_dict:
-                value = param.get(u'value', defaultattr=u'default')
-                if value is not None:
-                    logging.debug('Set default for parameter: {0}'.format(param.key))
-                    input_dict[param.key] = value
+        # Register parameters wherever they are defined
+        for key, value in input_dict.items():
+            node = request.query_nodes({request.node_key_tag: key})
+            if len(node) == 1:
 
-        # Check for file types
+                # Check form list of files. Should be handled by graph lib
+                if isinstance(value, list):
+                    file_list = []
+                    for n in value:
+                        if is_file(n):
+                            file_list.append(to_file_obj(n, inline_files=self.inline_files()))
+                        else:
+                            file_list.append(n)
+                    value = file_list
+
+                # Check if it is a file path, include as path_file object
+                #elif is_file(value):
+                #    value = to_file_obj(value, inline_files=self.inline_files())
+
+                node.set(request.node_value_tag, value)
+            elif node.empty():
+                logging.warn('Task task {0} ({1}): parameter {2} not defined in endpoint schema'.format(self.nid,
+                                                                                                        self.key, key))
+            elif len(node) > 1:
+                logging.warn('Task task {0} ({1}): parameter {2} defined multiple times in schema'.format(self.nid,
+                                                                                                        self.key, key))
+
+        # Check for file types, remove schema parameters not defined
         for node in request.query_nodes({'title': u'path_file'}).iternodes():
-            input_dict[node.key] = node.to_dict(input_dict.get(node.key))
+            if node.get(node.node_key_tag) not in input_dict:
+                request.remove_node(node.nid)
+            else:
+                fileobj = node.to_dict(input_dict.get(node.key),
+                                       inline_files=self.inline_files(),
+                                       workdir=self.task_metadata.workdir.get())
+                for key, value in fileobj.items():
+                    obj = node.descendants().query_nodes({node.node_key_tag: key})
+                    obj.set(node.node_value_tag, value)
+
+                # Reset original 'value' with file path
+                node.set(node.node_value_tag, None)
+
+        # Check for parameters that have defaults, remove others
+        nodes_to_remove = []
+        for node in request.query_nodes({u'schema_label': u'properties'}):
+            if node.get(u'value') is None:
+                node_type = node.get(u'type', [])
+                if not isinstance(node_type, list):
+                    node_type = [node_type]
+                if u'object' in node_type:
+                    continue
+                if node.get(u'default') is None and not u'null' in node_type:
+                    nodes_to_remove.append(node.nid)
+        request.remove_nodes(nodes_to_remove)
+
+        # Build parameter dictionary from JSON Schema
+        param_dict = write_dict(request)
+
+        # Remove all 'value' parameters with value None.
+        # TODO: These are left overs from lie_graph.
+        def recursive_remove_none(d):
+
+            for k, v in d.items():
+                if k == 'value' and v is None:
+                    del d[k]
+                elif isinstance(v, dict):
+                    d[k] = recursive_remove_none(v)
+
+            return d
+
+        param_dict = recursive_remove_none(param_dict)
 
         # Write input to disk as JSON? Task working directory should exist
         if self.task_metadata.store_output():
             input_json = os.path.join(self.task_metadata.workdir.get(), 'input.json')
-            json.dump(input_dict, open(input_json, 'w'), indent=2)
+            json.dump(param_dict, open(input_json, 'w'), indent=2)
 
-        return_value(input_dict)
+        return_value(param_dict)
 
     @chainable
     def run_task(self, callback, errorback, **kwargs):

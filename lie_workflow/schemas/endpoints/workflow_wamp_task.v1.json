@@ -22,6 +22,11 @@
           "type": "string",
           "description": "MDStudio WAMP group context",
           "default": "mdgroup"
+        },
+        "inline_files": {
+          "type": "boolean",
+          "description": "Send file contents inline in the WAMP message",
+          "default": true
         }
       }
     }
