@@ -70,14 +70,29 @@ def edge_select_transform(data, edge):
     if not select:
         select = data.keys()
 
+    def recursive_key_search(keys, search_data):
+
+        if keys[0] in search_data:
+            search_data = search_data[keys[0]]
+        else:
+            return None
+
+        if len(keys) > 1:
+            return recursive_key_search(keys[1:], search_data)
+        return search_data
+
     transformed_data = {}
     for key in select:
 
-        if key not in data:
+        # search recursively for dot seperated keys
+        value = recursive_key_search(key.split('.'), data)
+
+        if value is None:
             logging.warn('Data selection: parameter {0} not in output of task {1}'.format(key, edge.nid))
             continue
-
-        transformed_data[mapper.get(key, key)] = data[key]
+        
+        key = key.split('.')[-1]
+        transformed_data[mapper.get(key, key)] = value
 
     for key, value in mapper.items():
         if not key in select:
