@@ -5,6 +5,7 @@ import re
 import logging
 import itertools
 import shutil
+import stat
 
 from collections import Counter
 
@@ -19,6 +20,33 @@ class WorkflowError(Exception):
         super(WorkflowError, self).__init__(message)
 
         logging.error(message)
+
+
+def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+        shutil.copystat(src, dst)
+    lst = os.listdir(src)
+    if ignore:
+        excl = ignore(src, lst)
+        lst = [x for x in lst if x not in excl]
+    for item in lst:
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if symlinks and os.path.islink(s):
+            if os.path.lexists(d):
+                os.remove(d)
+            os.symlink(os.readlink(s), d)
+            try:
+                st = os.lstat(s)
+                mode = stat.S_IMODE(st.st_mode)
+                os.lchmod(d, mode)
+            except:
+                pass  # lchmod not available
+        elif os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
 
 def concat_dict(dict_list):
@@ -81,10 +109,13 @@ def validate_workflow(workflow):
 
 def is_file(param):
 
-    if not isinstance(param, (str, unicode)):
+    if not isinstance(param, PY_STRING):
         return False
 
     if param.count('\n') > 0:
+        return False
+
+    if os.path.isdir(param):
         return False
 
     if re.match('^(.+)/([^/]+)$', param):
@@ -100,26 +131,24 @@ def collect_data(output, task_dir):
 
         for key, value in node.items():
 
-            if isinstance(value, PY_STRING):
+            if isinstance(value, PY_STRING) or is_file(value):
 
                 # Serialized file
-                if len(value.split('\n')) > 1:
+                if value.count('\n') > 0:
                     output_file = os.path.join(task_dir,
                                                'file_{0}.{1}'.format(node.get('key', key),
-                                                                     node.get('extension', 'out')))
+                                                                     node.get('extension', 'out').lstrip('.')))
                     with file(output_file, 'w') as outf:
                         outf.write(value)
 
                     logging.info('Store output to file: {0}'.format(output_file))
 
-            elif is_file(value):  # It still could be a file or directory
-
-                if os.path.isdir(value):
+                elif os.path.isdir(value):
 
                     # Copy the full directory
                     dirname = os.path.basename(value)
                     destination = os.path.join(task_dir, dirname)
-                    shutil.copytree(value, destination)
+                    copytree(value, destination)
                     node[key] = destination
 
                     logging.info('Collect directory: {0} to {1}'.format(value, destination))
