@@ -35,6 +35,10 @@ wamp_urischema = (u'group', u'component', u'type', u'name')
 
 def to_file_obj(data, inline_files=True):
 
+    # Data could already be a path_file object from a previous WAMP task
+    if isinstance(data, dict) and data.keys() == [u'content', u'path', u'extension']:
+        return data
+
     fileobj = {u'extension': 'smi', u'encoding': 'utf8', u'content': None}
 
     if is_file(data):
@@ -350,8 +354,6 @@ class WampTask(TaskBase):
         # Retrieve JSON schemas for the endpoint request and response
         schemaparser = SchemaParser(kwargs.get('task_runner'))
         request = yield schemaparser.get(uri=self.uri(), request=True)
-
-        # Retrieve JSON schemas for the endpoint request
         request = read_json_schema(request)
         request.orm.map_node(FileType, title='path_file')
 
@@ -369,10 +371,6 @@ class WampTask(TaskBase):
                         else:
                             file_list.append(n)
                     value = file_list
-
-                # Check if it is a file path, include as path_file object
-                #elif is_file(value):
-                #    value = to_file_obj(value, inline_files=self.inline_files())
 
                 node.set(request.node_value_tag, value)
             elif node.empty():
