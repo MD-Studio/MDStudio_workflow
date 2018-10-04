@@ -66,9 +66,7 @@ def edge_select_transform(data, edge):
     """
 
     mapper = edge.get('data_mapping', {})
-    select = edge.get('data_select')
-    if not select:
-        select = data.keys()
+    select = edge.get('data_select', data.keys())
 
     def recursive_key_search(keys, search_data):
 
@@ -84,21 +82,15 @@ def edge_select_transform(data, edge):
     transformed_data = {}
     for key in select:
 
-        # search recursively for dot seperated keys
+        # search recursively for dot separated keys
         value = recursive_key_search(key.split('.'), data)
 
         if value is None:
             logging.warn('Data selection: parameter {0} not in output of task {1}'.format(key, edge.nid))
             continue
-        
+
         key = key.split('.')[-1]
         transformed_data[mapper.get(key, key)] = value
-
-    for key, value in mapper.items():
-        if not key in select:
-            select.append(key)
-        if value in select:
-            select.remove(value)
 
     return transformed_data
 
@@ -305,7 +297,10 @@ class TaskBase(NodeTools):
         :rtype:     :py:dict
         """
 
-        output = self.task_metadata.output_data.get(default={})
+        output = self.task_metadata.output_data.get()
+        if output is None:
+            raise WorkflowError('Task {0} ({1}). No output'.format(self.nid, self.key))
+
         output = load_referenced_output(output,
                                         base_path=self._full_graph.query_nodes(key='project_metadata').project_dir())
 
