@@ -36,10 +36,14 @@ wamp_urischema = (u'group', u'component', u'type', u'name')
 def to_file_obj(data, inline_files=True):
 
     # Data could already be a path_file object from a previous WAMP task
-    if isinstance(data, dict) and data.keys() == [u'content', u'path', u'extension']:
-        return data
-
     fileobj = {u'extension': 'smi', u'encoding': 'utf8', u'content': None}
+    if isinstance(data, dict) and data.keys() == [u'content', u'path', u'extension']:
+        fileobj.update(data)
+
+        if inline_files:
+            with open(data[u'path'], 'r') as df:
+                fileobj[u'content'] = df.read()
+        return fileobj
 
     if is_file(data):
         fileobj[u'path'] = os.path.abspath(data)
@@ -364,9 +368,12 @@ class WampTask(TaskBase):
 
                 # Check form list of files. Should be handled by graph lib
                 if isinstance(value, list):
+
                     file_list = []
                     for n in value:
                         if is_file(n):
+                            file_list.append(to_file_obj(n, inline_files=self.inline_files()))
+                        elif isinstance(n, dict) and n.keys() == [u'content', u'path', u'extension']:
                             file_list.append(to_file_obj(n, inline_files=self.inline_files()))
                         else:
                             file_list.append(n)
