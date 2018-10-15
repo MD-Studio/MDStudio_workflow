@@ -124,6 +124,18 @@ def is_file(param):
     return False
 
 
+def process_duplicate_filenames(path):
+
+    if os.path.exists(path):
+        count = 1
+        base, ext = os.path.splitext(path)
+        while os.path.exists(path):
+            path = '{0}_{1}{2}'.format(base, count, ext)
+            count += 1
+
+    return path
+
+
 def collect_data(output, task_dir):
 
     graph = read_dict(output)
@@ -156,7 +168,7 @@ def collect_data(output, task_dir):
 
                     # Copy the file
                     filename = os.path.basename(value)
-                    destination = os.path.join(task_dir, filename)
+                    destination = process_duplicate_filenames(os.path.join(task_dir, filename))
                     shutil.copy(value, destination)
                     node[key] = destination
 
