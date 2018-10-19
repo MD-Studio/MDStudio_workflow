@@ -88,7 +88,7 @@ class FileType(NodeAxisTools):
         :rtype:              :py:dict
         """
 
-        new_file_obj = to_file_obj(data)
+        new_file_obj = to_file_obj(data, inline_files=inline_files)
 
         # No inline file content, ensure valid file path
         if not inline_files and new_file_obj[u'content'] and workdir and new_file_obj[u'extension'] != 'smi':
@@ -154,7 +154,7 @@ class FileArrayType(NodeAxisTools):
         file_array = []
         for item in data:
 
-            new_file_obj = to_file_obj(item)
+            new_file_obj = to_file_obj(item, inline_files=inline_files)
 
             # No inline file content, ensure valid file path
             if not inline_files and new_file_obj[u'content'] and workdir and new_file_obj[u'extension'] != 'smi':
