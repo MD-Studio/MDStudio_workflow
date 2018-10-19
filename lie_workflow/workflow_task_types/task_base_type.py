@@ -84,7 +84,6 @@ def edge_select_transform(data, edge):
 
         # search recursively for dot separated keys
         value = recursive_key_search(key.split('.'), data)
-
         if value is None:
             logging.warn('Data selection: parameter {0} not in output of task {1}'.format(key, edge.nid))
             continue
@@ -260,6 +259,7 @@ class TaskBase(NodeTools):
                 # Select and transform based on edge definitions
                 task_output = edge_select_transform(prev_task.get_output(),
                                                     self._full_graph.getedges((prev_task.nid, self.nid)))
+
                 collected_input.append(task_output)
 
         # concatenate multiple input dictionaries to a new dict

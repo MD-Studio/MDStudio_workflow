@@ -35,28 +35,28 @@ wamp_urischema = (u'group', u'component', u'type', u'name')
 
 def to_file_obj(data, inline_files=True):
 
+    new_file_obj = {u'extension': 'smi', u'encoding': 'utf8', u'content': None, u'path': None}
+
     # Data could already be a path_file object from a previous WAMP task
-    fileobj = {u'extension': 'smi', u'encoding': 'utf8', u'content': None}
-    if isinstance(data, dict) and data.keys() == [u'content', u'path', u'extension']:
-        fileobj.update(data)
+    if isinstance(data, dict) and u'content' in data:
+        new_file_obj.update(data)
 
-        if inline_files:
-            with open(data[u'path'], 'r') as df:
-                fileobj[u'content'] = df.read()
-        return fileobj
+    # Data could be a path
+    elif is_file(data):
+        new_file_obj[u'path'] = os.path.abspath(data)
+        new_file_obj[u'extension'] = data.split('.')[-1]
 
-    if is_file(data):
-        fileobj[u'path'] = os.path.abspath(data)
-        fileobj[u'extension'] = data.split('.')[-1]
-
-        # Add content of file inline of the WAMP message if inline_files
-        if inline_files:
-            with open(data, 'r') as df:
-                fileobj[u'content'] = df.read()
+    # Else it is 'content'
     else:
-        fileobj[u'content'] = data
+        new_file_obj[u'content'] = data
 
-    return fileobj
+    # If path and inline content
+    if new_file_obj[u'path'] is not None and os.path.exists(new_file_obj[u'path']) and inline_files:
+        new_file_obj[u'extension'] = new_file_obj[u'path'].split('.')[-1]
+        with open(new_file_obj[u'path'], 'r') as df:
+            new_file_obj[u'content'] = df.read()
+
+    return new_file_obj
 
 
 class FileType(NodeAxisTools):
@@ -88,56 +88,102 @@ class FileType(NodeAxisTools):
         :rtype:              :py:dict
         """
 
-        # Data could already be a path_file object from a previous WAMP task
-        if isinstance(data, dict) and data.keys() == [u'content', u'path', u'extension', u'encoding']:
-            fileobj = data
+        new_file_obj = to_file_obj(data)
 
-        # Data could be the content of the file or a path
-        else:
-            fileobj = to_file_obj(data, inline_files=inline_files)
+        # No inline file content, ensure valid file path
+        if not inline_files and new_file_obj[u'content'] and workdir and new_file_obj[u'extension'] != 'smi':
 
-        # post-process
-        # 1) No inline file content, ensure valid file path
-        if not inline_files and fileobj[u'content'] and workdir:
+            if new_file_obj[u'path']:
 
-            if fileobj[u'path']:
-
-                # If local path does not exists, store content in workdir
-                # else use path
-                if not os.path.exists(fileobj[u'path']):
-                    newfile = os.path.join(workdir, os.path.basename(fileobj[u'path']))
+                # If local path does not exists, store content in workdir else use path
+                if not os.path.exists(new_file_obj[u'path']):
+                    newfile = os.path.join(workdir, os.path.basename(new_file_obj[u'path']))
                     with open(newfile, 'w') as outfile:
-                        outfile.write(fileobj[u'content'])
-                    fileobj[u'path'] = newfile
-                    fileobj[u'content'] = None
+                        outfile.write(new_file_obj[u'content'])
+                    new_file_obj[u'path'] = newfile
+                    new_file_obj[u'content'] = None
 
             # No path, make one using a unique filename.
             else:
-
                 tmpfilename = os.path.basename(mktemp())
-                newfile = os.path.join(workdir, '{0}.{1}'.format(tmpfilename, fileobj[u'extension'] or 'txt'))
+                newfile = os.path.join(workdir, '{0}.{1}'.format(tmpfilename, new_file_obj[u'extension'] or 'txt'))
                 with open(newfile, 'w') as outfile:
-                    outfile.write(fileobj[u'content'])
-                fileobj[u'path'] = newfile
-                fileobj[u'content'] = None
+                    outfile.write(new_file_obj[u'content'])
+                new_file_obj[u'path'] = newfile
+                new_file_obj[u'content'] = None
 
-        elif not inline_files and fileobj[u'content'] and not workdir:
-            raise IOError('Unable to store output in local task directory.'
-                          'Set store_output to True for this task.')
+        elif not inline_files and new_file_obj[u'content'] and not workdir and new_file_obj[u'extension'] != 'smi':
+            raise IOError('Unable to store output in local task directory. Set store_output to True for this task.')
 
-        # 2) Inline file content
-        elif inline_files and not fileobj[u'content']:
+        return new_file_obj
 
-            if fileobj[u'path'] and os.path.exists(fileobj[u'path']):
 
-                with open(fileobj[u'path'], 'r') as infile:
-                    fileobj[u'content'] = infile.read()
+class FileArrayType(NodeAxisTools):
 
-        # 3) Remove dot from extension
-        if fileobj[u'extension']:
-            fileobj[u'extension'] = fileobj[u'extension'].lstrip('.')
+    def to_dict(self, data, inline_files=True, workdir=None):
+        """
+        Create a path_file object for communication of files in a WAMP message
 
-        return fileobj
+        A path_file object contains information on local path where the file
+        is stored, the file extension, the encoding and the contents of the
+        file.
+        Not all of this data is required, availability depends on:
+
+        * If `inline_files` is True (default) the content of the file is
+          send inline to the WAMP endpoint. If `inline_files` is False, the
+          `path` parameter needs to be set to a local file system path that is
+          also accessible by the endpoint the WAMP message is send to.
+
+        :param data:         file related information to construct path_file
+                             object from. Either an existing path_file object,
+                             a file path or the content of the file.
+        :type data:          :py:dict or :py:str
+        :param inline_files: include content of file inline to the WAMP message
+        :type inline_files:  :py:bool
+        :param workdir:      local working directory to store files to
+        :type workdir:       :py:str
+
+        :return:             path_file obejct
+        :rtype:              :py:dict
+        """
+
+        # Course input to list
+        if not isinstance(data, (list, tuple)):
+            data = [data]
+
+        file_array = []
+        for item in data:
+
+            new_file_obj = to_file_obj(item)
+
+            # No inline file content, ensure valid file path
+            if not inline_files and new_file_obj[u'content'] and workdir and new_file_obj[u'extension'] != 'smi':
+
+                if new_file_obj[u'path']:
+
+                    # If local path does not exists, store content in workdir else use path
+                    if not os.path.exists(new_file_obj[u'path']):
+                        newfile = os.path.join(workdir, os.path.basename(new_file_obj[u'path']))
+                        with open(newfile, 'w') as outfile:
+                            outfile.write(new_file_obj[u'content'])
+                        new_file_obj[u'path'] = newfile
+                        new_file_obj[u'content'] = None
+
+                # No path, make one using a unique filename.
+                else:
+                    tmpfilename = os.path.basename(mktemp())
+                    newfile = os.path.join(workdir,'{0}.{1}'.format(tmpfilename, new_file_obj[u'extension'] or 'txt'))
+                    with open(newfile, 'w') as outfile:
+                        outfile.write(new_file_obj[u'content'])
+                    new_file_obj[u'path'] = newfile
+                    new_file_obj[u'content'] = None
+
+            elif not inline_files and new_file_obj[u'content'] and not workdir and new_file_obj[u'extension'] != 'smi':
+                raise IOError('Unable to store output in local task directory. Set store_output to True for this task.')
+
+            file_array.append(new_file_obj)
+
+        return file_array
 
 
 def schema_uri_to_dict(uri, request=True):
@@ -359,26 +405,13 @@ class WampTask(TaskBase):
         schemaparser = SchemaParser(kwargs.get('task_runner'))
         request = yield schemaparser.get(uri=self.uri(), request=True)
         request = read_json_schema(request)
-        request.orm.map_node(FileType, title='path_file')
+        request.orm.map_node(FileType, format='file')
+        request.orm.map_node(FileArrayType, format='file_array')
 
         # Register parameters wherever they are defined
         for key, value in input_dict.items():
             node = request.query_nodes({request.node_key_tag: key})
             if len(node) == 1:
-
-                # Check form list of files. Should be handled by graph lib
-                if isinstance(value, list):
-
-                    file_list = []
-                    for n in value:
-                        if is_file(n):
-                            file_list.append(to_file_obj(n, inline_files=self.inline_files()))
-                        elif isinstance(n, dict) and n.keys() == [u'content', u'path', u'extension']:
-                            file_list.append(to_file_obj(n, inline_files=self.inline_files()))
-                        else:
-                            file_list.append(n)
-                    value = file_list
-
                 node.set(request.node_value_tag, value)
             elif node.empty():
                 logging.warn('Task task {0} ({1}): parameter {2} not defined in endpoint schema'.format(self.nid,
@@ -388,19 +421,32 @@ class WampTask(TaskBase):
                                                                                                         self.key, key))
 
         # Check for file types, remove schema parameters not defined
-        for node in request.query_nodes({'title': u'path_file'}).iternodes():
+        for node in request.query_nodes({'format': u'file'}).iternodes():
             if node.get(node.node_key_tag) not in input_dict:
                 request.remove_node(node.nid)
             else:
                 fileobj = node.to_dict(input_dict.get(node.key),
                                        inline_files=self.inline_files(),
                                        workdir=self.task_metadata.workdir.get())
+
                 for key, value in fileobj.items():
                     obj = node.descendants().query_nodes({node.node_key_tag: key})
                     obj.set(node.node_value_tag, value)
 
                 # Reset original 'value' with file path
                 node.set(node.node_value_tag, None)
+
+        # Check for file arrays, remove schema parameters not defined
+        for node in request.query_nodes({'format': u'file_array'}).iternodes():
+            if node.get(node.node_key_tag) not in input_dict:
+                request.remove_node(node.nid)
+            else:
+                fileobj = node.to_dict(input_dict.get(node.key),
+                                       inline_files=self.inline_files(),
+                                       workdir=self.task_metadata.workdir.get())
+
+                # Reset original 'value' with file path
+                node.set(node.node_value_tag, fileobj)
 
         # Check for parameters that have defaults, remove others
         nodes_to_remove = []
@@ -411,7 +457,7 @@ class WampTask(TaskBase):
                     node_type = [node_type]
                 if u'object' in node_type:
                     continue
-                if node.get(u'default') is None and not u'null' in node_type:
+                if node.get(u'default') is None and u'null' not in node_type:
                     nodes_to_remove.append(node.nid)
         request.remove_nodes(nodes_to_remove)
 
