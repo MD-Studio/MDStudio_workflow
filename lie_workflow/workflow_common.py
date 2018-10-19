@@ -118,7 +118,7 @@ def is_file(param):
     if os.path.isdir(param):
         return False
 
-    if re.match('^(.+)/([^/]+)$', param):
+    if re.match('^(.+)/([^/]+)$', param) and not '(' in param:
         return True
 
     return False
