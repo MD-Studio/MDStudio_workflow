@@ -53,7 +53,7 @@
         "store_output": {
             "description": "Store the output of the task to disk",
             "type": "boolean",
-            "default": false
+            "default": true
         },
         "workdir": {
             "description": "Storage location of task data",
