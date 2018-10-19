@@ -154,10 +154,14 @@ class WorkflowSpec(object):
         assert task2 in self.workflow.nodes, 'Task {0} not in workflow'.format(task2)
         assert task1 != task2, 'Connection to self not allowed'
 
-        eid = self.workflow.add_edge(task1, task2,
-                                     label='task_link',
-                                     data_mapping=prepaire_data_dict(kwargs),
-                                     data_select=[to_unicode(arg) for arg in args])
+        edge_data = {'label': u'task_link'}
+        data_mapping = prepaire_data_dict(kwargs)
+        if data_mapping:
+            edge_data['data_mapping'] = data_mapping
+        if len(args):
+            edge_data['data_select'] = [to_unicode(arg) for arg in args]
+
+        eid = self.workflow.add_edge(task1, task2, **edge_data)
 
         return eid
 
