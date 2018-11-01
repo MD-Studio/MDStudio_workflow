@@ -121,6 +121,19 @@ class PythonTask(TaskBase):
 
         self.status = 'aborted'
 
+    def validate(self, key=None):
+        """
+        Python task specific validation.
+
+        Check if custom function can be loaded
+        """
+
+        if not self.custom_func.load():
+            logging.error('Task {0} ({1}), ValidationError: unable to load python function'.format(self.nid, self.key))
+            return False
+        
+        return super(PythonTask, self).validate()
+
 
 class BlockingPythonTask(TaskBase):
     """
@@ -178,3 +191,16 @@ class BlockingPythonTask(TaskBase):
     def cancel(self):
 
         self.status = 'aborted'
+
+    def validate(self, key=None):
+        """
+        Python task specific validation.
+
+        Check if custom function can be loaded
+        """
+
+        if not self.custom_func.load():
+            logging.error('Task {0} ({1}), ValidationError: unable to load python function'.format(self.nid, self.key))
+            return False
+
+        return super(BlockingPythonTask, self).validate()
