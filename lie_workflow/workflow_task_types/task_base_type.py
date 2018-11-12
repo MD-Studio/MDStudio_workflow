@@ -297,9 +297,9 @@ class TaskBase(NodeTools):
         :rtype:     :py:dict
         """
 
-        output = self.task_metadata.output_data.get()
-        if output is None:
-            raise WorkflowError('Task {0} ({1}). No output'.format(self.nid, self.key))
+        output = self.task_metadata.output_data.get(default={})
+        if not output:
+            logging.info('Task {0} ({1}). No output'.format(self.nid, self.key))
 
         output = load_referenced_output(output,
                                         base_path=self._full_graph.query_nodes(key='project_metadata').project_dir())
