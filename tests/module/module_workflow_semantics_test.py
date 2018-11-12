@@ -24,10 +24,10 @@ class TestInputOutputMapping(unittest.TestCase):
 
         self.wf = Workflow()
 
-        self.tid1 = self.wf.add_task('test1', custom_func="dummy_task_runners.task_runner")
+        self.tid1 = self.wf.add_task('test1', custom_func="dummy_task_runners.task_runner", store_output=False)
         self.tid1.set_input(add_number=10, dummy=2)
 
-        self.tid2 = self.wf.add_task('test2', custom_func="dummy_task_runners.task_runner")
+        self.tid2 = self.wf.add_task('test2', custom_func="dummy_task_runners.task_runner", store_output=False)
         self.tid2.set_input(add_number=8)
         self.wf.connect_task(self.tid1.nid, self.tid2.nid, 'dummy')
 

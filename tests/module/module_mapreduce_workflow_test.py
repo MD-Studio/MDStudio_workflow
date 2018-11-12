@@ -60,7 +60,7 @@ class BaseWorkflowRunnerTests(object):
 
         result = {}
         for task in self.wf.get_tasks():
-            o = task.task_metadata.output_data.get(default={})
+            o = task.get_output()
             result[task.key] = o.get('dummy')
 
         self.assertDictEqual(result, self.expected_output)
@@ -99,7 +99,8 @@ class TestBuildMapreduceWorkflow(unittest.TestCase):
         """
 
         for task in range(9):
-            self.spec.add_task('test{0}'.format(task+1), custom_func="dummy_task_runners.task_runner")
+            self.spec.add_task('test{0}'.format(task+1), custom_func="dummy_task_runners.task_runner",
+                               store_output=False)
 
         self.assertEqual(len(self.spec), 9)
 

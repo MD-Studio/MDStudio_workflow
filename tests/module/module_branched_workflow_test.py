@@ -12,7 +12,7 @@ Unit tests construction and running the branched workflow:
                     9 -- 10
 """
 
-import os, sys
+import os
 import unittest
 import time
 
@@ -20,6 +20,7 @@ from lie_workflow import Workflow, WorkflowSpec
 
 currpath = os.path.dirname(__file__)
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-branched-workflow.jgf'))
+project_dir = os.path.abspath(os.path.join(currpath, '../files/mdstudio_workflow'))
 
 
 class BaseWorkflowRunnerTests(object):
@@ -64,7 +65,7 @@ class BaseWorkflowRunnerTests(object):
 
         result = {}
         for task in self.wf.get_tasks():
-            o = task.task_metadata.output_data.get(default={})
+            o = task.get_output()
             result[task.key] = o.get('dummy')
 
         self.assertDictEqual(result, self.expected_output)
@@ -167,7 +168,7 @@ class TestRunBranchedWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase)
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -214,7 +215,7 @@ class TestRunBranchedWorkflowBlocking(BaseWorkflowRunnerTests, unittest.TestCase
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -277,7 +278,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest.TestCase):
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -347,7 +348,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest.TestCase):
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -417,7 +418,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCa
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow hits breakpoint
         while self.wf.is_running:
@@ -435,7 +436,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCa
         self.wf.step_breakpoint(bp[0].nid)
 
         # Run the workflow
-        self.wf.run(tid=bp[0].nid, project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(tid=bp[0].nid, project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -498,7 +499,7 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest.TestCase
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -569,7 +570,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest.TestCase):
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -629,7 +630,7 @@ class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
@@ -659,7 +660,7 @@ class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
         """
 
         # Run the workflow
-        self.wf.run(project_dir='./tests/files/mdstudio_workflow')
+        self.wf.run(project_dir=project_dir)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
