@@ -15,14 +15,16 @@ from lie_graph.graph_io.io_jsonschema_format_drafts import StringType
 
 from .task_python_type import PythonTask, BlockingPythonTask, LoadCustomFunc
 from .task_wamp_type import WampTask
+from .task_loop_type import LoopTask
 
-task_types = ('PythonTask', 'BlockingPythonTask', 'WampTask')
+task_types = ('PythonTask', 'BlockingPythonTask', 'WampTask', 'LoopTask')
 
 # Define the workflow Task ORM
 WORKFLOW_ORM = GraphORM(inherit=False)
 WORKFLOW_ORM.map_node(PythonTask, task_type='PythonTask')
 WORKFLOW_ORM.map_node(BlockingPythonTask, task_type='BlockingPythonTask')
 WORKFLOW_ORM.map_node(WampTask, task_type='WampTask')
+WORKFLOW_ORM.map_node(LoopTask, task_type='LoopTask')
 WORKFLOW_ORM.map_node(User, key='user')
 WORKFLOW_ORM.map_node(DateTime, format='date-time')
 WORKFLOW_ORM.map_node(UUID, format='uuid')

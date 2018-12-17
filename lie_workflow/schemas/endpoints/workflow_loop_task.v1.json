@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://liestudio/schemas/workflowtask.json",
+  "title": "MDStudio loop Task",
+  "description": "Definitions for running a loop task in a workflow",
+  "type": "object",
+  "properties": {
+    "task": {
+      "format": "task",
+      "properties": {
+        "task_metadata": {
+          "description": "Common task meta-data",
+          "$ref": "../resources/task_template.json/#root"
+        },
+        "mapper_arg": {
+          "type": "string",
+          "description": "Input argument to use as source of mapper values. Argument should be an iterable."
+        },
+        "mapper_workflow": {
+          "type": "string",
+          "description": "Optional path to mapper workflow JSON file."
+        },
+        "repeat_counter": {
+          "type": "integer",
+          "description": "Repeat the linked workflow a set number of times"
+        },
+        "loop_end_task": {
+          "type": "integer",
+          "description": "Loop end task closing the loop"
+        }
+      },
+      "required": ["loop_end_task"]
+    }
+  }
+}

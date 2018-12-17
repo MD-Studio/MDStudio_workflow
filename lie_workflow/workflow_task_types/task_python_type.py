@@ -6,7 +6,6 @@ file: task_python_type.py
 Task for running a Python function in threaded or blocking mode
 """
 
-import os
 import logging
 
 from importlib import import_module
@@ -64,11 +63,11 @@ class LoadCustomFunc(NodeTools):
         return func
 
 
-class PythonTask(TaskBase):
-    """
-    Task class for running Python functions or classes in threaded
-    mode using Twisted `deferToThread`.
-    """
+class PythonTaskBase(TaskBase):
+
+    def cancel(self):
+
+        self.status = 'aborted'
 
     def new(self, **kwargs):
         """
@@ -89,6 +88,26 @@ class PythonTask(TaskBase):
 
             # Set unique task uuid
             self.task_metadata.task_id.set('value', self.task_metadata.task_id.create())
+
+    def validate(self, key=None):
+        """
+        Python task specific validation.
+
+        Check if custom function can be loaded
+        """
+
+        if self.custom_func() and not self.custom_func.load():
+            logging.error('Task {0} ({1}), ValidationError: unable to load python function'.format(self.nid, self.key))
+            return False
+
+        return super(PythonTaskBase, self).validate()
+
+
+class PythonTask(PythonTaskBase):
+    """
+    Task class for running Python functions or classes in threaded
+    mode using Twisted `deferToThread`.
+    """
 
     def run_task(self, callback, errorback, **kwargs):
         """
@@ -103,64 +122,33 @@ class PythonTask(TaskBase):
                             deferToThread when task failed.
         """
 
-        # Load python function or fail
-        python_func = self.custom_func.load()
-        if python_func is None:
-            return errorback('No Python path to function or class defined', self.nid)
+        # Empty task if no custom_func defined, output == input
+        if self.custom_func() is None:
+            logging.info('No python function or class defined. Empty task returns input as output')
+            callback(self.get_input(), self.nid)
 
-        d = threads.deferToThread(python_func, **self.get_input())
-        if errorback:
-            d.addErrback(errorback, self.nid)
-        if callback:
-            d.addCallback(callback, self.nid)
+        else:
+            # Load python function or fail
+            python_func = self.custom_func.load()
+            if python_func is None:
+                return errorback('No Python path to function or class defined', self.nid)
 
-        if not reactor.running:
-            reactor.run(installSignalHandlers=0)
+            d = threads.deferToThread(python_func, **self.get_input())
+            if errorback:
+                d.addErrback(errorback, self.nid)
+            if callback:
+                d.addCallback(callback, self.nid)
 
-    def cancel(self):
-
-        self.status = 'aborted'
-
-    def validate(self, key=None):
-        """
-        Python task specific validation.
-
-        Check if custom function can be loaded
-        """
-
-        if not self.custom_func.load():
-            logging.error('Task {0} ({1}), ValidationError: unable to load python function'.format(self.nid, self.key))
-            return False
-        
-        return super(PythonTask, self).validate()
+            if not reactor.running:
+                reactor.run(installSignalHandlers=0)
 
 
-class BlockingPythonTask(TaskBase):
+class BlockingPythonTask(PythonTaskBase):
     """
     Task class for running Python functions or classes in blocking
     mode resulting in the main workflow thread to be blocked until
     a result is returned or an exception is raised.
     """
-
-    def new(self, **kwargs):
-        """
-        Implements 'new' abstract base class method to create new
-        task node tree.
-
-        Load task from JSON Schema workflow_python_task.v1.json in package
-        /schemas/endpoints folder.
-        """
-
-        # Do not initiate twice in case method gets called more then once.
-        if not len(self.children()):
-
-            logging.info('Init task {0} ({1}) from schema: {2}'.format(self.nid, self.key, TASK_SCHEMA))
-
-            graph_join(self._full_graph, TASK.descendants(),
-                       links=[(self.nid, i) for i in TASK.children(return_nids=True)])
-
-            # Set unique task uuid
-            self.task_metadata.task_id.set('value', self.task_metadata.task_id.create())
 
     def run_task(self, callback, errorback, **kwargs):
         """
@@ -173,6 +161,11 @@ class BlockingPythonTask(TaskBase):
         :param errorback:   WorkflowRunner errorback method called when task
                             failed.
         """
+
+        # Empty task if no custom_func defined, output == input
+        if self.custom_func() is None:
+            logging.info('No python function or class defined. Empty task returns input as output')
+            return callback(self.get_input(), self.nid)
 
         # Load python function or fail
         python_func = self.custom_func.load()
@@ -187,20 +180,3 @@ class BlockingPythonTask(TaskBase):
                 return errorback(e, self.nid)
 
         callback(output, self.nid)
-
-    def cancel(self):
-
-        self.status = 'aborted'
-
-    def validate(self, key=None):
-        """
-        Python task specific validation.
-
-        Check if custom function can be loaded
-        """
-
-        if not self.custom_func.load():
-            logging.error('Task {0} ({1}), ValidationError: unable to load python function'.format(self.nid, self.key))
-            return False
-
-        return super(BlockingPythonTask, self).validate()

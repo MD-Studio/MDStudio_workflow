@@ -45,6 +45,7 @@ class WorkflowRunner(WorkflowSpec):
         self.workflow_thread = None
 
         # Workflow state
+        self._heartbeat_interval = 60.0
         self._is_running = False
     
     def error_callback(self, failure, tid):
@@ -110,7 +111,7 @@ class WorkflowRunner(WorkflowSpec):
             # Update the task output data only if not already 'completed'
             if task.status not in ('completed', 'failed'):
                 task.set_output(output)
-                task.status = 'completed'
+                task.status = output.get('status', 'completed')
                 task.task_metadata.endedAtTime.set()
 
             logging.info('Task {0} ({1}), status: {2}'.format(task.nid, task.key, task.status))
@@ -122,14 +123,21 @@ class WorkflowRunner(WorkflowSpec):
         # If the task is completed, go to next
         next_task_nids = []
         if task.status == 'completed':
-            
+            task.task_metadata.call_periodic_function.value = False
+
             # Get next task(s) to run
             next_task_nids.extend([ntask.nid for ntask in task.next_tasks()])
             logging.info('{0} new tasks to run with output of {1} ({2})'.format(len(next_task_nids), task.nid, task.key))
 
+        # If the task is running, check if 'Future' object and register with
+        # system 'ping' service
+        if task.status == 'running':
+            task.task_metadata.call_periodic_function.value = True
+
         # If the task failed, retry if allowed and reset status to "ready"
         if task.status == 'failed' and task.task_metadata.retry_count():
             task.task_metadata.retry_count.value -= 1
+            task.task_metadata.call_periodic_function.value = False
             task.status = 'ready'
 
             logging.warn('Task {0} ({1}) failed. Retry ({2} times left)'.format(task.nid, task.key,
@@ -138,6 +146,7 @@ class WorkflowRunner(WorkflowSpec):
 
         # If the active failed an no retry is allowed, save workflow and stop.
         if task.status == 'failed' and task.task_metadata.retry_count() == 0:
+            task.task_metadata.call_periodic_function.value = False
             logging.error('Task {0} ({1}) failed'.format(task.nid, task.key))
             if metadata.project_dir():
                 self.save(os.path.join(metadata.project_dir(), 'workflow.jgf'))
@@ -211,7 +220,7 @@ class WorkflowRunner(WorkflowSpec):
         unfinished_prev_tasks = [t.nid for t in task.previous_tasks() if t.status != 'completed']
         if unfinished_prev_tasks:
             logging.info('Task {0} ({1}): output of tasks {2} not available'.format(task.nid, task.key,
-                                                                                    unfinished_prev_tasks))
+                                                                            repr(unfinished_prev_tasks).strip('[]')))
             return
 
         # Run the task if status is 'ready'
@@ -256,6 +265,9 @@ class WorkflowRunner(WorkflowSpec):
         if not state:
             state = len(self.active_tasks) >= 1
         self._is_running = state
+
+        if not self.is_running:
+            exit.set()
 
     @property
     def is_completed(self):
@@ -488,7 +500,7 @@ class WorkflowRunner(WorkflowSpec):
         # Validate workflow before running?
         if validate:
             if not validate_workflow(self.workflow):
-                return
+                raise WorkflowError('Workflow validation failed')
 
         # Set is_running flag. Function as a thread-safe signal to indicate
         # that the workflow is running.
@@ -513,7 +525,7 @@ class WorkflowRunner(WorkflowSpec):
         if not project_metadata.start_time():
             project_metadata.start_time.set()
 
-        # Spawn a thread
+        # Spawn a workflow thread
         self.workflow_thread = threading.Thread(target=self.run_task, args=[tid])
         self.workflow_thread.daemon = True
         self.workflow_thread.start()

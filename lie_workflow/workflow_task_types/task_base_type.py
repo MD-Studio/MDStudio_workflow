@@ -195,44 +195,6 @@ class TaskBase(NodeTools):
 
         self.task_metadata.status.value = state
 
-    def next_tasks(self, exclude_disabled=True):
-        """
-        Get downstream tasks connected to the current task
-
-        :param exclude_disabled: exclude disabled tasks
-        :type exclude_disabled:  :py:bool
-
-        :return:                 downstream task relative to root
-        :rtype:                  :py:list
-        """
-
-        tasks = []
-        for nid in self.neighbors(return_nids=True):
-            edge = self.edges.get((self.nid, nid))
-            if edge.get('label') == 'task_link':
-                task = self.getnodes(nid)
-                if exclude_disabled and task.status == 'disabled':
-                    continue
-                tasks.append(task)
-
-        return tasks
-
-    def previous_tasks(self):
-        """
-        Get upstream tasks connected to the current task
-
-        :return: upstream task relative to root
-        :rtype:  :py:list
-        """
-
-        task_nid = []
-        for nid in self.all_parents(return_nids=True):
-            edge = self.edges.get((nid, self.nid))
-            if edge.get('label') == 'task_link':
-                task_nid.append(nid)
-
-        return [self.getnodes(nid) for nid in task_nid]
-
     def get_input(self, **kwargs):
         """
         Prepare task input
@@ -259,7 +221,6 @@ class TaskBase(NodeTools):
                 # Select and transform based on edge definitions
                 task_output = edge_select_transform(prev_task.get_output(),
                                                     self._full_graph.getedges((prev_task.nid, self.nid)))
-
                 collected_input.append(task_output)
 
         # concatenate multiple input dictionaries to a new dict
@@ -276,15 +237,6 @@ class TaskBase(NodeTools):
             json.dump(input_dict, open(input_json, 'w'), indent=2)
 
         return input_dict
-
-    def set_input(self, **kwargs):
-        """
-        Register task input
-        """
-
-        data = self.task_metadata.input_data.get(default={})
-        data.update(prepaire_data_dict(kwargs))
-        self.task_metadata.input_data.set('value', data)
 
     def get_output(self, **kwargs):
         """
@@ -306,53 +258,27 @@ class TaskBase(NodeTools):
 
         return output
 
-    def set_output(self, output, **kwargs):
+    def next_tasks(self, exclude_disabled=True):
         """
-        Set the output of the task.
+        Get downstream tasks connected to the current task
 
-        If the task is configured to store output to disk (store_output == True)
-        the dictionary with output data is serialized to JSON and stored in the
-        task directory. A JSON schema $ref directive is added to the project file
-        to enable reloading of the output data.
-        """
+        :param exclude_disabled: exclude disabled tasks
+        :type exclude_disabled:  :py:bool
 
-        # Output should be a dictionary for now
-        if not isinstance(output, dict):
-            raise WorkflowError('Task {0} ({1}). Output should be a dictionary, got {2}'.format(self.nid, self.key,
-                                                                                                type(output)))
-
-        # Store to file or not
-        if self.task_metadata.store_output():
-            project_dir = self._full_graph.query_nodes(key='project_metadata').project_dir()
-            task_dir = self.task_metadata.workdir.get()
-            if task_dir and os.path.exists(task_dir):
-
-                # Check for file paths, copy data to workdir
-                output = collect_data(output, task_dir)
-
-                output_json = os.path.join(task_dir, 'output.json')
-                json.dump(output, open(output_json, 'w'), indent=2)
-
-                output = {'$ref': os.path.relpath(output_json, project_dir)}
-            else:
-                raise WorkflowError('Task directory does not exist: {0}'.format(task_dir))
-
-        outnode = self.task_metadata.output_data
-        if outnode.get() is None:
-            outnode.set('value', output)
-
-    def validate(self, key=None):
-        """
-        Validate task data
+        :return:                 downstream task relative to root
+        :rtype:                  :py:list
         """
 
-        is_valid = True
-        for node in self.descendants().query_nodes(required=True):
-            if node.get() is None:
-                logging.error('Parameter "{0}" is required'.format(node.key))
-                is_valid = False
+        tasks = []
+        for nid in self.neighbors(return_nids=True):
+            edge = self.edges.get((self.nid, nid))
+            if edge.get('label') == 'task_link':
+                task = self.getnodes(nid)
+                if exclude_disabled and task.status == 'disabled':
+                    continue
+                tasks.append(task)
 
-        return is_valid
+        return tasks
 
     def prepare_run(self, **kwargs):
         """
@@ -389,3 +315,96 @@ class TaskBase(NodeTools):
             os.chdir(path)
 
         return True
+
+    def previous_tasks(self):
+        """
+        Get upstream tasks connected to the current task
+
+        :return: upstream task relative to root
+        :rtype:  :py:list
+        """
+
+        task_nid = []
+        for nid in self.all_parents(return_nids=True):
+            edge = self.edges.get((nid, self.nid))
+            if edge.get('label') == 'task_link':
+                task_nid.append(nid)
+
+        return [self.getnodes(nid) for nid in task_nid]
+
+    def set_input(self, **kwargs):
+        """
+        Register task input
+        """
+
+        data = self.task_metadata.input_data.get(default={})
+        data.update(prepaire_data_dict(kwargs))
+        self.task_metadata.input_data.set('value', data)
+
+    def set_output(self, output, **kwargs):
+        """
+        Set the output of the task.
+
+        If the task is configured to store output to disk (store_output == True)
+        the dictionary with output data is serialized to JSON and stored in the
+        task directory. A JSON schema $ref directive is added to the project file
+        to enable reloading of the output data.
+        """
+
+        # Output should be a dictionary for now
+        if not isinstance(output, dict):
+            raise WorkflowError('Task {0} ({1}). Output should be a dictionary, got {2}'.format(self.nid, self.key,
+                                                                                                type(output)))
+
+        # Store to file or not
+        if self.task_metadata.store_output():
+            project_dir = self._full_graph.query_nodes(key='project_metadata').project_dir()
+            task_dir = self.task_metadata.workdir.get()
+            if task_dir and os.path.exists(task_dir):
+
+                # Check for file paths, copy data to workdir
+                output = collect_data(output, task_dir)
+
+                output_json = os.path.join(task_dir, 'output.json')
+                json.dump(output, open(output_json, 'w'), indent=2)
+
+                output = {'$ref': os.path.relpath(output_json, project_dir)}
+            else:
+                raise WorkflowError('Task directory does not exist: {0}'.format(task_dir))
+
+        outnode = self.task_metadata.output_data
+        if outnode.get() is None:
+            outnode.set('value', output)
+
+    def task_graph(self):
+        """
+        Returns all task specific nodes as one task subgraph
+
+        By default, a task node only represents the root or head-node of a task
+        subgraph containing more task specific nodes such as task configuration
+        and results. This method return all of these nodes as a subgraph view.
+
+        :return: :lie_graph:GraphAxis
+        """
+
+        next_tasks = [t.nid for t in self.next_tasks()]
+
+        node_tasks = [self.nid]
+        for nid in self.adjacency[self.nid]:
+            if nid not in next_tasks:
+                node_tasks.extend(self.getnodes(nid).descendants(include_self=True, return_nids=True))
+
+        return self.getnodes(node_tasks)
+
+    def validate(self, key=None):
+        """
+        Validate task data
+        """
+
+        is_valid = True
+        for node in self.descendants().query_nodes(required=True):
+            if node.get() is None:
+                logging.error('Parameter "{0}" is required'.format(node.key))
+                is_valid = False
+
+        return is_valid
