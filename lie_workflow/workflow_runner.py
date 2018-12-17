@@ -47,7 +47,7 @@ class WorkflowRunner(WorkflowSpec):
         # Workflow state
         self._heartbeat_interval = 60.0
         self._is_running = False
-    
+
     def error_callback(self, failure, tid):
         """
         Process the output of a failed task and stage the next task to run
@@ -123,21 +123,14 @@ class WorkflowRunner(WorkflowSpec):
         # If the task is completed, go to next
         next_task_nids = []
         if task.status == 'completed':
-            task.task_metadata.call_periodic_function.value = False
 
             # Get next task(s) to run
             next_task_nids.extend([ntask.nid for ntask in task.next_tasks()])
             logging.info('{0} new tasks to run with output of {1} ({2})'.format(len(next_task_nids), task.nid, task.key))
 
-        # If the task is running, check if 'Future' object and register with
-        # system 'ping' service
-        if task.status == 'running':
-            task.task_metadata.call_periodic_function.value = True
-
         # If the task failed, retry if allowed and reset status to "ready"
         if task.status == 'failed' and task.task_metadata.retry_count():
             task.task_metadata.retry_count.value -= 1
-            task.task_metadata.call_periodic_function.value = False
             task.status = 'ready'
 
             logging.warn('Task {0} ({1}) failed. Retry ({2} times left)'.format(task.nid, task.key,
@@ -146,7 +139,6 @@ class WorkflowRunner(WorkflowSpec):
 
         # If the active failed an no retry is allowed, save workflow and stop.
         if task.status == 'failed' and task.task_metadata.retry_count() == 0:
-            task.task_metadata.call_periodic_function.value = False
             logging.error('Task {0} ({1}) failed'.format(task.nid, task.key))
             if metadata.project_dir():
                 self.save(os.path.join(metadata.project_dir(), 'workflow.jgf'))
