@@ -132,14 +132,6 @@ class TaskBase(NodeTools):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def cancel(self):
-        """
-        Cancel the task
-        """
-
-        return
-
-    @abc.abstractmethod
     def run_task(self, callback, errorback, **kwargs):
         """
         A task requires a run_task method with the logic on how to run the task
@@ -194,6 +186,19 @@ class TaskBase(NodeTools):
         """
 
         self.task_metadata.status.value = state
+
+    def cancel(self):
+        """
+        Cancel the task
+        """
+
+        if not self.task_metadata.active:
+            logging.info('Unable to cancel task {0} ({1}) not active'.format(self.nid, self.key))
+            return
+
+        self.status = 'aborted'
+        self.task_metadata.active.value = False
+        logging.info('Canceled task {0} ({1})'.format(self.nid, self.key))
 
     def get_input(self, **kwargs):
         """
