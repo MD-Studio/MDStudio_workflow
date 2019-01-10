@@ -9,6 +9,7 @@ from twisted.python.failure import Failure
 from lie_workflow.workflow_common import WorkflowError, validate_workflow
 from lie_workflow.workflow_spec import WorkflowSpec
 
+# Set twisted logger
 from twisted.logger import Logger
 logging = Logger()
 
@@ -94,7 +95,7 @@ class WorkflowRunner(WorkflowSpec):
         :param tid:    Task ID
         :type tid:     :py:int
         """
-
+        print(output)
         # Get the task
         task = self.get_task(tid)
 
@@ -110,8 +111,16 @@ class WorkflowRunner(WorkflowSpec):
         else:
             # Update the task output data only if not already 'completed'
             if task.status not in ('completed', 'failed'):
-                task.set_output(output)
                 task.status = output.get('status', 'completed')
+
+                # Process Future object
+                if task.status == 'running' and 'query_url' in output:
+                    threading.Timer(output.get('delta_t', 10), task.run_task, (self.output_callback,)).start()
+                    logging.info('Task {0} ({1}): check status after {2} sec.'.format(task.nid, task.key,
+                                                                                      output.get('delta_t', 10)))
+                    return
+
+                task.set_output(output)
                 task.task_metadata.endedAtTime.set()
 
             logging.info('Task {0} ({1}), status: {2}'.format(task.nid, task.key, task.status))
@@ -183,7 +192,7 @@ class WorkflowRunner(WorkflowSpec):
 
         Handles the setup procedure for running a task using a dedicated Task
         runner. The output or errors of a task are handled by the
-        `output_callback` and `error_callback` methods respectively.
+        `output_callback` method.
 
         Tasks to run are processed using the following rules:
 
@@ -225,9 +234,10 @@ class WorkflowRunner(WorkflowSpec):
 
             # Perform run preparations and run the task
             if task.prepare_run():
-                task.run_task(self.output_callback, self.error_callback, task_runner=self.task_runner)
+                task.run_task(self.output_callback, task_runner=self.task_runner)
             else:
-                self.error_callback('Task preparation failed', task.nid)
+                logging.error('Task preparation failed')
+                self.output_callback(None, task.nid)
 
         # In all other cases, pass task data to default output callback
         # instructing it to not update the data but decide on the followup
@@ -257,9 +267,6 @@ class WorkflowRunner(WorkflowSpec):
         if not state:
             state = len(self.active_tasks) >= 1
         self._is_running = state
-
-        if not self.is_running:
-            exit.set()
 
     @property
     def is_completed(self):

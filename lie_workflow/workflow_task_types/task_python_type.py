@@ -65,10 +65,6 @@ class LoadCustomFunc(NodeTools):
 
 class PythonTaskBase(TaskBase):
 
-    def cancel(self):
-
-        self.status = 'aborted'
-
     def new(self, **kwargs):
         """
         Implements 'new' abstract base class method to create new
@@ -109,7 +105,7 @@ class PythonTask(PythonTaskBase):
     mode using Twisted `deferToThread`.
     """
 
-    def run_task(self, callback, errorback, **kwargs):
+    def run_task(self, callback, **kwargs):
         """
         Implements run_task method
 
@@ -118,8 +114,6 @@ class PythonTask(PythonTaskBase):
 
         :param callback:    WorkflowRunner callback method called from Twisted
                             deferToThread when task is done.
-        :param errorback:   WorkflowRunner errorback method called from Twisted
-                            deferToThread when task failed.
         """
 
         # Empty task if no custom_func defined, output == input
@@ -128,16 +122,8 @@ class PythonTask(PythonTaskBase):
             callback(self.get_input(), self.nid)
 
         else:
-            # Load python function or fail
-            python_func = self.custom_func.load()
-            if python_func is None:
-                return errorback('No Python path to function or class defined', self.nid)
-
-            d = threads.deferToThread(python_func, **self.get_input())
-            if errorback:
-                d.addErrback(errorback, self.nid)
-            if callback:
-                d.addCallback(callback, self.nid)
+            d = threads.deferToThread(self.custom_func.load(), **self.get_input())
+            d.addCallback(callback, self.nid)
 
             if not reactor.running:
                 reactor.run(installSignalHandlers=0)
@@ -150,7 +136,7 @@ class BlockingPythonTask(PythonTaskBase):
     a result is returned or an exception is raised.
     """
 
-    def run_task(self, callback, errorback, **kwargs):
+    def run_task(self, callback, **kwargs):
         """
         Implements run_task method
 
@@ -158,25 +144,19 @@ class BlockingPythonTask(PythonTaskBase):
 
         :param callback:    WorkflowRunner callback method called when task
                             is done.
-        :param errorback:   WorkflowRunner errorback method called when task
-                            failed.
         """
 
         # Empty task if no custom_func defined, output == input
         if self.custom_func() is None:
             logging.info('No python function or class defined. Empty task returns input as output')
-            return callback(self.get_input(), self.nid)
+            callback(self.get_input(), self.nid)
 
-        # Load python function or fail
-        python_func = self.custom_func.load()
-        if python_func is None:
-            return errorback('No Python path to function or class defined', self.nid)
+        else:
+            python_func = self.custom_func.load()
+            output = None
+            try:
+                output = python_func(**self.get_input())
+            except Exception as e:
+                logging.error(e)
 
-        output = None
-        try:
-            output = python_func(**self.get_input())
-        except Exception as e:
-            if errorback:
-                return errorback(e, self.nid)
-
-        callback(output, self.nid)
+            callback(output, self.nid)

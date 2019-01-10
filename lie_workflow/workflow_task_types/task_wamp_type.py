@@ -486,7 +486,7 @@ class WampTask(TaskBase):
         return_value(param_dict)
 
     @chainable
-    def run_task(self, callback, errorback, **kwargs):
+    def run_task(self, callback, **kwargs):
         """
         Implements run_task method
 
@@ -494,8 +494,6 @@ class WampTask(TaskBase):
 
         :param callback:    WorkflowRunner callback method called from Twisted
                             deferred when task is done.
-        :param errorback:   WorkflowRunner errorback method called from Twisted
-                            deferred when task failed.
         :param kwargs:      Additional keyword arguments should contain the main
                             mdstudio.component.session.ComponentSession instance as
                             'task_runner'
@@ -517,25 +515,8 @@ class WampTask(TaskBase):
             # Call the service
             input_dict = yield self.get_input(task_runner=task_runner)
             deferred = task_runner.call(wamp_uri, input_dict)
-
-            # Attach error callback
-            deferred.addErrback(errorback, self.nid)
-
-            # Attach callback
             deferred.addCallback(callback, self.nid)
 
         else:
-            errorback('task_runner not of type mdstudio.component.session.ComponentSession', self.nid)
-
-    def cancel(self):
-        """
-        Cancel the task
-        """
-
-        if not self.task_metadata.active:
-            logging.info('Unable to cancel task {0} ({1}) not active'.format(self.nid, self.key))
-            return
-
-        self.task_metadata.status.value = 'aborted'
-        self.task_metadata.active.value = False
-        logging.info('Canceled task {0} ({1})'.format(self.nid, self.key))
+            logging.error('task_runner not of type mdstudio.component.session.ComponentSession')
+            callback(None, self.nid)
