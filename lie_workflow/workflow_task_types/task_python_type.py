@@ -128,6 +128,31 @@ class PythonTask(PythonTaskBase):
             if not reactor.running:
                 reactor.run(installSignalHandlers=0)
 
+    def check_task(self, callback, **kwargs):
+        """
+        Implement check_task method for asynchronous tasks
+
+        :param callback:    WorkflowRunner callback method called from Twisted
+                            deferred when task is done.
+        :param kwargs:      Additional keyword arguments should contain the main
+                            mdstudio.component.session.ComponentSession instance as
+                            'task_runner'
+        """
+
+        # Empty task if no custom_func defined, output == input
+        if self.custom_func() is None:
+            logging.info('No python function or class defined. Empty task returns input as output')
+            callback(self.get_input(), self.nid)
+
+        else:
+            d = threads.deferToThread(self.custom_func.load(), task_id=self.task_metadata.external_task_id(),
+                                      status=self.status, query_url=self.custom_func(),
+                                      checks=self.task_metadata.checks())
+            d.addCallback(callback, self.nid)
+
+            if not reactor.running:
+                reactor.run(installSignalHandlers=0)
+
 
 class BlockingPythonTask(PythonTaskBase):
     """

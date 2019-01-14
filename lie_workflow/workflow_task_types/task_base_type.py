@@ -128,18 +128,43 @@ def load_referenced_output(output_dict, base_path=None):
 class TaskBase(NodeTools):
     """
     Abstract Base class for workflow Task classes
+
+    Defines abstract methods and common methods for task specific functions.
+    Every task type needs to inherit from `TaskBase`. Abstract methods need
+    to be implemented and common methods may be overloaded or extended.
+    In the latter case, don't forget to use `super` to call the base
+    implementation in the base class.
     """
+
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def run_task(self, callback, errorback, **kwargs):
+    def run_task(self, callback, **kwargs):
         """
-        A task requires a run_task method with the logic on how to run the task
+        Run the task itself
+
+        This method contains the logic for running the task itself using the
+        data stored within the task data structure (graph) or provided
+        externally.
+
+        The method requires a callback method as argument. This is the
+        `WorkflowRunner.output_callback` method by default. This method needs
+        to be called with the output of the task and the task ID as arguments
+        whatever the status of the tak may be. This may be:
+
+        * A dictionary representing the results of a task when finished.
+        * A dictionary representing a 'Future' object that is required to
+          check the progress of the task at regular intervals
+        * None in case the tasked failed.
+
+        The `run_task` method may accept any additional number of keyword
+        arguments required for it to perform its function.
 
         :param callback:    WorkflowRunner callback method called with the
                             results of the task and the task ID.
-        :param errorback:   WorkflowRunner errorback method called when the
-                            task failed with the failure message and task ID.
+        :param kwargs:      Additional keyword arguments required by the
+                            method.
+        :type kwargs:       :py:dict
         """
 
         return
@@ -148,6 +173,10 @@ class TaskBase(NodeTools):
     def is_active(self):
         """
         Is the task currently active or not
+
+        Not active is any status other then 'submitted' or 'running'
+
+        :rtype: :py:bool
         """
 
         return self.status in ('submitted', 'running')
@@ -187,12 +216,24 @@ class TaskBase(NodeTools):
 
         self.task_metadata.status.value = state
 
-    def cancel(self):
+    def cancel(self, **kwargs):
         """
         Cancel the task
+
+        This method will perform a administrative canceling of the task by
+        default. This involves changing the task status to 'aborted' and
+        making it inactive.
+
+        The method may be overloaded or extended by specific Task classes to
+        actively cancel the associated task by for instance 'killing' an
+        active process based on process ID or canceling a remote WAMP task
+        using the service job cancel endpoint.
+
+        :param kwargs: additional keyword arguments required to cancel the task
+        :type kwargs:  :py:dict
         """
 
-        if not self.task_metadata.active:
+        if not self.is_active:
             logging.info('Unable to cancel task {0} ({1}) not active'.format(self.nid, self.key))
             return
 
@@ -204,9 +245,11 @@ class TaskBase(NodeTools):
         """
         Prepare task input
 
-        The final input to a task is a combination of input definitions made on
-        the task using `set_input` and the output of other tasks connected to
-        it.
+        The final input of a task is a combination between the input defined as
+        part of the task itself (using `set_input`) and the output of the tasks
+        connected to it. The latter may be post-processed selecting and
+        transforming data based on edge definitions.
+
         lie_workflows are dynamic and therefore the `get_input` and `get_output`
         methods are always called even if input/output was previously stored
         locally.
@@ -214,27 +257,35 @@ class TaskBase(NodeTools):
         If the task is configured to store output to disk (store_output == True)
         the dictionary with input data is serialized to JSON and stored in the
         task directory.
+
+        :param kwargs: additional keyword arguments required to create the
+                       dictionary of input data
+        :type kwargs:  :py:dict
+
+        :return:       input data to the task such as used in the `run_task`
+                       method
+        :rtype:        :py:dict
         """
 
-        # Get output of tasks connected to this task
+        # Get output of tasks connected to this task that are completed
         collected_input = []
-        for prev_task in self.previous_tasks():
+        for prev_task in self.previous_tasks(status='completed'):
 
-            # Only use output when task finished successfully
-            if prev_task.status == 'completed':
+            # Select and transform based on edge definitions
+            task_output = edge_select_transform(prev_task.get_output(),
+                                                self._full_graph.getedges((prev_task.nid, self.nid)))
+            collected_input.append(task_output)
 
-                # Select and transform based on edge definitions
-                task_output = edge_select_transform(prev_task.get_output(),
-                                                    self._full_graph.getedges((prev_task.nid, self.nid)))
-                collected_input.append(task_output)
-
-        # concatenate multiple input dictionaries to a new dict
+        # Concatenate multiple input dictionaries to a new dict
         input_dict = {}
         if collected_input:
             input_dict = concat_dict(collected_input)
 
         # Get input defined in current task and update
         input_dict.update(self.task_metadata.input_data.get(default={}))
+
+        # Update with additional keyword arguments
+        input_dict.update(kwargs)
 
         # Write input to disk as JSON? Task working directory should exist
         if self.task_metadata.store_output():
@@ -245,23 +296,28 @@ class TaskBase(NodeTools):
 
     def get_output(self, **kwargs):
         """
-        Get task output
+        Prepare task output
 
         Return dictionary of output data registered in task_metadata.output_data
         If the data is serialized to a local JSON file, load.
 
-        :return:    Output data
-        :rtype:     :py:dict
+        :param kwargs: additional keyword arguments required to create the
+                       dictionary of output data
+        :type kwargs:  :py:dict
+
+        :return:       output data of the task
+        :rtype:        :py:dict
         """
 
-        output = self.task_metadata.output_data.get(default={})
-        if not output:
+        output_dict = self.task_metadata.output_data.get(default={})
+        if not output_dict:
             logging.info('Task {0} ({1}). No output'.format(self.nid, self.key))
 
-        output = load_referenced_output(output,
+        output_dict = load_referenced_output(output_dict,
                                         base_path=self._full_graph.query_nodes(key='project_metadata').project_dir())
+        output_dict.update(kwargs)
 
-        return output
+        return output_dict
 
     def next_tasks(self, exclude_disabled=True):
         """
@@ -274,16 +330,45 @@ class TaskBase(NodeTools):
         :rtype:                  :py:list
         """
 
-        tasks = []
+        next_tasks = []
         for nid in self.neighbors(return_nids=True):
             edge = self.edges.get((self.nid, nid))
             if edge.get('label') == 'task_link':
                 task = self.getnodes(nid)
                 if exclude_disabled and task.status == 'disabled':
                     continue
-                tasks.append(task)
+                next_tasks.append(task)
 
-        return tasks
+        return next_tasks
+
+    def previous_tasks(self, status=None):
+        """
+        Get upstream tasks connected to the current task
+
+        :param status:  filter previous tasks based on task status
+                        no filtering by default
+        :type status:   :py:str
+
+        :return: upstream task relative to root
+        :rtype:  :py:list
+        """
+
+        prev_tasks = []
+        for nid in self.all_parents(return_nids=True):
+            edge = self.edges.get((nid, self.nid))
+            if edge.get('label') == 'task_link' and self._full_graph.nodes[nid].get('format') == 'task':
+
+                # Get task object
+                task = self.getnodes(nid)
+
+                # Filter task on status if defined
+                if status:
+                    if not task.status == status:
+                        continue
+
+                prev_tasks.append(task)
+
+        return prev_tasks
 
     def prepare_run(self, **kwargs):
         """
@@ -305,11 +390,6 @@ class TaskBase(NodeTools):
         :rtype:     :py:bool
         """
 
-        # Always start of by registering the task as running
-        self.status = 'running'
-        self.task_metadata.startedAtTime.set()
-        logging.info('Task {0} ({1}), status: {2}'.format(self.nid, self.key, self.status))
-
         # If store_data, create output dir and switch
         if self.task_metadata.store_output():
             project_dir = self._full_graph.query_nodes(key='project_dir').get()
@@ -321,29 +401,27 @@ class TaskBase(NodeTools):
 
         return True
 
-    def previous_tasks(self):
-        """
-        Get upstream tasks connected to the current task
-
-        :return: upstream task relative to root
-        :rtype:  :py:list
-        """
-
-        task_nid = []
-        for nid in self.all_parents(return_nids=True):
-            edge = self.edges.get((nid, self.nid))
-            if edge.get('label') == 'task_link':
-                task_nid.append(nid)
-
-        return [self.getnodes(nid) for nid in task_nid]
-
-    def set_input(self, **kwargs):
+    def set_input(self, *args, **kwargs):
         """
         Register task input
+
+        Set task input directly in the task itself.
+        Input is defined as predefined dictionary or keyword arguments
+        to the method.
+
+        :param args:    predefined dictionary of task input
+        :type args:     :py:dict
+        :param kwargs:  input data as keyword arguments
+        :type kwargs:   :py:dict
         """
 
         data = self.task_metadata.input_data.get(default={})
-        data.update(prepaire_data_dict(kwargs))
+
+        predefined = [n for n in args if isinstance(n, dict)]
+        predefined.append(kwargs)
+        for indict in predefined:
+            data.update(prepaire_data_dict(indict))
+
         self.task_metadata.input_data.set('value', data)
 
     def set_output(self, output, **kwargs):
@@ -354,12 +432,20 @@ class TaskBase(NodeTools):
         the dictionary with output data is serialized to JSON and stored in the
         task directory. A JSON schema $ref directive is added to the project file
         to enable reloading of the output data.
+
+        :param output:  task output data to set
+        :type output:   :py:dict
+        :param kwargs:  additional output data as keyword arguments
+        :type kwargs:   :py:dict
         """
 
         # Output should be a dictionary for now
         if not isinstance(output, dict):
             raise WorkflowError('Task {0} ({1}). Output should be a dictionary, got {2}'.format(self.nid, self.key,
                                                                                                 type(output)))
+
+        # Update with any keyword arguments
+        output.update(kwargs)
 
         # Store to file or not
         if self.task_metadata.store_output():
@@ -401,9 +487,43 @@ class TaskBase(NodeTools):
 
         return self.getnodes(node_tasks)
 
+    def update(self, output, status=None):
+        """
+        Update the task metadata
+
+        Usually called when the task is launched, the status is checked or the
+        results are processed.
+
+        :return:    task status after update
+        :rtype:     :py:ste
+        """
+
+        self.task_metadata.checks.value = self.task_metadata.checks.get(default=0) + 1
+
+        # Output or not
+        if output is None:
+            logging.error('Task {0} ({1}) returned no output'.format(self.nid, self.key))
+            self.status = 'failed'
+            self.task_metadata.endedAtTime.set()
+            return
+        else:
+            self.status = output.get('status', 'completed')
+
+        status = self.status
+        if status == 'completed':
+            self.set_output(output)
+            self.task_metadata.endedAtTime.set()
+
+        logging.info('Task {0} ({1}), status: {2}'.format(self.nid, self.key, status))
+        return status
+
     def validate(self, key=None):
         """
-        Validate task data
+        Validate task
+
+        Run task data validation. Usually called at the beginning of the
+        workflow execution.
+        By default the method validates if all required data is set.
         """
 
         is_valid = True

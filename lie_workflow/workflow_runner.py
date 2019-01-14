@@ -4,8 +4,6 @@ import os
 import logging
 import threading
 
-from twisted.python.failure import Failure
-
 from lie_workflow.workflow_common import WorkflowError, validate_workflow
 from lie_workflow.workflow_spec import WorkflowSpec
 
@@ -46,42 +44,21 @@ class WorkflowRunner(WorkflowSpec):
         self.workflow_thread = None
 
         # Workflow state
-        self._heartbeat_interval = 60.0
         self._is_running = False
 
-    def error_callback(self, failure, tid):
-        """
-        Process the output of a failed task and stage the next task to run
-        if allowed
+    def process_check_run(self, task, output):
 
-        :param failure: Twisted deferred error stack trace
-        :type failure:  exception
-        :param tid:     Task ID of failed task
-        :type tid:      :py:int
-        """
+        if not task.task_metadata.external_task_id():
+            task.task_metadata.external_task_id.set(task.node_value_tag, output.get('task_id'))
 
-        task = self.get_task(tid)
+        if 'query_url' in task.task_metadata:
+            if not task.task_metadata.query_url():
+                task.task_metadata.query_url.value.set(task.node_value_tag, output.get('query_url'))
 
-        failure_message = ""
-        if isinstance(failure, Exception) or isinstance(failure, str):
-            failure_message = str(failure)
-        elif isinstance(failure, Failure):
-            failure_message = failure.value
-        else:
-            failure.getErrorMessage()
-
-        logging.error('Task {0} ({1}) crashed with error: {2}'.format(task.nid, task.key, failure_message))
-
-        # Update task meta data
-        task.status = 'failed'
-        task.task_metadata.endedAtTime.set()
-
-        # Update workflow metadata
-        metadata = self.workflow.query_nodes(key='project_metadata')
-        metadata.update_time.set()
-        self.is_running = False
-
-        return
+        delta_t = output.get('delta_t', 10)
+        threading.Timer(delta_t, task.check_task, (self.output_callback,)).start()
+        logging.info('Task {0} ({1}): check {2} next after {3} sec.'.format(task.nid, task.key,
+                                                                            task.task_metadata.checks(), delta_t))
 
     def output_callback(self, output, tid):
         """
@@ -95,35 +72,19 @@ class WorkflowRunner(WorkflowSpec):
         :param tid:    Task ID
         :type tid:     :py:int
         """
-        print(output)
-        # Get the task
+
+        # Get and update the task
         task = self.get_task(tid)
+        status = task.update(output)
 
         # Update project metadata
         metadata = self.workflow.query_nodes(key='project_metadata')
         metadata.update_time.set()
 
-        # Update task metadata
-        # If the task returned no output at all, fail it
-        if output is None:
-            logging.error('Task {0} ({1}) returned no output'.format(task.nid, task.key))
-            task.status = 'failed'
-        else:
-            # Update the task output data only if not already 'completed'
-            if task.status not in ('completed', 'failed'):
-                task.status = output.get('status', 'completed')
-
-                # Process Future object
-                if task.status == 'running' and 'query_url' in output:
-                    threading.Timer(output.get('delta_t', 10), task.run_task, (self.output_callback,)).start()
-                    logging.info('Task {0} ({1}): check status after {2} sec.'.format(task.nid, task.key,
-                                                                                      output.get('delta_t', 10)))
-                    return
-
-                task.set_output(output)
-                task.task_metadata.endedAtTime.set()
-
-            logging.info('Task {0} ({1}), status: {2}'.format(task.nid, task.key, task.status))
+        # Process Future object
+        if status == 'running' and 'query_url' in output:
+            self.process_check_run(task, output)
+            return
 
         # Switch workdir if needed
         if metadata.project_dir.get():
@@ -131,14 +92,14 @@ class WorkflowRunner(WorkflowSpec):
 
         # If the task is completed, go to next
         next_task_nids = []
-        if task.status == 'completed':
+        if status == 'completed':
 
             # Get next task(s) to run
             next_task_nids.extend([ntask.nid for ntask in task.next_tasks()])
             logging.info('{0} new tasks to run with output of {1} ({2})'.format(len(next_task_nids), task.nid, task.key))
 
         # If the task failed, retry if allowed and reset status to "ready"
-        if task.status == 'failed' and task.task_metadata.retry_count():
+        if status == 'failed' and task.task_metadata.retry_count():
             task.task_metadata.retry_count.value -= 1
             task.status = 'ready'
 
@@ -175,11 +136,11 @@ class WorkflowRunner(WorkflowSpec):
             # Finish of if there are no more tasks to run and all are completed
             if self.is_completed or self.has_failed:
                 logging.info('finished workflow')
-                self.is_running = False
                 if not metadata.finish_time():
                     metadata.finish_time.set()
                 if metadata.project_dir():
                     self.save(os.path.join(metadata.project_dir(), 'workflow.jgf'))
+                self.is_running = False
                 return
 
         # Launch new tasks

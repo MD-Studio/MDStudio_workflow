@@ -520,3 +520,37 @@ class WampTask(TaskBase):
         else:
             logging.error('task_runner not of type mdstudio.component.session.ComponentSession')
             callback(None, self.nid)
+
+    @chainable
+    def check_task(self, callback, **kwargs):
+        """
+        Implement check_task method for asynchronous tasks
+
+        :param callback:    WorkflowRunner callback method called from Twisted
+                            deferred when task is done.
+        :param kwargs:      Additional keyword arguments should contain the main
+                            mdstudio.component.session.ComponentSession instance as
+                            'task_runner'
+        """
+
+        task_runner = kwargs.get('task_runner')
+
+        # Task_runner should be defined and of type
+        # mdstudio.component.session.ComponentSession
+        if isinstance(task_runner, ComponentSession):
+
+            # Check if there is a group_context defined and if the WAMP uri
+            # starts with the group_context.
+            group_context = self.group_context()
+            wamp_uri = self.task_metadata.query_url()
+            if group_context and not wamp_uri.startswith(group_context):
+                wamp_uri = '{0}.{1}'.format(group_context, wamp_uri)
+
+            # Call the service
+            deferred = task_runner.call(wamp_uri, task_id=self.task_metadata.external_task_id(), status=self.status,
+                                        query_url=wamp_uri, checks=self.task_metadata.checks())
+            deferred.addCallback(callback, self.nid)
+
+        else:
+            logging.error('task_runner not of type mdstudio.component.session.ComponentSession')
+            callback(None, self.nid)
