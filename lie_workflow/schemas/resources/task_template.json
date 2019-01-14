@@ -1,64 +1,86 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "http://liestudio/schemas/workflowtask.json",
-    "title": "Task",
-    "description": "Workflow Task schema",
-    "type": "object",
-    "properties": {
-        "active": {
-            "description": "Is the current task active or not",
-            "type": "boolean",
-            "default": false
-        },
-        "breakpoint": {
-            "description": "Add a breakpoint for the task. The workflow will only continue if explicitly instructed",
-            "type": "boolean",
-            "default": false
-        },
-        "endedAtTime": {
-            "description": "Task finish time stamp. W3C PROV UTC dateTime",
-            "format": "date-time",
-            "type": "string"
-        },
-        "input_data": {
-            "description": "All required input and optional configuration to the service as key/value pairs",
-            "type": "object"
-        },
-        "output_data": {
-            "description": "All output returned by the task",
-            "type": "object"
-        },
-        "retry_count": {
-            "description": "Number of times the task should be resubmitted when it failed",
-            "type": "integer",
-            "default": 0,
-            "minimum": 0
-        },
-        "startedAtTime": {
-            "description": "Task start time stamp. W3C PROV UTC dateTime",
-            "format": "date-time",
-            "type": "string"
-        },
-        "status": {
-            "description": "The status of the current task",
-            "type": "string",
-            "default": "ready",
-            "enum": ["ready","submitted","running","failed","aborted","completed","disabled"]
-        },
-        "store_output": {
-            "description": "Store the output of the task to disk",
-            "type": "boolean",
-            "default": true
-        },
-        "task_id": {
-            "description": "Unique ID used to identify the task in the system",
-            "format": "uuid",
-            "type": "string"
-        },
-        "workdir": {
-            "description": "Storage location of task data",
-            "type": "string"
-        }
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://liestudio/schemas/workflowtask.json",
+  "title": "Task",
+  "description": "Workflow Task schema",
+  "type": "object",
+  "properties": {
+    "active": {
+      "description": "Is the current task active or not",
+      "type": "boolean",
+      "default": false
     },
-    "required": ["active", "breakpoint", "retry_count", "status"]
+    "breakpoint": {
+      "description": "Add a breakpoint for the task. The workflow will only continue if explicitly instructed",
+      "type": "boolean",
+      "default": false
+    },
+    "checks": {
+      "description": "Number of times the task has been checked by the workflow manager",
+      "type": "integer",
+      "default": 0
+    },
+    "endedAtTime": {
+      "description": "Task finish time stamp. W3C PROV UTC dateTime",
+      "format": "date-time",
+      "type": "string"
+    },
+    "external_task_id": {
+      "type": "string",
+      "description": "Service specific identifier of the task"
+    },
+    "input_data": {
+      "description": "All required input and optional configuration to the service as key/value pairs",
+      "type": "object"
+    },
+    "output_data": {
+      "description": "All output returned by the task",
+      "type": "object"
+    },
+    "retry_count": {
+      "description": "Number of times the task should be resubmitted when it failed",
+      "type": "integer",
+      "default": 0,
+      "minimum": 0
+    },
+    "startedAtTime": {
+      "description": "Task start time stamp. W3C PROV UTC dateTime",
+      "format": "date-time",
+      "type": "string"
+    },
+    "status": {
+      "description": "The status of the current task",
+      "type": "string",
+      "default": "ready",
+      "enum": [
+        "ready",
+        "submitted",
+        "running",
+        "failed",
+        "aborted",
+        "completed",
+        "disabled"
+      ]
+    },
+    "store_output": {
+      "description": "Store the output of the task to disk",
+      "type": "boolean",
+      "default": true
+    },
+    "task_id": {
+      "description": "Unique ID used to identify the task in the system",
+      "format": "uuid",
+      "type": "string"
+    },
+    "workdir": {
+      "description": "Storage location of task data",
+      "type": "string"
+    }
+  },
+  "required": [
+    "active",
+    "breakpoint",
+    "retry_count",
+    "status"
+  ]
 }

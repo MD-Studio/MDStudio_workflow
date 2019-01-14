@@ -27,7 +27,11 @@
           "type": "boolean",
           "description": "Send file contents inline in the WAMP message",
           "default": true
-        }
+        },
+        "query_url": {
+          "type": "string",
+          "description": "Url to query for the results of a async/future call"
+	    }
       }
     }
   }
