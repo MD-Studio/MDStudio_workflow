@@ -17,10 +17,10 @@ from mdstudio.component.session import ComponentSession
 from mdstudio.deferred.chainable import chainable
 from mdstudio.deferred.return_value import return_value
 
-from lie_graph.graph_math_operations import graph_join
-from lie_graph.graph_axis.graph_axis_mixin import NodeAxisTools
-from lie_graph.graph_io.io_jsonschema_format import read_json_schema
-from lie_graph.graph_io.io_dict_format import write_dict
+from graphit.graph_combinatorial.graph_split_join_operations import graph_join
+from graphit.graph_axis.graph_axis_mixin import NodeAxisTools
+from graphit.graph_io.io_jsonschema_format import read_json_schema
+from graphit.graph_io.io_pydata_format import write_pydata
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
 from lie_workflow.workflow_common import is_file
 
@@ -384,7 +384,7 @@ class WampTask(TaskBase):
         if not len(self.children()):
 
             logging.info('Init task {0} ({1}) from schema: {2}'.format(self.nid, self.key, TASK_SCHEMA))
-            graph_join(self._full_graph, TASK.descendants(),
+            graph_join(self.origin, TASK.descendants(),
                        links=[(self.nid, i) for i in TASK.children(return_nids=True)])
 
             # Set unique task uuid
@@ -410,9 +410,9 @@ class WampTask(TaskBase):
 
         # Register parameters wherever they are defined
         for key, value in input_dict.items():
-            node = request.query_nodes({request.node_key_tag: key})
+            node = request.query_nodes({request.key_tag: key})
             if len(node) == 1:
-                node.set(request.node_value_tag, value)
+                node.set(request.value_tag, value)
             elif node.empty():
                 logging.warn('Task task {0} ({1}): parameter {2} not defined in endpoint schema'.format(self.nid,
                                                                                                         self.key, key))
@@ -422,7 +422,7 @@ class WampTask(TaskBase):
 
         # Check for file types, remove schema parameters not defined
         for node in request.query_nodes({'format': u'file'}).iternodes():
-            if node.get(node.node_key_tag) not in input_dict:
+            if node.get(node.key_tag) not in input_dict:
                 request.remove_node(node.nid)
             else:
                 fileobj = node.to_dict(input_dict.get(node.key),
@@ -430,15 +430,15 @@ class WampTask(TaskBase):
                                        workdir=self.task_metadata.workdir.get())
 
                 for key, value in fileobj.items():
-                    obj = node.descendants().query_nodes({node.node_key_tag: key})
-                    obj.set(node.node_value_tag, value)
+                    obj = node.descendants().query_nodes({node.key_tag: key})
+                    obj.set(node.value_tag, value)
 
                 # Reset original 'value' with file path
-                node.set(node.node_value_tag, None)
+                node.set(node.value_tag, None)
 
         # Check for file arrays, remove schema parameters not defined
         for node in request.query_nodes({'format': u'file_array'}).iternodes():
-            if node.get(node.node_key_tag) not in input_dict:
+            if node.get(node.key_tag) not in input_dict:
                 request.remove_node(node.nid)
             else:
                 fileobj = node.to_dict(input_dict.get(node.key),
@@ -446,7 +446,7 @@ class WampTask(TaskBase):
                                        workdir=self.task_metadata.workdir.get())
 
                 # Reset original 'value' with file path
-                node.set(node.node_value_tag, fileobj)
+                node.set(node.value_tag, fileobj)
 
         # Check for parameters that have defaults, remove others
         nodes_to_remove = []
@@ -462,7 +462,7 @@ class WampTask(TaskBase):
         request.remove_nodes(nodes_to_remove)
 
         # Build parameter dictionary from JSON Schema
-        param_dict = write_dict(request)
+        param_dict = write_pydata(request)
 
         # Remove all 'value' parameters with value None.
         # TODO: These are left overs from lie_graph.

@@ -11,8 +11,8 @@ import logging
 from importlib import import_module
 from twisted.internet import (reactor, threads)
 
-from lie_graph.graph_mixin import NodeTools
-from lie_graph.graph_math_operations import graph_join
+from graphit.graph_mixin import NodeTools
+from graphit.graph_combinatorial.graph_split_join_operations import graph_join
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
@@ -79,7 +79,7 @@ class PythonTaskBase(TaskBase):
 
             logging.info('Init task {0} ({1}) from schema: {2}'.format(self.nid, self.key, TASK_SCHEMA))
 
-            graph_join(self._full_graph, TASK.descendants(),
+            graph_join(self.origin, TASK.descendants(),
                        links=[(self.nid, i) for i in TASK.children(return_nids=True)])
 
             # Set unique task uuid

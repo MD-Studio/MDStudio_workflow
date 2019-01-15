@@ -9,8 +9,8 @@ Graph node task classes
 import itertools
 import logging
 
-from lie_graph.graph_algorithms import dfs_paths
-from lie_graph.graph_helpers import renumber_id
+from graphit.graph_algorithms.path_traversal import dfs_paths
+from graphit.graph_helpers import renumber_id
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = {'workflow_python_task.v1.json': None, 'workflow_wamp_task.v1.json': None}
@@ -103,11 +103,11 @@ class Mapper(_TaskBase):
 
             # Get the full descendant lineage from this Mapper task to
             # the Collect task assigned to the mapper
-            collector_task = self._full_graph.query_nodes(
+            collector_task = self.origin.query_nodes(
                 {'to_mapper': self.nid})
             if collector_task:
                 maptid = list(itertools.chain.from_iterable(
-                    dfs_paths(self._full_graph, self.nid, collector_task.nid)))
+                    dfs_paths(self.origin, self.nid, collector_task.nid)))
                 maptid = sorted(set(maptid))
                 maptid.remove(self.nid)
                 maptid.remove(collector_task.nid)
@@ -119,7 +119,7 @@ class Mapper(_TaskBase):
             # A subgraph is a deep copy of the full graph but with all edges.
             # remove edges not having any link to the mapped tasks.
             if maptid:
-                subgraph = self._full_graph.getnodes(maptid).copy(clean=False)
+                subgraph = self.origin.getnodes(maptid).copy(clean=False)
                 maptidset = set(maptid)
                 for edge in list(subgraph.edges.keys()):
                     if not set(edge).intersection(maptidset):
@@ -132,15 +132,15 @@ class Mapper(_TaskBase):
 
             first_task = maptid[0]
             last_task = maptid[-1]
-            mapper_data_mapping = self._full_graph.edges[(self.nid, first_task)]
+            mapper_data_mapping = self.origin.edges[(self.nid, first_task)]
             mapped_children = [first_task]
             for task in range(len(mapped)-1):
 
-                g, tidmap = renumber_id(subgraph, self._full_graph._nodeid)
-                self._full_graph += g
+                g, tidmap = renumber_id(subgraph, self.origin._nodeid)
+                self.origin += g
 
                 if collector_task:
-                    self._full_graph.add_edge(
+                    self.origin.add_edge(
                         tidmap[last_task], collector_task.nid)
 
                 first_task = tidmap[first_task]
@@ -149,11 +149,11 @@ class Mapper(_TaskBase):
 
             for i, child in enumerate(mapped_children):
 
-                child = self._full_graph.getnodes([child])
+                child = self.origin.getnodes([child])
 
                 # Define input for the copied task
                 if 'input_data' not in child:
-                    self._full_graph.nodes[child.nid]['input_data'] = {}
+                    self.origin.nodes[child.nid]['input_data'] = {}
 
                 # Add all other input arguments to
                 for key, value in task_input.items():

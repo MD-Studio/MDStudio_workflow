@@ -11,12 +11,12 @@ import os
 import logging
 import pkg_resources
 
-from lie_graph import GraphAxis
-from lie_graph.graph_io.io_jgf_format import write_jgf, read_jgf
-from lie_graph.graph_io.io_jsonschema_format import read_json_schema
-from lie_graph.graph_axis.graph_axis_mixin import NodeAxisTools
-from lie_graph.graph_py2to3 import to_unicode, prepaire_data_dict
-from lie_graph.graph_helpers import renumber_id
+from graphit import GraphAxis
+from graphit.graph_axis.graph_axis_mixin import NodeAxisTools
+from graphit.graph_io.io_jgf_format import write_jgf, read_jgf
+from graphit.graph_io.io_jsonschema_format import read_json_schema
+from graphit.graph_py2to3 import to_unicode, prepaire_data_dict
+from graphit.graph_helpers import renumber_id
 
 from lie_workflow import __version__
 from lie_workflow.workflow_common import WorkflowError
@@ -43,17 +43,9 @@ class WorkflowSpec(object):
     configuration and input from other task nodes and provides these to the
     specific task that may be a microservice or dedicated Python function or
     class that performs work and collects the returned output.
-    Offloading of work is performed by a dedicated task runner class that
+    Offloading work is performed by a dedicated task runner class that
     knows how to call external microservice or local Python function/class in
     asynchronous or blocking mode.
-    In addition to a task node there are nodes required to construct specific
-    workflow patterns such as:
-
-    * Collect: a node that collects and combines the output of various tasks
-      before forwarding it to the next.
-    * Choice: a node that makes a choice on the next step to take based on the
-      output of another node.
-
     """
 
     def __init__(self, workflow=None, **kwargs):
@@ -65,23 +57,24 @@ class WorkflowSpec(object):
         metadata.
 
         :param workflow: workflow specification
-        :type workflow:  :lie_graph:GraphAxis
+        :type workflow:  :graphit:GraphAxis
         :param kwargs:   additional keyword arguments used to update project
                          metadata
         :type kwargs:    :py:dict
         """
 
         self.workflow = workflow
-
-        if self.workflow is None:
+        if workflow is None:
             self.new()
-        elif not isinstance(workflow, GraphAxis):
-            raise WorkflowError('Not a valid workflow {0}'.format(workflow))
+
+        if not isinstance(self.workflow, GraphAxis):
+            raise WorkflowError('Not a valid workflow {0}'.format(self.workflow))
 
         # Update project metadata
         if kwargs:
-            project_metadata = self.workflow.query_nodes(key='project_metadata')
-            project_metadata.descendants().update(kwargs)
+            project_metadata = self.workflow.query_nodes(key='project_metadata').descendants()
+            if not project_metadata.empty():
+                project_metadata.update(kwargs)
 
     def __len__(self):
         """
@@ -152,6 +145,8 @@ class WorkflowSpec(object):
 
         assert task1 in self.workflow.nodes, 'Task {0} not in workflow'.format(task1)
         assert task2 in self.workflow.nodes, 'Task {0} not in workflow'.format(task2)
+        assert self.workflow.nodes[task1].get('format') == 'task', 'Node {0} not of format "task"'.format(task1)
+        assert self.workflow.nodes[task2].get('format') == 'task', 'Node {0} not of format "task"'.format(task1)
         assert task1 != task2, 'Connection to self not allowed'
 
         edge_data = {'label': u'task_link'}
@@ -165,15 +160,15 @@ class WorkflowSpec(object):
 
         return eid
 
-    def get_tasks(self, tid=None):
+    def get_tasks(self):
         """
-        Return a task by task ID (graph nid)
+        Return all tasks in a workflow
 
         :param tid:       nid of task to return
         :type tid:        :py:int
         """
 
-        tasks = self.workflow.query_nodes(format="task")
+        tasks = self.workflow.query_nodes(format='task')
         if len(tasks) == 1:
             return [tasks]
 
@@ -187,9 +182,9 @@ class WorkflowSpec(object):
         """
 
         # Build workflow template from schema.
-        # Set 'is_directed' to True to import JSON schema as directed graph
+        # Set 'directed' to True to import JSON schema as directed graph
         template_graph = GraphAxis()
-        template_graph.is_directed = True
+        template_graph.directed = True
         template = read_json_schema(schema, graph=template_graph, exclude_args=['title', 'description', 'schema_label'])
 
         self.workflow = template.query_nodes(key='project_metadata').descendants(include_self=True).copy()

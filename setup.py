@@ -41,7 +41,7 @@ setup(
     packages=find_packages(),
     package_data={distribution_name: ['schemas/*', 'schemas/endpoints/*', 'schemas/resources/*']},
     py_modules=[distribution_name],
-    install_requires=["lie_graph", "mdstudio"],
+    install_requires=["py-graphit", "mdstudio"],
     dependency_links=[
         "https://github.com/MD-Studio/lie_graph/tarball/master#egg=lie_graph"],
     include_package_data=True,

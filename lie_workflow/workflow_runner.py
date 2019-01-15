@@ -49,11 +49,11 @@ class WorkflowRunner(WorkflowSpec):
     def process_check_run(self, task, output):
 
         if not task.task_metadata.external_task_id():
-            task.task_metadata.external_task_id.set(task.node_value_tag, output.get('task_id'))
+            task.task_metadata.external_task_id.set(task.value_tag, output.get('task_id'))
 
         if 'query_url' in task.task_metadata:
             if not task.task_metadata.query_url():
-                task.task_metadata.query_url.value.set(task.node_value_tag, output.get('query_url'))
+                task.task_metadata.query_url.value.set(task.value_tag, output.get('query_url'))
 
         delta_t = output.get('delta_t', 10)
         threading.Timer(delta_t, task.check_task, (self.output_callback,)).start()

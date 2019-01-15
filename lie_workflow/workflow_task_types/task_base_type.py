@@ -13,10 +13,10 @@ import logging
 import json
 import os
 
-from lie_graph import GraphAxis
-from lie_graph.graph_mixin import NodeTools
-from lie_graph.graph_py2to3 import prepaire_data_dict, PY_STRING
-from lie_graph.graph_io.io_jsonschema_format import read_json_schema
+from graphit import GraphAxis
+from graphit.graph_mixin import NodeTools
+from graphit.graph_py2to3 import prepaire_data_dict, PY_STRING
+from graphit.graph_io.io_jsonschema_format import read_json_schema
 
 from lie_workflow.workflow_common import WorkflowError, collect_data, concat_dict
 
@@ -34,9 +34,8 @@ def load_task_schema(schema_name):
     :rtype:             :lie_graph:GraphAxis
     """
 
-    # Set 'is_directed' to True to import JSON schema as directed graph
-    template_graph = GraphAxis()
-    template_graph.is_directed = True
+    # Set 'directed' to True to import JSON schema as directed graph
+    template_graph = GraphAxis(directed=True)
 
     task_schema = pkg_resources.resource_filename('lie_workflow', '/schemas/endpoints/{0}'.format(schema_name))
     task_template = read_json_schema(task_schema, graph=template_graph,
@@ -44,7 +43,7 @@ def load_task_schema(schema_name):
     task_node = task_template.query_nodes(key='task')
 
     if task_node.empty():
-        raise ImportError('Unable to load {0} task defintions'.format(schema_name))
+        raise ImportError('Unable to load {0} task definitions'.format(schema_name))
     return task_node
 
 
@@ -185,9 +184,6 @@ class TaskBase(NodeTools):
     def has_input(self):
         """
         Check if input is available
-
-        TODO: does not yet distinguish between predefined input and output
-        of other tasks
         """
 
         return self.task_metadata.input_data.get() is not None
@@ -273,7 +269,7 @@ class TaskBase(NodeTools):
 
             # Select and transform based on edge definitions
             task_output = edge_select_transform(prev_task.get_output(),
-                                                self._full_graph.getedges((prev_task.nid, self.nid)))
+                                                self.origin.getedges((prev_task.nid, self.nid)))
             collected_input.append(task_output)
 
         # Concatenate multiple input dictionaries to a new dict
@@ -314,7 +310,7 @@ class TaskBase(NodeTools):
             logging.info('Task {0} ({1}). No output'.format(self.nid, self.key))
 
         output_dict = load_referenced_output(output_dict,
-                                        base_path=self._full_graph.query_nodes(key='project_metadata').project_dir())
+                                        base_path=self.origin.query_nodes(key='project_metadata').project_dir())
         output_dict.update(kwargs)
 
         return output_dict
@@ -330,16 +326,11 @@ class TaskBase(NodeTools):
         :rtype:                  :py:list
         """
 
-        next_tasks = []
-        for nid in self.neighbors(return_nids=True):
-            edge = self.edges.get((self.nid, nid))
-            if edge.get('label') == 'task_link':
-                task = self.getnodes(nid)
-                if exclude_disabled and task.status == 'disabled':
-                    continue
-                next_tasks.append(task)
+        nxt = self.children(include_self=True).query_edges(label='task_link')
 
-        return next_tasks
+        if exclude_disabled:
+            return [task for task in nxt if task.nid != self.nid and task.status != 'disabled']
+        return [task for task in nxt if task.nid != self.nid]
 
     def previous_tasks(self, status=None):
         """
@@ -349,26 +340,15 @@ class TaskBase(NodeTools):
                         no filtering by default
         :type status:   :py:str
 
-        :return: upstream task relative to root
-        :rtype:  :py:list
+        :return:        upstream task relative to root
+        :rtype:         :py:list
         """
 
-        prev_tasks = []
-        for nid in self.all_parents(return_nids=True):
-            edge = self.edges.get((nid, self.nid))
-            if edge.get('label') == 'task_link' and self._full_graph.nodes[nid].get('format') == 'task':
+        pvt = self.all_parents(include_self=True).query_edges(label='task_link')
 
-                # Get task object
-                task = self.getnodes(nid)
-
-                # Filter task on status if defined
-                if status:
-                    if not task.status == status:
-                        continue
-
-                prev_tasks.append(task)
-
-        return prev_tasks
+        if status is not None:
+            return [task for task in pvt if task.nid != self.nid and task.status == status]
+        return [task for task in pvt if task.nid != self.nid]
 
     def prepare_run(self, **kwargs):
         """
@@ -392,7 +372,7 @@ class TaskBase(NodeTools):
 
         # If store_data, create output dir and switch
         if self.task_metadata.store_output():
-            project_dir = self._full_graph.query_nodes(key='project_dir').get()
+            project_dir = self.origin.query_nodes(key='project_dir').get()
             workdir = self.task_metadata.workdir
             workdir.set('value', os.path.join(project_dir, 'task-{0}-{1}'.format(self.nid, self.key.replace(' ', '_'))))
             path = workdir.makedirs()
@@ -422,7 +402,7 @@ class TaskBase(NodeTools):
         for indict in predefined:
             data.update(prepaire_data_dict(indict))
 
-        self.task_metadata.input_data.set('value', data)
+        self.task_metadata.input_data.set(self.value_tag, data)
 
     def set_output(self, output, **kwargs):
         """
@@ -449,7 +429,7 @@ class TaskBase(NodeTools):
 
         # Store to file or not
         if self.task_metadata.store_output():
-            project_dir = self._full_graph.query_nodes(key='project_metadata').project_dir()
+            project_dir = self.origin.query_nodes(key='project_metadata').project_dir()
             task_dir = self.task_metadata.workdir.get()
             if task_dir and os.path.exists(task_dir):
 

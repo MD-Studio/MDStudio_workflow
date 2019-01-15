@@ -9,8 +9,8 @@ import stat
 
 from collections import Counter
 
-from lie_graph.graph_io.io_dict_format import read_dict, write_dict
-from lie_graph.graph_py2to3 import PY_STRING
+from graphit.graph_io.io_pydata_format import read_pydata, write_pydata
+from graphit.graph_py2to3 import PY_STRING
 
 
 class WorkflowError(Exception):
@@ -138,7 +138,7 @@ def process_duplicate_filenames(path):
 
 def collect_data(output, task_dir):
 
-    graph = read_dict(output)
+    graph = read_pydata(output)
     for node in graph.nodes.values():
 
         for key, value in node.items():
@@ -176,4 +176,4 @@ def collect_data(output, task_dir):
                 else:
                     logging.debug('Value might be a file but the path does not exist: {0}'.format(value))
 
-    return write_dict(graph)
+    return write_pydata(graph)

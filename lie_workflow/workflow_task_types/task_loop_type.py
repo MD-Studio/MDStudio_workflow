@@ -8,7 +8,7 @@ Task for running a Python function in threaded or blocking mode
 
 import logging
 
-from lie_graph.graph_math_operations import graph_join
+from graphit.graph_combinatorial.graph_split_join_operations import graph_join
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema, edge_select_transform
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
@@ -34,7 +34,7 @@ class LoopTask(TaskBase):
         if not len(self.children()):
 
             logging.info('Init task {0} ({1}) from schema: {2}'.format(self.nid, self.key, TASK_SCHEMA))
-            graph_join(self._full_graph, TASK.descendants(),
+            graph_join(self.origin, TASK.descendants(),
                        links=[(self.nid, i) for i in TASK.children(return_nids=True)])
 
             # Set unique task uuid
@@ -69,7 +69,7 @@ class LoopTask(TaskBase):
 
             # Select and transform selected mapper argument based on edge definitions
             arg = edge_select_transform({mapper_arg: input[mapper_arg][i]},
-                                        self._full_graph.getedges((self.nid, task.nid)))
+                                        self.origin.getedges((self.nid, task.nid)))
 
             task.set_input(**arg)
 
@@ -119,8 +119,8 @@ class LoopTask(TaskBase):
 
                 return wf.getnodes(sub_workflow_nids)
 
-            v = get_sub_workflow(self._full_graph, self,
-                                 self._full_graph.query_nodes({self.node_key_tag: self.loop_end_task()}))
+            v = get_sub_workflow(self.origin, self,
+                                 self.origin.query_nodes({self.key_tag: self.loop_end_task()}))
 
             ww = list(v.nodes.keys())
             subgraph = v.copy(clean=False)
@@ -134,7 +134,7 @@ class LoopTask(TaskBase):
                     tid = list(intr)[0]
                     rid = list(set(edge).difference(ww))[0]
                     loose = (tid, rid)
-                    if not loose in self._full_graph.edges():
+                    if not loose in self.origin.edges():
                         loose = (rid, tid)
                     loose_edges.append(loose)
                     subgraph_endpoints.append(tid)
@@ -147,18 +147,18 @@ class LoopTask(TaskBase):
 
                 mapping = {}
                 for nid, attr in subgraph.nodes.items():
-                    newnid = self._full_graph.add_node(run_node_new=False, **attr)
+                    newnid = self.origin.add_node(run_node_new=False, **attr)
                     mapping[nid] = newnid
 
                 for eid, attr in subgraph.edges.items():
                     if eid[0] in mapping and eid[1] in mapping:
                         neweid = (mapping[eid[0]], mapping[eid[1]])
-                        self._full_graph.add_edge(neweid, directed=True, run_edge_new=False, **attr)
+                        self.origin.add_edge(neweid, directed=True, run_edge_new=False, **attr)
 
                 for ledge in loose_edges:
-                    attr = self._full_graph.edges[(ledge)]
-                    self._full_graph.add_edge(mapping.get(ledge[0], ledge[0]), mapping.get(ledge[1], ledge[1]),
-                                              run_edge_new=False, directed=self.is_directed, **attr)
+                    attr = self.origin.edges[(ledge)]
+                    self.origin.add_edge(mapping.get(ledge[0], ledge[0]), mapping.get(ledge[1], ledge[1]),
+                                              run_edge_new=False, directed=self.directed, **attr)
 
         return True
 
@@ -172,7 +172,7 @@ class LoopTask(TaskBase):
 
         # loop_end_task should exist
         loop_end_task = self.loop_end_task()
-        if self._full_graph.query_nodes({self.node_key_tag: loop_end_task}).empty():
+        if self.origin.query_nodes({self.key_tag: loop_end_task}).empty():
             logging.error('Loop_end_task "{0}" not in workflow'.format(loop_end_task))
             return False
 
