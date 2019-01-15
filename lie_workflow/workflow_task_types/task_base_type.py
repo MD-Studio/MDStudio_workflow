@@ -30,8 +30,10 @@ def load_task_schema(schema_name):
     :param schema_name: task JSON Schema file name to load
     :type schema_name:  :py:str
 
-    :return:            Directed GraphAxis task template graph
-    :rtype:             :lie_graph:GraphAxis
+    :return:            directed GraphAxis task template graph
+    :rtype:             :graphit:GraphAxis
+
+    :raises:            ImportError, unable to import JSON template
     """
 
     # Set 'directed' to True to import JSON schema as directed graph
@@ -58,9 +60,9 @@ def edge_select_transform(data, edge):
     :param data:  output of previous task
     :type data:   :py:dict
     :param edge:  edge connecting tasks
-    :type edge:   :lie_graph:Graph
+    :type edge:   :graphit:GraphAxis
 
-    :return:      currated output
+    :return:      curated output
     :rtype:       :py:dict
     """
 
@@ -100,9 +102,13 @@ def load_referenced_output(output_dict, base_path=None):
     Referred output is defined in the output dictionary using the JSON Schema
     '$ref' keyword that points to a json file on disk.
 
-    :param output_dict:
-    :param base_path:
-    :return:
+    :param output_dict: output dict to be updated
+    :type output_dict:  :py:dict
+    :param base_path:   base project path
+    :type base_path:    :py:str
+
+    :return:            updated output dict
+    :rtype:             :py:dict
     """
 
     for key, value in output_dict.items():
@@ -184,6 +190,8 @@ class TaskBase(NodeTools):
     def has_input(self):
         """
         Check if input is available
+
+        :rtype: :py:bool
         """
 
         return self.task_metadata.input_data.get() is not None
@@ -210,7 +218,7 @@ class TaskBase(NodeTools):
         :type state:  :py:str
         """
 
-        self.task_metadata.status.value = state
+        self.task_metadata.status.set(self.value_tag, state)
 
     def cancel(self, **kwargs):
         """
@@ -374,7 +382,8 @@ class TaskBase(NodeTools):
         if self.task_metadata.store_output():
             project_dir = self.origin.query_nodes(key='project_dir').get()
             workdir = self.task_metadata.workdir
-            workdir.set('value', os.path.join(project_dir, 'task-{0}-{1}'.format(self.nid, self.key.replace(' ', '_'))))
+            workdir.set(self.value_tag,
+                        os.path.join(project_dir, 'task-{0}-{1}'.format(self.nid, self.key.replace(' ', '_'))))
             path = workdir.makedirs()
 
             os.chdir(path)
@@ -417,6 +426,9 @@ class TaskBase(NodeTools):
         :type output:   :py:dict
         :param kwargs:  additional output data as keyword arguments
         :type kwargs:   :py:dict
+
+        :raises:        WorkflowError, output should be of type 'dict',
+                        task directory should exist if store_output
         """
 
         # Output should be a dictionary for now
@@ -445,7 +457,7 @@ class TaskBase(NodeTools):
 
         outnode = self.task_metadata.output_data
         if outnode.get() is None:
-            outnode.set('value', output)
+            outnode.set(self.value_tag, output)
 
     def task_graph(self):
         """
@@ -455,7 +467,7 @@ class TaskBase(NodeTools):
         subgraph containing more task specific nodes such as task configuration
         and results. This method return all of these nodes as a subgraph view.
 
-        :return: :lie_graph:GraphAxis
+        :rtype: :graphit:GraphAxis
         """
 
         next_tasks = [t.nid for t in self.next_tasks()]
@@ -467,7 +479,7 @@ class TaskBase(NodeTools):
 
         return self.getnodes(node_tasks)
 
-    def update(self, output, status=None):
+    def update(self, output):
         """
         Update the task metadata
 
@@ -475,10 +487,10 @@ class TaskBase(NodeTools):
         results are processed.
 
         :return:    task status after update
-        :rtype:     :py:ste
+        :rtype:     :py:str
         """
 
-        self.task_metadata.checks.value = self.task_metadata.checks.get(default=0) + 1
+        self.task_metadata.checks.set(self.value_tag, self.task_metadata.checks.get(default=0) + 1)
 
         # Output or not
         if output is None:

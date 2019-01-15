@@ -21,8 +21,9 @@ from graphit.graph_combinatorial.graph_split_join_operations import graph_join
 from graphit.graph_axis.graph_axis_mixin import NodeAxisTools
 from graphit.graph_io.io_jsonschema_format import read_json_schema
 from graphit.graph_io.io_pydata_format import write_pydata
+
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
-from lie_workflow.workflow_common import is_file
+from lie_workflow.workflow_common import is_file, WorkflowError
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = 'workflow_wamp_task.v1.json'
@@ -221,14 +222,14 @@ def schema_uri_to_dict(uri, request=True):
     # Parse MDStudio resource URI
     if '//' in uri:
         if len(split_uri) != 5:
-            raise FormatError('Invalid MDStudio schema uri: {0}'.format(uri))
+            raise WorkflowError('Invalid MDStudio schema uri: {0}'.format(uri))
         uri_dict = dict(zip(mdstudio_urischema[:4], split_uri[:4]))
         uri_dict[u'version'] = int(split_uri[-1].strip(u'v'))
 
     # Parse WAMP URI
     else:
         if len(split_uri) != 4:
-            raise FormatError('Invalid WAMP schema uri: {0}'.format(uri))
+            raise WorkflowError('Invalid WAMP schema uri: {0}'.format(uri))
         uri_dict = dict(zip(wamp_urischema, split_uri))
         uri_dict[u'name'] = u'{0}_{1}'.format(uri_dict[u'name'], u'request' if request else u'response')
         uri_dict[u'version'] = 1
@@ -388,7 +389,7 @@ class WampTask(TaskBase):
                        links=[(self.nid, i) for i in TASK.children(return_nids=True)])
 
             # Set unique task uuid
-            self.task_metadata.task_id.set('value', self.task_metadata.task_id.create())
+            self.task_metadata.task_id.set(self.value_tag, self.task_metadata.task_id.create())
 
     @chainable
     def get_input(self, **kwargs):

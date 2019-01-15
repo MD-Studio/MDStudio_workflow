@@ -38,7 +38,7 @@ class LoopTask(TaskBase):
                        links=[(self.nid, i) for i in TASK.children(return_nids=True)])
 
             # Set unique task uuid
-            self.task_metadata.task_id.set('value', self.task_metadata.task_id.create())
+            self.task_metadata.task_id.set(self.value_tag, self.task_metadata.task_id.create())
 
     def cancel(self):
 

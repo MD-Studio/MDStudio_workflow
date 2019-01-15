@@ -394,7 +394,7 @@ class WorkflowRunner(WorkflowSpec):
             return
 
         # Remove the breakpoint
-        task.task_metadata.breakpoint.set('value', False)
+        task.task_metadata.breakpoint.set(self.value_tag, False)
         logging.info('Remove breakpoint on task {0} ({1})'.format(tid, task.key))
 
     def input(self, tid, **kwargs):
@@ -473,10 +473,10 @@ class WorkflowRunner(WorkflowSpec):
         # If there are steps that store results locally (store_output == True)
         # Create a project directory.
         if any(self.workflow.query_nodes(key="store_output").values()):
-            project_metadata.project_dir.set('value', project_metadata.project_dir.get(default=project_dir))
+            project_metadata.project_dir.set(self.value_tag, project_metadata.project_dir.get(default=project_dir))
             project_metadata.project_dir.makedirs()
         else:
-            project_metadata.project_dir.set('value', None)
+            project_metadata.project_dir.set(self.value_tag, None)
 
         logging.info('Running workflow: {0}, start task ID: {1}'.format(project_metadata.title(), tid))
 

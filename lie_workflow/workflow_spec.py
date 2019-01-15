@@ -61,6 +61,8 @@ class WorkflowSpec(object):
         :param kwargs:   additional keyword arguments used to update project
                          metadata
         :type kwargs:    :py:dict
+
+        :raises:         WorkflowError, if 'workflow' not valid
         """
 
         self.workflow = workflow
@@ -81,6 +83,7 @@ class WorkflowSpec(object):
         Implement class __len__
 
         :return: return number of tasks in workflow
+        :rtype:  :py:int
         """
 
         return len(self.workflow.query_nodes(format='task'))
@@ -95,21 +98,23 @@ class WorkflowSpec(object):
         Additional keyword arguments provided to the 'add_task' method will
         used to update the task data
 
-        :param task_name: Administrative name of the task
+        :param task_name: administrative name of the task
         :type task_name:  :py:str
-        :param task_type: Task type to add
+        :param task_type: task type to add
         :type task_type:  :py:str
         :param kwargs:    additional keyword arguments passed to the task
                           init_task method.
         :type kwargs:     :py:dict
 
         :return:          Task object
+        :rtype:           :graphit:GraphAxis
+
+        :raises:          WorkflowError, unsupported 'task_type'
         """
 
         # Task type needs to be supported by ORM
         if task_type not in task_types:
-            raise WorkflowError('Workflow task type "{0}" not supported. Needs to be one of {1}'.format(task_type,
-                                                                                    ', '.join(task_types)))
+            raise WorkflowError('Task type "{0}" not supported, requires: {1}'.format(task_type, ', '.join(task_types)))
 
         # Add the task as node to the workflow graph. The task 'new' method is
         # called for initial task initiation.
@@ -141,6 +146,9 @@ class WorkflowSpec(object):
         :type task1:          :py:int
         :param task2:         second task of two tasks to connect
         :type task2:          :py:int
+
+        :return:              edge identifier
+        :rtype:               :py:tuple
         """
 
         assert task1 in self.workflow.nodes, 'Task {0} not in workflow'.format(task1)
@@ -164,8 +172,8 @@ class WorkflowSpec(object):
         """
         Return all tasks in a workflow
 
-        :param tid:       nid of task to return
-        :type tid:        :py:int
+        :return:          workflow graph task objects
+        :rtype:           :py:list
         """
 
         tasks = self.workflow.query_nodes(format='task')
@@ -196,7 +204,7 @@ class WorkflowSpec(object):
         metadata = self.workflow.query_nodes(key='project_metadata')
         metadata.create_time.set()
         metadata.user.set()
-        metadata.version.set('value', __version__)
+        metadata.version.set(self.value_tag, __version__)
 
         logging.info('Init default empty workflow')
 

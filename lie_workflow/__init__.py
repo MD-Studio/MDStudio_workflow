@@ -9,7 +9,7 @@ __date__ = '15 april 2016'
 __licence__ = 'Apache Software License 2.0'
 __url__ = 'https://github.com/NLeSC/LIEStudio'
 __copyright__ = "Copyright (c) VU University, Amsterdam"
-__all__ = ['Workflow']
+__all__ = ['Workflow', '__version__']
 
 from .workflow_runner import WorkflowRunner as Workflow
 from .workflow_spec import WorkflowSpec
