@@ -44,6 +44,7 @@ class WorkflowRunner(WorkflowSpec):
         self.workflow_thread = None
 
         # Workflow state
+        self.project_metadata = None
         self._is_running = False
 
     def process_check_run(self, task, output):
@@ -78,8 +79,7 @@ class WorkflowRunner(WorkflowSpec):
         status = task.update(output)
 
         # Update project metadata
-        metadata = self.workflow.query_nodes(key='project_metadata')
-        metadata.update_time.set()
+        self.project_metadata.update_time.set()
 
         # Process Future object
         if status == 'running' and 'query_url' in output:
@@ -87,8 +87,8 @@ class WorkflowRunner(WorkflowSpec):
             return
 
         # Switch workdir if needed
-        if metadata.project_dir.get():
-            os.chdir(metadata.project_dir.get())
+        if self.project_metadata.project_dir.get():
+            os.chdir(self.project_metadata.project_dir.get())
 
         # If the task is completed, go to next
         next_task_nids = []
@@ -110,8 +110,8 @@ class WorkflowRunner(WorkflowSpec):
         # If the active failed an no retry is allowed, save workflow and stop.
         if task.status == 'failed' and task.task_metadata.retry_count() == 0:
             logging.error('Task {0} ({1}) failed'.format(task.nid, task.key))
-            if metadata.project_dir():
-                self.save(os.path.join(metadata.project_dir(), 'workflow.jgf'))
+            if self.project_metadata.project_dir():
+                self.save(os.path.join(self.project_metadata.project_dir(), 'workflow.jgf'))
             self.is_running = False
             return
 
@@ -136,10 +136,10 @@ class WorkflowRunner(WorkflowSpec):
             # Finish of if there are no more tasks to run and all are completed
             if self.is_completed or self.has_failed:
                 logging.info('finished workflow')
-                if not metadata.finish_time():
-                    metadata.finish_time.set()
-                if metadata.project_dir():
-                    self.save(os.path.join(metadata.project_dir(), 'workflow.jgf'))
+                if not self.project_metadata.finish_time():
+                    self.project_metadata.finish_time.set()
+                if self.project_metadata.project_dir():
+                    self.save(os.path.join(self.project_metadata.project_dir(), 'workflow.jgf'))
                 self.is_running = False
                 return
 
@@ -171,7 +171,6 @@ class WorkflowRunner(WorkflowSpec):
         # Get the task object from the graph. nid is expected to be in graph.
         # Check if the task has a 'run_task' method.
         task = self.get_task(tid)
-        metadata = self.workflow.query_nodes(key='project_metadata')
 
         # Do not continue if the task is active
         if task.is_active:
@@ -191,7 +190,7 @@ class WorkflowRunner(WorkflowSpec):
 
             # Confirm again that the workflow is running
             self.is_running = True
-            metadata.update_time.set()
+            self.project_metadata.update_time.set()
 
             # Perform run preparations and run the task
             if task.prepare_run():
@@ -260,8 +259,7 @@ class WorkflowRunner(WorkflowSpec):
         :rtype: :py:int
         """
 
-        metadata = self.workflow.query_nodes(key='project_metadata')
-        return metadata.start_time.timestamp()
+        return self.project_metadata.start_time.timestamp()
 
     @property
     def updatetime(self):
@@ -271,8 +269,7 @@ class WorkflowRunner(WorkflowSpec):
         :rtype: :py:int
         """
 
-        metadata = self.workflow.query_nodes(key='project_metadata')
-        return metadata.update_time.timestamp()
+        return self.project_metadata.update_time.timestamp()
 
     @property
     def finishtime(self):
@@ -284,8 +281,7 @@ class WorkflowRunner(WorkflowSpec):
         """
 
         if not self.is_running:
-            metadata = self.workflow.query_nodes(key='project_metadata')
-            return metadata.finish_time.timestamp()
+            return self.project_metadata.finish_time.timestamp()
         return None
 
     @property
@@ -353,9 +349,7 @@ class WorkflowRunner(WorkflowSpec):
         for task in active_tasks:
             task.cancel()
 
-        metadata = self.workflow.query_nodes(key='project_metadata')
-        metadata.update_time.set()
-
+        self.project_metadata.update_time.set()
         self.is_running = False
 
     def get_task(self, tid=None, key=None):
@@ -464,26 +458,27 @@ class WorkflowRunner(WorkflowSpec):
 
         # Set is_running flag. Function as a thread-safe signal to indicate
         # that the workflow is running.
-        project_metadata = self.workflow.query_nodes(key='project_metadata')
+        self.project_metadata = self.workflow.query_nodes(key='project_metadata')
         if self.is_running:
-            logging.warning('Workflow {0} is already running'.format(project_metadata.title()))
+            logging.warning('Workflow {0} is already running'.format(self.project_metadata.title()))
             return
         self.is_running = True
 
         # If there are steps that store results locally (store_output == True)
         # Create a project directory.
         if any(self.workflow.query_nodes(key="store_output").values()):
-            project_metadata.project_dir.set(self.value_tag, project_metadata.project_dir.get(default=project_dir))
-            project_metadata.project_dir.makedirs()
+            self.project_metadata.project_dir.set(self.workflow.value_tag,
+                                                  self.project_metadata.project_dir.get(default=project_dir))
+            self.project_metadata.project_dir.makedirs()
         else:
-            project_metadata.project_dir.set(self.value_tag, None)
+            self.project_metadata.project_dir.set(self.workflow.value_tag, None)
 
-        logging.info('Running workflow: {0}, start task ID: {1}'.format(project_metadata.title(), tid))
+        logging.info('Running workflow: {0}, start task ID: {1}'.format(self.project_metadata.title(), tid))
 
         # Set workflow start time if not defined. Don't rerun to allow
         # continuation of unfinished workflow.
-        if not project_metadata.start_time():
-            project_metadata.start_time.set()
+        if not self.project_metadata.start_time():
+            self.project_metadata.start_time.set()
 
         # Spawn a workflow thread
         self.workflow_thread = threading.Thread(target=self.run_task, args=[tid])

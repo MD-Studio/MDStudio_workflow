@@ -204,7 +204,7 @@ class WorkflowSpec(object):
         metadata = self.workflow.query_nodes(key='project_metadata')
         metadata.create_time.set()
         metadata.user.set()
-        metadata.version.set(self.value_tag, __version__)
+        metadata.version.set(metadata.value_tag, __version__)
 
         logging.info('Init default empty workflow')
 
