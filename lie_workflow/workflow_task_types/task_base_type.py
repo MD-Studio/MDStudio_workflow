@@ -9,7 +9,6 @@ task type should implement
 
 import abc
 import pkg_resources
-import logging
 import json
 import os
 
@@ -20,6 +19,9 @@ from graphit.graph_io.io_jsonschema_format import read_json_schema
 
 from lie_workflow.workflow_common import WorkflowError, collect_data, concat_dict
 
+# Set twisted logger
+from twisted.logger import Logger
+logging = Logger()
 
 def load_task_schema(schema_name):
     """
@@ -119,7 +121,9 @@ def load_referenced_output(output_dict, base_path=None):
                 value = os.path.join(base_path, value)
 
             if os.path.exists(value):
-                output_dict.update(json.load(open(value)))
+                json_parsed = json.load(open(value))
+                if isinstance(json_parsed, dict):
+                    output_dict.update(json_parsed)
                 del output_dict[key]
             else:
                 raise WorkflowError('No such references output file: {0}'.format(value))
@@ -503,6 +507,10 @@ class TaskBase(NodeTools):
 
         status = self.status
         if status == 'completed':
+
+            if 'status' in output:
+                del output['status']
+
             self.set_output(output)
             self.task_metadata.endedAtTime.set()
 

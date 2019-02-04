@@ -138,7 +138,7 @@ def process_duplicate_filenames(path):
 
 def collect_data(output, task_dir):
 
-    graph = read_pydata(output)
+    graph = read_pydata(output, level=1)
     for node in graph.nodes.values():
 
         for key, value in node.items():
@@ -176,4 +176,4 @@ def collect_data(output, task_dir):
                 else:
                     logging.debug('Value might be a file but the path does not exist: {0}'.format(value))
 
-    return write_pydata(graph)
+    return write_pydata(graph, export_all=True)

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import logging
 import threading
 
 from lie_workflow.workflow_common import WorkflowError, validate_workflow
@@ -48,17 +47,24 @@ class WorkflowRunner(WorkflowSpec):
         self._is_running = False
 
     def process_check_run(self, task, output):
+        """
+        Process Future object and register an new task status check for the future.
+
+        :param task:    task to check
+        :type task:     :graphit:Graph
+        :param output:  Future object
+        :type output:   :py:dict
+        """
 
         if not task.task_metadata.external_task_id():
             task.task_metadata.external_task_id.set(task.value_tag, output.get('task_id'))
 
-        if 'query_url' in task.task_metadata:
-            if not task.task_metadata.query_url():
-                task.task_metadata.query_url.value.set(task.value_tag, output.get('query_url'))
+        if 'query_url' in output:
+            task.query_url.set(task.value_tag, output['query_url'])
 
-        delta_t = output.get('delta_t', 10)
-        threading.Timer(delta_t, task.check_task, (self.output_callback,)).start()
-        logging.info('Task {0} ({1}): check {2} next after {3} sec.'.format(task.nid, task.key,
+        delta_t = output.get('delta_t', 600)
+        threading.Timer(delta_t, task.check_task, (self.output_callback,), {'task_runner':self.task_runner}).start()
+        logging.info('Task {0} ({1}): {2} check {3} next after {4} sec.'.format(task.status, task.nid, task.key,
                                                                             task.task_metadata.checks(), delta_t))
 
     def output_callback(self, output, tid):
@@ -70,19 +76,24 @@ class WorkflowRunner(WorkflowSpec):
 
         :param output: output of the task
         :type output:  :py:dict
-        :param tid:    Task ID
+        :param tid:    task ID
         :type tid:     :py:int
         """
 
         # Get and update the task
         task = self.get_task(tid)
+        output = output or {}
         status = task.update(output)
 
         # Update project metadata
         self.project_metadata.update_time.set()
 
+        # Save workflow to file
+        if self.project_metadata.project_dir():
+            self.save(os.path.join(self.project_metadata.project_dir(), 'workflow.jgf'))
+
         # Process Future object
-        if status == 'running' and 'query_url' in output:
+        if output.get('object_type') == 'FutureObject' and status == 'running':
             self.process_check_run(task, output)
             return
 
@@ -110,8 +121,6 @@ class WorkflowRunner(WorkflowSpec):
         # If the active failed an no retry is allowed, save workflow and stop.
         if task.status == 'failed' and task.task_metadata.retry_count() == 0:
             logging.error('Task {0} ({1}) failed'.format(task.nid, task.key))
-            if self.project_metadata.project_dir():
-                self.save(os.path.join(self.project_metadata.project_dir(), 'workflow.jgf'))
             self.is_running = False
             return
 
@@ -124,7 +133,7 @@ class WorkflowRunner(WorkflowSpec):
 
         # No more new tasks
         if not next_task_nids:
-
+            
             # Not finished but no active tasks anymore/breakpoint
             if not self.active_tasks and not self.is_completed:
                 breakpoints = self.active_breakpoints
@@ -138,8 +147,6 @@ class WorkflowRunner(WorkflowSpec):
                 logging.info('finished workflow')
                 if not self.project_metadata.finish_time():
                     self.project_metadata.finish_time.set()
-                if self.project_metadata.project_dir():
-                    self.save(os.path.join(self.project_metadata.project_dir(), 'workflow.jgf'))
                 self.is_running = False
                 return
 
@@ -168,8 +175,6 @@ class WorkflowRunner(WorkflowSpec):
         :type tid:  :py:int
         """
 
-        # Get the task object from the graph. nid is expected to be in graph.
-        # Check if the task has a 'run_task' method.
         task = self.get_task(tid)
 
         # Do not continue if the task is active
@@ -194,6 +199,7 @@ class WorkflowRunner(WorkflowSpec):
 
             # Perform run preparations and run the task
             if task.prepare_run():
+                task.status = 'running'
                 task.run_task(self.output_callback, task_runner=self.task_runner)
             else:
                 logging.error('Task preparation failed')
@@ -204,7 +210,7 @@ class WorkflowRunner(WorkflowSpec):
         # workflow step to take.
         else:
             logging.info('Task {0} ({1}), status: {0}'.format(task.nid, task.key, task.status))
-            self.output_callback({}, tid)
+            self.output_callback(None, tid)
 
     @property
     def is_running(self):
@@ -222,6 +228,8 @@ class WorkflowRunner(WorkflowSpec):
         Set the global state of the workflow as running or not.
         If the new state is 'False' first check if there are no other parallel
         active tasks.
+
+        :rtype: :py:bool
         """
 
         if not state:
@@ -244,6 +252,8 @@ class WorkflowRunner(WorkflowSpec):
         Did the workflow finish unsuccessfully?
         True if there are no more active tasks and at least one task has failed
         or was aborted
+
+        :rtype: :py:bool
         """
 
         if not len(self.active_tasks) and any([task.status in ('failed', 'aborted') for task in self.get_tasks()]):
@@ -314,13 +324,20 @@ class WorkflowRunner(WorkflowSpec):
 
     @property
     def failed_tasks(self):
+        """
+        Return failed tasks in the workflow
+
+        :rtype: :py:list
+        """
 
         return [task for task in self.get_tasks() if task.status == 'failed']
 
     @property
     def active_breakpoints(self):
         """
-        Return tasks with active breakpoint or None
+        Return tasks with active breakpoint in the workflow
+
+        :rtype: :py:list
         """
 
         return [task for task in self.get_tasks() if task.task_metadata.breakpoint.get(default=False)]
@@ -358,6 +375,11 @@ class WorkflowRunner(WorkflowSpec):
 
         :param tid:       nid of task to return
         :type tid:        :py:int
+        :param key:       task name
+        :type key:        :py:str
+
+        :return:          task object
+        :rtype:           :graphit:Graph
         """
 
         if tid:
@@ -394,6 +416,10 @@ class WorkflowRunner(WorkflowSpec):
     def input(self, tid, **kwargs):
         """
         Define task input and configuration data
+
+        :param tid:    task ID to define input for
+        :type tid:     :py:int
+        :param kwargs: keyword arguments to register as input
         """
 
         task = self.get_task(tid)
@@ -407,6 +433,8 @@ class WorkflowRunner(WorkflowSpec):
 
         :param tid: task ID to return output for
         :type tid:  :py:int
+
+        :rtype:     :py:dict
         """
 
         task = self.get_task(tid)
@@ -433,10 +461,12 @@ class WorkflowRunner(WorkflowSpec):
         By default, the workflow specification will be validated using the
         `validate` method of the WorkflowSpec class.
 
-        :param tid:      Start the workflow from task ID
-        :type tid:       :py:int
-        :param validate: Validate the workflow before running it
-        :type validate:  :py:bool
+        :param tid:         start the workflow from task ID
+        :type tid:          :py:int
+        :param validate:    Validate the workflow before running it
+        :type validate:     :py:bool
+        :param project_dir: directory to store task output
+        :type project_dir:  :py:str
         """
 
         # Empty workflow, return
@@ -456,6 +486,20 @@ class WorkflowRunner(WorkflowSpec):
             if not validate_workflow(self.workflow):
                 raise WorkflowError('Workflow validation failed')
 
+        # If there are steps that store results locally (store_output == True)
+        # Create a project directory.
+        if any(self.workflow.query_nodes(key="store_output").values()):
+            self.project_metadata.project_dir.set(self.workflow.value_tag,
+                                                  self.project_metadata.project_dir.get(default=project_dir))
+            if self.project_metadata.project_dir.exists and self.is_completed:
+                raise WorkflowError('Directory for finished project exists: {0}'.format(
+                    self.project_metadata.project_dir()))
+            self.project_metadata.project_dir.makedirs()
+        else:
+            self.project_metadata.project_dir.set(self.workflow.value_tag, None)
+
+        logging.info('Running workflow: {0}, start task ID: {1}'.format(self.project_metadata.title(), tid))
+
         # Set is_running flag. Function as a thread-safe signal to indicate
         # that the workflow is running.
         self.project_metadata = self.workflow.query_nodes(key='project_metadata')
@@ -463,17 +507,6 @@ class WorkflowRunner(WorkflowSpec):
             logging.warning('Workflow {0} is already running'.format(self.project_metadata.title()))
             return
         self.is_running = True
-
-        # If there are steps that store results locally (store_output == True)
-        # Create a project directory.
-        if any(self.workflow.query_nodes(key="store_output").values()):
-            self.project_metadata.project_dir.set(self.workflow.value_tag,
-                                                  self.project_metadata.project_dir.get(default=project_dir))
-            self.project_metadata.project_dir.makedirs()
-        else:
-            self.project_metadata.project_dir.set(self.workflow.value_tag, None)
-
-        logging.info('Running workflow: {0}, start task ID: {1}'.format(self.project_metadata.title(), tid))
 
         # Set workflow start time if not defined. Don't rerun to allow
         # continuation of unfinished workflow.

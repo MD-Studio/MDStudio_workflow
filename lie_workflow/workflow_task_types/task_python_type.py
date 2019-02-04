@@ -6,14 +6,16 @@ file: task_python_type.py
 Task for running a Python function in threaded or blocking mode
 """
 
-import logging
-
 from importlib import import_module
-from twisted.internet import (reactor, threads)
+from twisted.internet import reactor, threads
 
 from graphit.graph_mixin import NodeTools
 from graphit.graph_combinatorial.graph_split_join_operations import graph_join
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
+
+# Set twisted logger
+from twisted.logger import Logger
+logging = Logger()
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = 'workflow_python_task.v1.json'

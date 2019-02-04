@@ -10,7 +10,6 @@ protocol (Web Agnostic Messaging Protocol)
 import os
 import re
 import json
-import logging
 
 from tempfile import mktemp
 from mdstudio.component.session import ComponentSession
@@ -24,6 +23,10 @@ from graphit.graph_io.io_pydata_format import write_pydata
 
 from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
 from lie_workflow.workflow_common import is_file, WorkflowError
+
+# Set twisted logger
+from twisted.logger import Logger
+logging = Logger()
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = 'workflow_wamp_task.v1.json'
@@ -406,8 +409,8 @@ class WampTask(TaskBase):
         schemaparser = SchemaParser(kwargs.get('task_runner'))
         request = yield schemaparser.get(uri=self.uri(), request=True)
         request = read_json_schema(request)
-        request.orm.map_node(FileType, format='file')
-        request.orm.map_node(FileArrayType, format='file_array')
+        request.orm.node_mapping.add(FileType, lambda x: x.get('format') == 'file')
+        request.orm.node_mapping.add(FileArrayType, lambda x: x.get('format') == 'file_array')
 
         # Register parameters wherever they are defined
         for key, value in input_dict.items():
@@ -501,9 +504,6 @@ class WampTask(TaskBase):
         """
 
         task_runner = kwargs.get('task_runner')
-
-        # Task_runner should be defined and of type
-        # mdstudio.component.session.ComponentSession
         if isinstance(task_runner, ComponentSession):
 
             # Check if there is a group_context defined and if the WAMP uri
@@ -535,21 +535,20 @@ class WampTask(TaskBase):
         """
 
         task_runner = kwargs.get('task_runner')
-
-        # Task_runner should be defined and of type
-        # mdstudio.component.session.ComponentSession
         if isinstance(task_runner, ComponentSession):
 
             # Check if there is a group_context defined and if the WAMP uri
             # starts with the group_context.
             group_context = self.group_context()
-            wamp_uri = self.task_metadata.query_url()
+            wamp_uri = self.query_url()
             if group_context and not wamp_uri.startswith(group_context):
                 wamp_uri = '{0}.{1}'.format(group_context, wamp_uri)
 
             # Call the service
-            deferred = task_runner.call(wamp_uri, task_id=self.task_metadata.external_task_id(), status=self.status,
-                                        query_url=wamp_uri, checks=self.task_metadata.checks())
+            input_dict = {'task_id': self.task_metadata.external_task_id(),
+                          'status': self.status, 'query_url': wamp_uri, 'object_type': 'FutureObject'}
+
+            deferred = task_runner.call(wamp_uri, input_dict)
             deferred.addCallback(callback, self.nid)
 
         else:
