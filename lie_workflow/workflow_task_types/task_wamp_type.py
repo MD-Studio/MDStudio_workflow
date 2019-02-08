@@ -12,6 +12,9 @@ import re
 import json
 
 from tempfile import mktemp
+from twisted.logger import Logger
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
 from mdstudio.component.session import ComponentSession
 from mdstudio.deferred.chainable import chainable
 from mdstudio.deferred.return_value import return_value
@@ -25,7 +28,6 @@ from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_
 from lie_workflow.workflow_common import is_file, WorkflowError
 
 # Set twisted logger
-from twisted.logger import Logger
 logging = Logger()
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
@@ -515,8 +517,13 @@ class WampTask(TaskBase):
 
             # Call the service
             input_dict = yield self.get_input(task_runner=task_runner)
+
+            # Add 1 sec sleep for other tasks in the reactor to complete
+            yield deferLater(reactor, 1, lambda: None)
+
             deferred = task_runner.call(wamp_uri, input_dict)
             deferred.addCallback(callback, self.nid)
+            deferred.addErrback(callback, self.nid)
 
         else:
             logging.error('task_runner not of type mdstudio.component.session.ComponentSession')
