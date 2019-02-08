@@ -488,6 +488,7 @@ class WorkflowRunner(WorkflowSpec):
 
         # If there are steps that store results locally (store_output == True)
         # Create a project directory.
+        self.project_metadata = self.workflow.query_nodes(key='project_metadata')
         if any(self.workflow.query_nodes(key="store_output").values()):
             self.project_metadata.project_dir.set(self.workflow.value_tag,
                                                   self.project_metadata.project_dir.get(default=project_dir))
@@ -502,7 +503,6 @@ class WorkflowRunner(WorkflowSpec):
 
         # Set is_running flag. Function as a thread-safe signal to indicate
         # that the workflow is running.
-        self.project_metadata = self.workflow.query_nodes(key='project_metadata')
         if self.is_running:
             logging.warning('Workflow {0} is already running'.format(self.project_metadata.title()))
             return
