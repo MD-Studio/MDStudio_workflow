@@ -63,7 +63,10 @@ class WorkflowRunner(WorkflowSpec):
             task.query_url.set(task.value_tag, output['query_url'])
 
         delta_t = output.get('delta_t', 600)
-        threading.Timer(delta_t, task.check_task, (self.output_callback,), {'task_runner':self.task_runner}).start()
+        timer = threading.Timer(delta_t, task.check_task, (self.output_callback,), {'task_runner':self.task_runner})
+        timer.deamon = True
+        timer.start()
+
         logging.info('Task {0} ({1}): {2} check {3} next after {4} sec.'.format(task.status, task.nid, task.key,
                                                                             task.task_metadata.checks(), delta_t))
 
