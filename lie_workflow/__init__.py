@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__module__ = 'lie_graph'
+__module__ = 'lie_workflow'
 __docformat__ = 'restructuredtext'
 __version__ = '{major:d}.{minor:d}'.format(major=1, minor=0)
 __author__ = 'Marc van Dijk'
