@@ -153,6 +153,7 @@ def collect_data(output, task_dir):
                     with file(output_file, 'w') as outf:
                         outf.write(value)
 
+                    node['path'] = output_file
                     logging.info('Store output to file: {0}'.format(output_file))
 
                 elif os.path.isdir(value):
