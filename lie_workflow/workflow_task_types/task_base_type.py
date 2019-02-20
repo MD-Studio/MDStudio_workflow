@@ -21,6 +21,7 @@ from lie_workflow.workflow_common import WorkflowError, collect_data, concat_dic
 
 # Set twisted logger
 from twisted.logger import Logger
+from twisted.python.failure import Failure
 logging = Logger()
 
 def load_task_schema(schema_name):
@@ -497,25 +498,29 @@ class TaskBase(NodeTools):
         self.task_metadata.checks.set(self.value_tag, self.task_metadata.checks.get(default=0) + 1)
 
         # Output or not
+        status = 'failed'
         if output is None:
             logging.error('Task {0} ({1}) returned no output'.format(self.nid, self.key))
-            self.status = 'failed'
-            self.task_metadata.endedAtTime.set()
-            return
+        elif isinstance(output, Failure):
+            logging.error('Task {0} ({1}) returned a failure: {2}'.format(self.nid, self.key, output.printTraceback()))
+        elif not isinstance(output, dict):
+            logging.error('Task {0} ({1}) returned unexpected {2} object'.format(self.nid, self.key, type(output)))
         else:
-            self.status = output.get('status', 'completed')
+            status = output.get('status', 'completed')
 
-        status = self.status
-        if status == 'completed':
-
-            if 'status' in output:
-                del output['status']
-
+        self.status = status
+        if status == 'failed':
+            output = {}
+            self.task_metadata.endedAtTime.set()
+        elif status == 'completed':
             self.set_output(output)
             self.task_metadata.endedAtTime.set()
 
+        if 'status' in output:
+            del output['status']
+
         logging.info('Task {0} ({1}), status: {2}'.format(self.nid, self.key, status))
-        return status
+        return status, output
 
     def validate(self, key=None):
         """
