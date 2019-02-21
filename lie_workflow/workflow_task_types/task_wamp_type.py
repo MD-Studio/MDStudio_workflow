@@ -13,8 +13,6 @@ import json
 
 from tempfile import mktemp
 from twisted.logger import Logger
-from twisted.internet import reactor
-from twisted.internet.task import deferLater
 from mdstudio.component.session import ComponentSession
 from mdstudio.deferred.chainable import chainable
 from mdstudio.deferred.return_value import return_value
@@ -517,9 +515,6 @@ class WampTask(TaskBase):
 
             # Call the service
             input_dict = yield self.get_input(task_runner=task_runner)
-
-            # Add 1 sec sleep for other tasks in the reactor to complete
-            yield deferLater(reactor, 1, lambda: None)
 
             deferred = task_runner.call(wamp_uri, input_dict)
             deferred.addCallback(callback, self.nid)
