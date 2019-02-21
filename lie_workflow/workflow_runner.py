@@ -2,6 +2,7 @@
 
 import os
 import threading
+import random
 
 from lie_workflow.workflow_common import WorkflowError, validate_workflow
 from lie_workflow.workflow_spec import WorkflowSpec
@@ -85,8 +86,7 @@ class WorkflowRunner(WorkflowSpec):
 
         # Get and update the task
         task = self.get_task(tid)
-        output = output or {}
-        status = task.update(output)
+        status, output = task.update(output)
 
         # Update project metadata
         self.project_metadata.update_time.set()
@@ -186,10 +186,18 @@ class WorkflowRunner(WorkflowSpec):
             return
 
         # Only continue if all connected tasks are done
-        unfinished_prev_tasks = [t.nid for t in task.previous_tasks() if t.status != 'completed']
+        unfinished_prev_tasks = [t for t in task.previous_tasks() if t.status != 'completed']
         if unfinished_prev_tasks:
+
             logging.info('Task {0} ({1}): output of tasks {2} not available'.format(task.nid, task.key,
-                                                                            repr(unfinished_prev_tasks).strip('[]')))
+                                                                ', '.join([str(t.nid) for t in unfinished_prev_tasks])))
+
+            # In cases if previous failed tasks, try unset is_running
+            for unfinished in unfinished_prev_tasks:
+                if unfinished.status == 'failed':
+                    self.is_running = False
+                    break
+            
             return
 
         # Run the task if status is 'ready'
@@ -203,7 +211,14 @@ class WorkflowRunner(WorkflowSpec):
             # Perform run preparations and run the task
             if task.prepare_run():
                 task.status = 'running'
-                task.run_task(self.output_callback, task_runner=self.task_runner)
+
+                if task.task_type == 'WampTask':
+                    wait = random.randint(5,15)
+                    logging.info('Task {0} ({1}): start task in {2} sec.'.format(task.nid, task.key, wait))
+                    threading.Timer(wait, task.run_task, (self.output_callback,),
+                                    {'task_runner': self.task_runner}).start()
+                else:
+                    task.run_task(self.output_callback, task_runner=self.task_runner)
             else:
                 logging.error('Task preparation failed')
                 self.output_callback(None, task.nid)
