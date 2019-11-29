@@ -34,16 +34,14 @@ setup(
     Paul Visscher - Zefiros Software (www.zefiros.eu)
     Felipe Zapata - eScience Center (https://www.esciencecenter.nl/)""",
     author_email=['m4.van.dijk@vu.nl', 'f.zapata@esciencecenter.nl'],
-    url='https://github.com/MD-Studio/lie_workflow',
+    url='https://github.com/MD-Studio/MDStudio_workflow',
     license='Apache Software License 2.0',
     keywords='MDStudio WAMP workflow',
     platforms=['Any'],
     packages=find_packages(),
-    package_data={distribution_name: ['schemas/*', 'schemas/endpoints/*', 'schemas/resources/*']},
+    package_data={distribution_name: ['schemas/endpoints/*', 'schemas/resources/*']},
     py_modules=[distribution_name],
     install_requires=["py-graphit", "mdstudio"],
-    dependency_links=[
-        "https://github.com/MD-Studio/lie_graph/tarball/master#egg=lie_graph"],
     include_package_data=True,
     zip_safe=True,
     classifiers=[
@@ -53,8 +51,5 @@ setup(
         'Topic :: Scientific/Engineering :: Chemistry',
         'Operating System :: OS Independent',
         'Intended Audience :: Science/Research',
-        ],
-    extras_require={
-        'test': ['coverage']
-    }
+    ]
 )
