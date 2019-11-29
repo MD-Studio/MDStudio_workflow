@@ -53,6 +53,6 @@ def make(config):
         return WorkflowWampApi(config)
     else:
         # if no config given, return a description of this WAMPlet ..
-        return {'label': 'LIEStudio workflow management WAMPlet',
+        return {'label': 'MDStudio workflow management WAMPlet',
                 'description':
-                'WAMPlet proving LIEStudio workflow management endpoints'}
+                'WAMPlet proving MDStudio workflow management endpoints'}

@@ -15,7 +15,7 @@
         },
         "uri": {
           "type": "string",
-          "description": "LIEStudio microservice method uri",
+          "description": "MDStudio microservice method uri",
           "pattern": "^\\w+(\\w+\\.)+\\w+$"
         },
         "group_context": {
