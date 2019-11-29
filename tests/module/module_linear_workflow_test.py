@@ -16,7 +16,7 @@ from mdstudio_workflow import Workflow, WorkflowSpec
 
 currpath = os.path.dirname(__file__)
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-linear-workflow.jgf'))
-project_dir = os.path.abspath(os.path.join(currpath, '../files/mdstudio_workflow'))
+project_dir = os.path.abspath(os.path.join(currpath, '../files/md_workflow'))
 
 
 class BaseWorkflowRunnerTests(object):

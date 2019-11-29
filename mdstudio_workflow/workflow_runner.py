@@ -463,7 +463,7 @@ class WorkflowRunner(WorkflowSpec):
 
         return output
 
-    def run(self, project_dir="./mdstudio_workflow", tid=None, validate=True):
+    def run(self, project_dir="./md_workflow", tid=None, validate=True):
         """
         Run a workflow specification
 
