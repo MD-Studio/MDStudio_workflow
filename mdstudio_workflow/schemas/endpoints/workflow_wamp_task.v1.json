@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://mdstudio/schemas/workflowtask.json",
+  "id": "http://mdstudio/schemas/endpoints/workflow_wamp_task.v1.json",
   "title": "MDStudio WAMP Task",
   "description": "Definitions for running a task in the MDStudio microservice environment",
   "type": "object",

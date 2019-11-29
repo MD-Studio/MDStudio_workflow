@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://mdstudio/schemas/workflowtask.json",
+  "id": "http://mdstudio/schemas/resources/task_template.json",
   "title": "Task",
   "description": "Workflow Task schema",
   "type": "object",
