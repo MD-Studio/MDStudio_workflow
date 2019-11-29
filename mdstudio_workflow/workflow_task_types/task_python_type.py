@@ -11,7 +11,7 @@ from twisted.internet import reactor, threads
 
 from graphit.graph_mixin import NodeTools
 from graphit.graph_combinatorial.graph_split_join_operations import graph_join
-from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
+from mdstudio_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
 
 # Set twisted logger
 from twisted.logger import Logger

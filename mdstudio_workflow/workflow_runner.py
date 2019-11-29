@@ -4,8 +4,8 @@ import os
 import threading
 import random
 
-from lie_workflow.workflow_common import WorkflowError, validate_workflow
-from lie_workflow.workflow_spec import WorkflowSpec
+from mdstudio_workflow.workflow_common import WorkflowError, validate_workflow
+from mdstudio_workflow.workflow_spec import WorkflowSpec
 
 # Set twisted logger
 from twisted.logger import Logger
@@ -136,7 +136,7 @@ class WorkflowRunner(WorkflowSpec):
 
         # No more new tasks
         if not next_task_nids:
-            
+
             # Not finished but no active tasks anymore/breakpoint
             if not self.active_tasks and not self.is_completed:
                 breakpoints = self.active_breakpoints
@@ -197,7 +197,7 @@ class WorkflowRunner(WorkflowSpec):
                 if unfinished.status == 'failed':
                     self.is_running = False
                     break
-            
+
             return
 
         # Run the task if status is 'ready'

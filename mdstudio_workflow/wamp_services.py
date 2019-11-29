@@ -7,7 +7,7 @@ WAMP service methods the module exposes.
 """
 
 from autobahn import wamp
-from lie_system import LieApplicationSession
+from mdstudio_system import LieApplicationSession
 
 
 class WorkflowWampApi(LieApplicationSession):
@@ -18,7 +18,7 @@ class WorkflowWampApi(LieApplicationSession):
     upon WAMP session setup
     """
 
-    require_config = ['system', 'lie_db']
+    require_config = ['system', 'mdstudio_db']
 
     @wamp.register(u'liestudio.workflow.run')
     def retrieve_structures(self, workflow, session=None):

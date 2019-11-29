@@ -17,7 +17,7 @@ from graphit.graph_mixin import NodeTools
 from graphit.graph_py2to3 import prepaire_data_dict, PY_STRING
 from graphit.graph_io.io_jsonschema_format import read_json_schema
 
-from lie_workflow.workflow_common import WorkflowError, collect_data, concat_dict
+from mdstudio_workflow.workflow_common import WorkflowError, collect_data, concat_dict
 
 # Set twisted logger
 from twisted.logger import Logger
@@ -42,7 +42,7 @@ def load_task_schema(schema_name):
     # Set 'directed' to True to import JSON schema as directed graph
     template_graph = GraphAxis(directed=True)
 
-    task_schema = pkg_resources.resource_filename('lie_workflow', '/schemas/endpoints/{0}'.format(schema_name))
+    task_schema = pkg_resources.resource_filename('mdstudio_workflow', '/schemas/endpoints/{0}'.format(schema_name))
     task_template = read_json_schema(task_schema, graph=template_graph,
                                      exclude_args=['title', 'description', 'schema_label'])
     task_node = task_template.query_nodes(key='task')
@@ -259,7 +259,7 @@ class TaskBase(NodeTools):
         connected to it. The latter may be post-processed selecting and
         transforming data based on edge definitions.
 
-        lie_workflows are dynamic and therefore the `get_input` and `get_output`
+        mdstudio_workflows are dynamic and therefore the `get_input` and `get_output`
         methods are always called even if input/output was previously stored
         locally.
 

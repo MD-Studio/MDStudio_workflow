@@ -22,8 +22,8 @@ from graphit.graph_axis.graph_axis_mixin import NodeAxisTools
 from graphit.graph_io.io_jsonschema_format import read_json_schema
 from graphit.graph_io.io_pydata_format import write_pydata
 
-from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
-from lie_workflow.workflow_common import is_file, WorkflowError
+from mdstudio_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
+from mdstudio_workflow.workflow_common import is_file, WorkflowError
 
 # Set twisted logger
 logging = Logger()
@@ -469,7 +469,7 @@ class WampTask(TaskBase):
         param_dict = write_pydata(request)
 
         # Remove all 'value' parameters with value None.
-        # TODO: These are left overs from lie_graph.
+        # TODO: These are left overs from graphit.
         def recursive_remove_none(d):
 
             for k, v in d.items():

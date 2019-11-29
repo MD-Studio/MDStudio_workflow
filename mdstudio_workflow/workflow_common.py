@@ -80,7 +80,7 @@ def validate_workflow(workflow):
     Validate the constructed workflow
 
     :param workflow: Workflow graph to validate
-    :type workflow:  :lie_graph:GraphAxis
+    :type workflow:  :graphit:GraphAxis
 
     :return: Validated or not
     :rtype:  :py:bool

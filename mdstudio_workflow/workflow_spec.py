@@ -18,12 +18,12 @@ from graphit.graph_io.io_jsonschema_format import read_json_schema
 from graphit.graph_py2to3 import to_unicode, prepaire_data_dict
 from graphit.graph_helpers import renumber_id
 
-from lie_workflow import __version__
-from lie_workflow.workflow_common import WorkflowError
-from lie_workflow.workflow_task_types import task_types, WORKFLOW_ORM
+from mdstudio_workflow import __version__
+from mdstudio_workflow.workflow_common import WorkflowError
+from mdstudio_workflow.workflow_task_types import task_types, WORKFLOW_ORM
 
 # Path to default workflow JSON schema part of the module
-workflow_metadata_template = pkg_resources.resource_filename('lie_workflow',
+workflow_metadata_template = pkg_resources.resource_filename('mdstudio_workflow',
                                                              '/schemas/resources/workflow_metadata_template.json')
 
 
@@ -35,7 +35,7 @@ class WorkflowSpec(object):
     tasks and the edges the connections between them. The Workflow class
     acts as manager collecting output from tasks and forwarding it to other
     tasks along the edges (push execution).
-    The `lie_workflow` DAG follows the workflow principles as described by the
+    The `mdstudio_workflow` DAG follows the workflow principles as described by the
     Workflow Patterns initiative supporting many but not all of the described
     patterns (http://www.workflowpatterns.com).
 

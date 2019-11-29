@@ -8,7 +8,7 @@ Task for running a Python function in threaded or blocking mode
 
 from graphit.graph_utils.graph_utilities import edges_parent_to_subgraph
 from graphit.graph_combinatorial.graph_split_join_operations import graph_join
-from lie_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema, edge_select_transform
+from mdstudio_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema, edge_select_transform
 
 # Set twisted logger
 from twisted.logger import Logger
