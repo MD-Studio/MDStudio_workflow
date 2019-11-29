@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://liestudio/schemas/workflow_template.json",
+  "id": "http://mdstudio/schemas/workflow_template.json",
   "title": "Workflow template",
   "description": "Workflow template with one meta-data node",
   "type": "object",

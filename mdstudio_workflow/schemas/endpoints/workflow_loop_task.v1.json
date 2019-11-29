@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://liestudio/schemas/workflowtask.json",
+  "id": "http://mdstudio/schemas/workflowtask.json",
   "title": "MDStudio loop Task",
   "description": "Definitions for running a loop task in a workflow",
   "type": "object",

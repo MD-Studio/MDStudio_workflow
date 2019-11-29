@@ -20,7 +20,7 @@ class WorkflowWampApi(LieApplicationSession):
 
     require_config = ['system', 'mdstudio_db']
 
-    @wamp.register(u'liestudio.workflow.run')
+    @wamp.register(u'mdstudio.workflow.run')
     def retrieve_structures(self, workflow, session=None):
         """
         Run a LIE Workflow
