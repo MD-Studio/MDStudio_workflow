@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Python runner for lie_workflow module unit tests, run as:
+Python runner for mdstudio_workflow module unit tests, run as:
 ::
     python tests
 """
@@ -21,17 +21,18 @@ sys.path.insert(0, modulepath)
 
 def module_test_suite():
     """
-    Run lie_workflow module unit tests
+    Run mdstudio_workflow module unit tests
     """
     loader = unittest.TestLoader()
-    
-    print('Running lie_workflow unittests')
+
+    print('Running mdstudio_workflow unittests')
     testpath = os.path.join(os.path.dirname(__file__), 'module')
     suite = loader.discover(testpath, pattern='module_*.py')
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+
+    return runner.run(suite).wasSuccessful()
 
 
 if __name__ == '__main__':
-    
-    module_test_suite()
+    result = module_test_suite()
+    sys.exit(not result)
