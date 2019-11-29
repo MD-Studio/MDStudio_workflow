@@ -11,7 +11,7 @@ import unittest
 import time
 import shutil
 
-from lie_workflow import Workflow
+from mdstudio_workflow import Workflow
 
 currpath = os.path.dirname(__file__)
 tmp_project_dir = os.path.abspath(os.path.join(currpath, '../files/test_project'))

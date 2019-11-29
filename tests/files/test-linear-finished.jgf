@@ -638,7 +638,7 @@
       "key": "active"
     }
   },
-  "lie_graph_version": "1.0",
+  "graphit_version": "1.0",
   "edge_attr": {
     "56": {
       "data_mapping": {},

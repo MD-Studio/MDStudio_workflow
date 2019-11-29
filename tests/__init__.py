@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Python function for lie_workflow module, run as:
+Python function for mdstudio_workflow module, run as:
 ::
     test = module_test_suite()
     runner = unittest.TextTestRunner(verbosity=2)
@@ -23,9 +23,9 @@ sys.path.insert(0, modulepath)
 
 def module_test_suite():
     """
-    Run lie_workflow module unit tests
+    Run mdstudio_workflow module unit tests
     """
-    
+
     testpath = os.path.join(os.path.dirname(__file__), 'module')
     loader = unittest.TestLoader()
     suite = loader.discover(testpath, pattern='module_*.py')

@@ -12,10 +12,10 @@ import jsonschema
 import unittest
 import pkg_resources
 
-from lie_graph.graph_io.io_dict_format import write_dict
-from lie_graph.graph_helpers import GraphValidationError
+from graphit.graph_io.io_dict_format import write_dict
+from graphit.graph_helpers import GraphValidationError
 
-from lie_workflow import WorkflowSpec
+from mdstudio_workflow import WorkflowSpec
 
 from dummy_task_runners import task_runner
 
@@ -45,7 +45,7 @@ class TestTaskBaseClass(object):
 
         self.assertFalse(self.task.empty())
 
-        schema_file = pkg_resources.resource_filename('lie_workflow',
+        schema_file = pkg_resources.resource_filename('mdstudio_workflow',
                                                       '/schemas/endpoints/{0}'.format(self.template_file))
         schema = json.load(open(schema_file))
         self.assertIsNone(jsonschema.validate(write_dict(self.task), schema))

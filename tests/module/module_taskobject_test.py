@@ -13,20 +13,20 @@ import pytz
 
 from datetime import datetime
 
-from lie_graph.graph_io.io_jsonschema_format import read_json_schema
-from lie_graph.graph_io.io_jsonschema_format_drafts import GraphValidationError
+from graphit.graph_io.io_jsonschema_format import read_json_schema
+from graphit.graph_io.io_jsonschema_format_drafts import GraphValidationError
 
-from lie_workflow.workflow_task_types import WORKFLOW_ORM
+from mdstudio_workflow.workflow_task_types import WORKFLOW_ORM
 
 currpath = os.path.dirname(__file__)
-    
+
 
 class TestTaskObject(unittest.TestCase):
     """
     Test creation and manipulation of Task objects using Task model API methods
     """
 
-    task_schema = pkg_resources.resource_filename('lie_workflow', '/schemas/resources/task_template.json')
+    task_schema = pkg_resources.resource_filename('mdstudio_workflow', '/schemas/resources/task_template.json')
 
     def setUp(self):
         """

@@ -12,7 +12,7 @@ import os
 import unittest
 import time
 
-from lie_workflow import Workflow, WorkflowSpec
+from mdstudio_workflow import Workflow, WorkflowSpec
 
 currpath = os.path.dirname(__file__)
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-linear-workflow.jgf'))

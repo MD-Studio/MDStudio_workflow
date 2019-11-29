@@ -11,11 +11,11 @@ import json
 import jsonschema
 import unittest
 
-from lie_graph.graph_io.io_dict_format import write_dict
+from graphit.graph_io.io_dict_format import write_dict
 
-from lie_workflow import WorkflowSpec
-from lie_workflow.workflow_common import WorkflowError
-from lie_workflow.workflow_spec import workflow_metadata_template
+from mdstudio_workflow import WorkflowSpec
+from mdstudio_workflow.workflow_common import WorkflowError
+from mdstudio_workflow.workflow_spec import workflow_metadata_template
 
 currpath = os.path.dirname(__file__)
 
@@ -24,9 +24,9 @@ class TestWorkflowSpec(unittest.TestCase):
     """
     Test WorkflowSpec class
     """
-    
+
     tempfiles = []
-    
+
     def tearDown(self):
         """
         tearDown method called after each unittest to cleanup

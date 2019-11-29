@@ -13,7 +13,7 @@ import jsonschema
 
 dummy_task_schema_input = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "http://liestudio/schemas/dummy_task.json",
+    "id": "http://mdstudio/schemas/dummy_task.json",
     "title": "Dummy input task",
     "description": "Dummy task input schema",
     "type": "object",
@@ -59,7 +59,7 @@ dummy_task_schema_input = {
 
 dummy_task_schema_output = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "id": "http://liestudio/schemas/dummy_task.json",
+    "id": "http://mdstudio/schemas/dummy_task.json",
     "title": "Dummy task output",
     "description": "Dummy task output schema",
     "type": "object",
@@ -76,13 +76,13 @@ def calculate_accumulated_task_runtime(workflow):
     """
     Calculate cumultative task runtime
     """
-    
+
     runtime = 0
     for tid,task in workflow.nodes.items():
         session = task.get('session')
         if session:
             runtime += (session.get('utime',0) - session.get('itime',0))
-    
+
     return runtime
 
 
@@ -91,14 +91,14 @@ def task_runner(**kwargs):
     Run a task based on the information in the task_data.
     Task_data is validated according to the JSON task schema
     """
-    
+
     # The session is validated by the WAMP framework but the tasks specific
     # data will have to be validated by the task
     jsonschema.validate(kwargs, dummy_task_schema_input)
 
     # Simulate running the task
     time.sleep(kwargs.get('sleep',0))
-    
+
     # Perform some calculations to simulate work
     # Add number to input
     output = kwargs['dummy'] + kwargs.get('add_number',0)

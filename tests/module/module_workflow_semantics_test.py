@@ -10,7 +10,7 @@ import os
 import unittest
 import time
 
-from lie_workflow import Workflow
+from mdstudio_workflow import Workflow
 
 currpath = os.path.dirname(__file__)
 
