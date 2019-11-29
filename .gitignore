@@ -1,13 +1,4 @@
-###Git ignore file for LIEStudio repository
-
-### LIEStudio specific
-app/typings/
-app/dist/
-data/logs/
-data/liedb/
-docs/html/
-bin/
-tmp/
+###Git ignore file for MDStudio repository
 
 # This file is different per user
 data/settings.json
@@ -44,6 +35,9 @@ var/
 # before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+
+# Jupyter notebooks
+.ipynb_checkpoints
 
 # Installer logs
 pip-log.txt
@@ -152,7 +146,6 @@ node_modules
 # Docker
 docker/.INSTALLING
 
-
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 .idea
@@ -204,4 +197,3 @@ cerise_config.json
 venv
 .env
 **/.settings.*.yml
-
