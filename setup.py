@@ -1,10 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# package: lie_workflow
+# package: mdstudio_workflow
 # file: setup.py
 #
-# Part of ‘lie_workflow’, a package providing WAMP microservice driven
+# Part of ‘MDStudio_workflow’, a package providing WAMP microservice driven
 # workflow management.
 #
 # Copyright © 2016 Marc van Dijk, VU University Amsterdam, the Netherlands
@@ -23,7 +23,7 @@
 
 from setuptools import setup, find_packages
 
-distribution_name = 'lie_workflow'
+distribution_name = 'mdstudio_workflow'
 
 setup(
     name=distribution_name,
