@@ -392,7 +392,7 @@ class WampTask(TaskBase):
                        links=[(self.nid, i) for i in TASK.children(return_nids=True)])
 
             # Set unique task uuid
-            self.task_metadata.task_id.set(self.value_tag, self.task_metadata.task_id.create())
+            self.task_metadata.task_id.set(self.data.value_tag, self.task_metadata.task_id.create())
 
     @chainable
     def get_input(self, **kwargs):
@@ -414,9 +414,9 @@ class WampTask(TaskBase):
 
         # Register parameters wherever they are defined
         for key, value in input_dict.items():
-            node = request.query_nodes({request.key_tag: key})
+            node = request.query_nodes({request.data.key_tag: key})
             if len(node) == 1:
-                node.set(request.value_tag, value)
+                node.set(request.data.value_tag, value)
             elif node.empty():
                 logging.warn('Task task {0} ({1}): parameter {2} not defined in endpoint schema'.format(self.nid,
                                                                                                         self.key, key))
@@ -426,7 +426,7 @@ class WampTask(TaskBase):
 
         # Check for file types, remove schema parameters not defined
         for node in request.query_nodes({'format': u'file'}).iternodes():
-            if node.get(node.key_tag) not in input_dict:
+            if node.get(node.data.key_tag) not in input_dict:
                 request.remove_node(node.nid)
             else:
                 fileobj = node.to_dict(input_dict.get(node.key),
@@ -434,15 +434,15 @@ class WampTask(TaskBase):
                                        workdir=self.task_metadata.workdir.get())
 
                 for key, value in fileobj.items():
-                    obj = node.descendants().query_nodes({node.key_tag: key})
-                    obj.set(node.value_tag, value)
+                    obj = node.descendants().query_nodes({node.data.key_tag: key})
+                    obj.set(node.data.value_tag, value)
 
                 # Reset original 'value' with file path
-                node.set(node.value_tag, None)
+                node.set(node.data.value_tag, None)
 
         # Check for file arrays, remove schema parameters not defined
         for node in request.query_nodes({'format': u'file_array'}).iternodes():
-            if node.get(node.key_tag) not in input_dict:
+            if node.get(node.data.key_tag) not in input_dict:
                 request.remove_node(node.nid)
             else:
                 fileobj = node.to_dict(input_dict.get(node.key),
@@ -450,7 +450,7 @@ class WampTask(TaskBase):
                                        workdir=self.task_metadata.workdir.get())
 
                 # Reset original 'value' with file path
-                node.set(node.value_tag, fileobj)
+                node.set(node.data.value_tag, fileobj)
 
         # Check for parameters that have defaults, remove others
         nodes_to_remove = []

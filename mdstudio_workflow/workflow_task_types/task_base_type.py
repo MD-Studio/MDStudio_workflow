@@ -223,7 +223,7 @@ class TaskBase(NodeTools):
         :type state:  :py:str
         """
 
-        self.task_metadata.status.set(self.value_tag, state)
+        self.task_metadata.status.set(self.data.value_tag, state)
 
     def cancel(self, **kwargs):
         """
@@ -387,7 +387,7 @@ class TaskBase(NodeTools):
         if self.task_metadata.store_output():
             project_dir = self.origin.query_nodes(key='project_dir').get()
             workdir = self.task_metadata.workdir
-            workdir.set(self.value_tag,
+            workdir.set(self.data.value_tag,
                         os.path.join(project_dir, 'task-{0}-{1}'.format(self.nid, self.key.replace(' ', '_'))))
             path = workdir.makedirs()
 
@@ -416,7 +416,7 @@ class TaskBase(NodeTools):
         for indict in predefined:
             data.update(prepaire_data_dict(indict))
 
-        self.task_metadata.input_data.set(self.value_tag, data)
+        self.task_metadata.input_data.set(self.data.value_tag, data)
 
     def set_output(self, output, **kwargs):
         """
@@ -462,7 +462,7 @@ class TaskBase(NodeTools):
 
         outnode = self.task_metadata.output_data
         if outnode.get() is None:
-            outnode.set(self.value_tag, output)
+            outnode.set(self.data.value_tag, output)
 
     def task_graph(self):
         """
@@ -495,12 +495,19 @@ class TaskBase(NodeTools):
         :rtype:     :py:str
         """
 
-        self.task_metadata.checks.set(self.value_tag, self.task_metadata.checks.get(default=0) + 1)
+        self.task_metadata.checks.set(self.data.value_tag, self.task_metadata.checks.get(default=0) + 1)
 
         # Output or not
         status = 'failed'
         if output is None:
             logging.error('Task {0} ({1}) returned no output'.format(self.nid, self.key))
+
+            # If task successfully run before, use output.
+            prev_output = self.get_output()
+            if prev_output and isinstance(prev_output, dict) and self.status == 'completed':
+                logging.info('Task {0} ({1}) successfully run before. Use output'.format(self.nid, self.key))
+                return 'completed', prev_output
+
         elif isinstance(output, Failure):
             logging.error('Task {0} ({1}) returned a failure: {2}'.format(self.nid, self.key, output.printTraceback()))
         elif not isinstance(output, dict):

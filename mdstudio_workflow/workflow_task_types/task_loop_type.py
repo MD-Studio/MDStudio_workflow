@@ -41,7 +41,7 @@ class LoopTask(TaskBase):
                        links=[(self.nid, i) for i in TASK.children(return_nids=True)])
 
             # Set unique task uuid
-            self.task_metadata.task_id.set(self.value_tag, self.task_metadata.task_id.create())
+            self.task_metadata.task_id.set(self.data.value_tag, self.task_metadata.task_id.create())
 
     def cancel(self):
 
@@ -107,16 +107,16 @@ class LoopTask(TaskBase):
 
         # Mapper should contain more than one item
         if len(input[mapper_arg]) <= 1:
-            loggin.error('Mapper argument {0} should contain more then one item'.format(mapper_arg))
+            logging.error('Mapper argument {0} should contain more then one item'.format(mapper_arg))
             return False
 
         # Duplicate subgraphs
         start = self.origin.getnodes([t.nid for t in self.next_tasks()])
         ds = start.descendants(include_self=True)
 
-        finish = self.origin.query_nodes({self.key_tag: self.loop_end_task(), 'format': 'task'})
+        finish = self.origin.query_nodes({self.data.key_tag: self.loop_end_task(), 'format': 'task'})
         if finish.empty():
-            loggin.error("Loop end task '{0}' not found in workflow".format(self.loop_end_task()))
+            logging.error("Loop end task '{0}' not found in workflow".format(self.loop_end_task()))
             return False
         df = finish.descendants(include_self=True)
 
@@ -146,7 +146,7 @@ class LoopTask(TaskBase):
 
         # loop_end_task should exist
         loop_end_task = self.loop_end_task()
-        if self.origin.query_nodes({self.key_tag: loop_end_task}).empty():
+        if self.origin.query_nodes({self.data.key_tag: loop_end_task}).empty():
             logging.error('Loop_end_task "{0}" not in workflow'.format(loop_end_task))
             return False
 

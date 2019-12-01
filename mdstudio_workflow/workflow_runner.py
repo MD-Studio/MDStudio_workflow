@@ -58,10 +58,10 @@ class WorkflowRunner(WorkflowSpec):
         """
 
         if not task.task_metadata.external_task_id():
-            task.task_metadata.external_task_id.set(task.value_tag, output.get('task_id'))
+            task.task_metadata.external_task_id.set(task.data.value_tag, output.get('task_id'))
 
         if 'query_url' in output:
-            task.query_url.set(task.value_tag, output['query_url'])
+            task.query_url.set(task.data.value_tag, output['query_url'])
 
         delta_t = output.get('delta_t', 600)
         timer = threading.Timer(delta_t, task.check_task, (self.output_callback,), {'task_runner':self.task_runner})
@@ -428,7 +428,7 @@ class WorkflowRunner(WorkflowSpec):
             return
 
         # Remove the breakpoint
-        task.task_metadata.breakpoint.set(self.value_tag, False)
+        task.task_metadata.breakpoint.set(task.data.value_tag, False)
         logging.info('Remove breakpoint on task {0} ({1})'.format(tid, task.key))
 
     def input(self, tid, **kwargs):
@@ -508,14 +508,14 @@ class WorkflowRunner(WorkflowSpec):
         # Create a project directory.
         self.project_metadata = self.workflow.query_nodes(key='project_metadata')
         if any(self.workflow.query_nodes(key="store_output").values()):
-            self.project_metadata.project_dir.set(self.workflow.value_tag,
+            self.project_metadata.project_dir.set(self.workflow.data.value_tag,
                                                   self.project_metadata.project_dir.get(default=project_dir))
             if self.project_metadata.project_dir.exists and self.is_completed:
                 raise WorkflowError('Directory for finished project exists: {0}'.format(
                     self.project_metadata.project_dir()))
             self.project_metadata.project_dir.makedirs()
         else:
-            self.project_metadata.project_dir.set(self.workflow.value_tag, None)
+            self.project_metadata.project_dir.set(self.workflow.data.value_tag, None)
 
         logging.info('Running workflow: {0}, start task ID: {1}'.format(self.project_metadata.title(), tid))
 
