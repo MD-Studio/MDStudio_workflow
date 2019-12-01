@@ -71,7 +71,7 @@ class WorkflowRunner(WorkflowSpec):
         logging.info('Task {0} ({1}): {2} check {3} next after {4} sec.'.format(task.status, task.nid, task.key,
                                                                             task.task_metadata.checks(), delta_t))
 
-    def output_callback(self, output, tid):
+    def output_callback(self, output, tid, update=False):
         """
         Process the output of a task and stage the next task(s) to run.
 
@@ -89,7 +89,8 @@ class WorkflowRunner(WorkflowSpec):
         status, output = task.update(output)
 
         # Update project metadata
-        self.project_metadata.update_time.set()
+        if update:
+            self.project_metadata.update_time.set()
 
         # Save workflow to file
         if self.project_metadata.project_dir():
@@ -223,12 +224,11 @@ class WorkflowRunner(WorkflowSpec):
                 logging.error('Task preparation failed')
                 self.output_callback(None, task.nid)
 
-        # In all other cases, pass task data to default output callback
-        # instructing it to not update the data but decide on the followup
-        # workflow step to take.
+        # In all other cases, pass None and have the task output update
+        # method decide what to do next.
         else:
             logging.info('Task {0} ({1}), status: {0}'.format(task.nid, task.key, task.status))
-            self.output_callback(None, tid)
+            self.output_callback(None, tid, update=False)
 
     @property
     def is_running(self):
