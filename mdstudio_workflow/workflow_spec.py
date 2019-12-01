@@ -157,7 +157,7 @@ class WorkflowSpec(object):
         assert self.workflow.nodes[task2].get('format') == 'task', 'Node {0} not of format "task"'.format(task1)
         assert task1 != task2, 'Connection to self not allowed'
 
-        edge_data = {'label': u'task_link'}
+        edge_data = {'key': u'task_link'}
         data_mapping = prepaire_data_dict(kwargs)
         if data_mapping:
             edge_data['data_mapping'] = data_mapping

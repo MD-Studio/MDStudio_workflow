@@ -339,7 +339,7 @@ class TaskBase(NodeTools):
         :rtype:                  :py:list
         """
 
-        nxt = self.children(include_self=True).query_edges(label='task_link')
+        nxt = self.children(include_self=True).query_edges(key='task_link')
 
         if exclude_disabled:
             return [task for task in nxt if task.nid != self.nid and task.status != 'disabled']
@@ -357,7 +357,7 @@ class TaskBase(NodeTools):
         :rtype:         :py:list
         """
 
-        pvt = self.all_parents(include_self=True).query_edges(label='task_link')
+        pvt = self.all_parents(include_self=True).query_edges(key='task_link')
 
         if status is not None:
             return [task for task in pvt if task.nid != self.nid and task.status == status]
