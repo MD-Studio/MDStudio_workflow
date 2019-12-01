@@ -118,7 +118,7 @@ class WorkflowSpec(object):
 
         # Add the task as node to the workflow graph. The task 'new' method is
         # called for initial task initiation.
-        nid = self.workflow.add_node(task_name, task_type=task_type, format='task')
+        nid = self.workflow.add_node(task_name, run_node_new=True, task_type=task_type, format='task')
 
         # Update Task metadata
         task = self.workflow.getnodes(nid)
