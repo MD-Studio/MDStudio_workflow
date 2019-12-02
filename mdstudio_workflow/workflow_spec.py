@@ -214,8 +214,8 @@ class WorkflowSpec(object):
 
         Initiate a workflow from a workflow specification or instance thereof.
 
-        :param workflow: Predefined workflow object
-        :type workflow:  GraphAxis
+        :param workflow: File path to predefined workflow in .jgf format
+        :type workflow:  :py:str
         """
 
         # Construct a workflow GraphAxis object

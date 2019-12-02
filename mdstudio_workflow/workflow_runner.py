@@ -92,7 +92,7 @@ class WorkflowRunner(WorkflowSpec):
         if update:
             self.project_metadata.update_time.set()
 
-        # Save workflow to file
+        # Save results as part of workflow to file
         if self.project_metadata.project_dir():
             self.save(os.path.join(self.project_metadata.project_dir(), 'workflow.jgf'))
 
