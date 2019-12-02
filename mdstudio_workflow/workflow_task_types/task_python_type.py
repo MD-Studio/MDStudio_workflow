@@ -124,8 +124,9 @@ class PythonTask(PythonTaskBase):
             callback(self.get_input(), self.nid)
 
         else:
-            d = threads.deferToThread(self.custom_func.load(), **self.get_input())
-            d.addCallback(callback, self.nid)
+            deferred = threads.deferToThread(self.custom_func.load(), **self.get_input())
+            deferred.addCallback(callback, self.nid)
+            deferred.addErrback(callback, self.nid)
 
             if not reactor.running:
                 reactor.run(installSignalHandlers=0)
@@ -147,12 +148,13 @@ class PythonTask(PythonTaskBase):
             callback(self.get_input(), self.nid)
 
         else:
-            d = threads.deferToThread(self.custom_func.load(),
-                                      task_id=self.task_metadata.external_task_id(),
-                                      status=self.status,
-                                      query_url=self.custom_func(),
-                                      checks=self.task_metadata.checks())
-            d.addCallback(callback, self.nid)
+            deferred = threads.deferToThread(self.custom_func.load(),
+                                             task_id=self.task_metadata.external_task_id(),
+                                             status=self.status,
+                                             query_url=self.custom_func(),
+                                             checks=self.task_metadata.checks())
+            deferred.addCallback(callback, self.nid)
+            deferred.addErrback(callback, self.nid)
 
             if not reactor.running:
                 reactor.run(installSignalHandlers=0)
