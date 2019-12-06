@@ -9,15 +9,15 @@ Unit tests for the WorkflowSpec class
 import os
 import json
 import jsonschema
-import unittest
 import pkg_resources
 
-from graphit.graph_io.io_dict_format import write_dict
-from graphit.graph_helpers import GraphValidationError
+from graphit.graph_io.io_pydata_format import write_pydata
+from graphit.graph_exceptions import GraphitValidationError
 
 from mdstudio_workflow import WorkflowSpec
 
 from dummy_task_runners import task_runner
+from unittest_baseclass import UnittestPythonCompatibility, STRING_TYPES
 
 currpath = os.path.dirname(__file__)
 
@@ -48,7 +48,7 @@ class TestTaskBaseClass(object):
         schema_file = pkg_resources.resource_filename('mdstudio_workflow',
                                                       '/schemas/endpoints/{0}'.format(self.template_file))
         schema = json.load(open(schema_file))
-        self.assertIsNone(jsonschema.validate(write_dict(self.task), schema))
+        self.assertIsNone(jsonschema.validate(write_pydata(self.task), schema))
 
     def test_add_task_default_meta(self):
         """
@@ -58,11 +58,12 @@ class TestTaskBaseClass(object):
         metadata = self.task.task_metadata
 
         self.assertFalse(metadata.empty())
-        self.assertItemsEqual(metadata.children().keys(), [u'status', u'task_id', u'input_data', u'output_data',
-                                                          u'endedAtTime', u'startedAtTime', u'retry_count',
-                                                          u'store_output', u'breakpoint', u'workdir', u'active'])
+        self.assertItemsEqual(metadata.children().keys(),
+                              [u'status', u'task_id', u'input_data', u'output_data', u'endedAtTime', u'startedAtTime',
+                               u'retry_count', u'store_output', u'breakpoint', u'workdir', u'active', u'checks',
+                               u'external_task_id'])
         self.assertEqual(metadata.status.value, 'ready')
-        self.assertIsInstance(metadata.task_id.value, (str, unicode))
+        self.assertIsInstance(metadata.task_id.value, STRING_TYPES)
 
     def test_add_task_task_arguments(self):
         """
@@ -75,7 +76,7 @@ class TestTaskBaseClass(object):
         self.assertEqual(task.task_metadata.retry_count.value, 3)
 
 
-class TestWorkflowSpecPythonTask(TestTaskBaseClass, unittest.TestCase):
+class TestWorkflowSpecPythonTask(TestTaskBaseClass, UnittestPythonCompatibility):
     """
     Test addition of Python workflow tasks
     """
@@ -92,10 +93,10 @@ class TestWorkflowSpecPythonTask(TestTaskBaseClass, unittest.TestCase):
         self.assertEqual(self.task.custom_func.load(), task_runner)
 
         # Basic dot-separated path validation (regex)
-        self.assertRaises(GraphValidationError, self.task.custom_func.set, 'value', 'dummy_task_runners')
+        self.assertRaises(GraphitValidationError, self.task.custom_func.set, 'value', 'dummy_task_runners')
 
 
-class TestWorkflowSpecBlockingPythonTask(TestTaskBaseClass, unittest.TestCase):
+class TestWorkflowSpecBlockingPythonTask(TestTaskBaseClass, UnittestPythonCompatibility):
     """
     Test addition of Blocking Python workflow tasks
     """
@@ -104,7 +105,7 @@ class TestWorkflowSpecBlockingPythonTask(TestTaskBaseClass, unittest.TestCase):
     template_file = 'workflow_python_task.v1.json'
 
 
-class TestWorkflowSpecWampTask(TestTaskBaseClass, unittest.TestCase):
+class TestWorkflowSpecWampTask(TestTaskBaseClass, UnittestPythonCompatibility):
     """
     Test addition of WAMP workflow tasks
     """
