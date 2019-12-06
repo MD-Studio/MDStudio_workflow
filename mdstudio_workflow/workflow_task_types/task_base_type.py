@@ -73,7 +73,7 @@ def edge_select_transform(data, edge):
     These options should cover most of the output/input data mapping needs.
     More elaborate data transformations should be handled by dedicated tasks
     instead.
-    
+
     .. warning:: data mapping may result in duplicated keys and resulting
                  (potentially unwanted) value replacement. Unwanted side
                  effects can be limited by selecting specific data first.
