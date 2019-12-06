@@ -55,16 +55,34 @@ def load_task_schema(schema_name):
 
 def edge_select_transform(data, edge):
     """
-    Select and transform output from previous task based on selection and
-    mapping definitions stored in the edge connecting two tasks.
+    Data selection and transformation between tasks
 
-    If there is no selection defined, all output will be forwarded as
-    input to the new task.
+    Data transfer between tasks is handled by edges that define rich data
+    mapping and selection criteria to match input of the next tasks to the
+    output of the previous task.
+
+    Supported transformation options:
+    - data_select: a list of data dictionary keys to select as input for the
+                   next tasks. All output selected as input by default
+    - data_mapping: dictionary to map (rename) key/value pairs. Useful when
+                   the input/output data types between tasks are the same but
+                   the names differ.
+    - nested data: specific selection of nested data is supported by definition
+                   of dot separated key names (path to nested data)
+
+    These options should cover most of the output/input data mapping needs.
+    More elaborate data transformations should be handled by dedicated tasks
+    instead.
+    
+    .. warning:: data mapping may result in duplicated keys and resulting
+                 (potentially unwanted) value replacement. Unwanted side
+                 effects can be limited by selecting specific data first.
+                 Multiple key/value renaming is handled in alphabetic order.
 
     :param data:  output of previous task
     :type data:   :py:dict
     :param edge:  edge connecting tasks
-    :type edge:   :graphit:GraphAxis
+    :type edge:   :graphit:GraphAxis,  :py:dict
 
     :return:      curated output
     :rtype:       :py:dict
@@ -90,11 +108,11 @@ def edge_select_transform(data, edge):
         # search recursively for dot separated keys
         value = recursive_key_search(key.split('.'), data)
         if value is None:
-            logging.warn('Data selection: parameter {0} not in output of task {1}'.format(key, edge.nid))
+            logging.warn('Data selection: parameter {0} not in output of task'.format(key))
             continue
 
-        key = key.split('.')[-1]
-        transformed_data[mapper.get(key, key)] = value
+        mapped_key = mapper.get(key, key)
+        transformed_data[mapped_key.split('.')[-1]] = value
 
     return transformed_data
 

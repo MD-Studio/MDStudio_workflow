@@ -151,18 +151,29 @@ class WorkflowSpec(object):
         :rtype:               :py:tuple
         """
 
-        assert task1 in self.workflow.nodes, 'Task {0} not in workflow'.format(task1)
-        assert task2 in self.workflow.nodes, 'Task {0} not in workflow'.format(task2)
-        assert self.workflow.nodes[task1].get('format') == 'task', 'Node {0} not of format "task"'.format(task1)
-        assert self.workflow.nodes[task2].get('format') == 'task', 'Node {0} not of format "task"'.format(task1)
-        assert task1 != task2, 'Connection to self not allowed'
+        for task in (task1, task2):
+            if task not in self.workflow.nodes:
+                raise WorkflowError('Task {0} not in workflow'.format(task))
+            if self.workflow.nodes[task].get('format') != 'task':
+                raise WorkflowError('Node {0} not of format "task"'.format(task))
+
+        if task1 == task2:
+            raise WorkflowError('Connection to self not allowed')
 
         edge_data = {'key': u'task_link'}
         data_mapping = prepaire_data_dict(kwargs)
         if data_mapping:
             edge_data['data_mapping'] = data_mapping
         if len(args):
-            edge_data['data_select'] = [to_unicode(arg) for arg in args]
+            data_select = [to_unicode(arg) for arg in args]
+
+            # If data_select and data_mapping, the mapping keys should be in data_select
+            for key in data_mapping:
+                if key not in data_select:
+                    data_select.append(key)
+                    logging.debug('Added {0} data key to data selection list'.format(key))
+
+            edge_data['data_select'] = data_select
 
         eid = self.workflow.add_edge(task1, task2, **edge_data)
 
