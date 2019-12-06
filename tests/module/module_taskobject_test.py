@@ -7,21 +7,21 @@ Unit test the Task model API
 """
 
 import os
-import unittest
 import pkg_resources
 import pytz
 
 from datetime import datetime
 
 from graphit.graph_io.io_jsonschema_format import read_json_schema
-from graphit.graph_io.io_jsonschema_format_drafts import GraphValidationError
+from graphit.graph_exceptions import GraphitValidationError
+from unittest_baseclass import UnittestPythonCompatibility
 
 from mdstudio_workflow.workflow_task_types import WORKFLOW_ORM
 
 currpath = os.path.dirname(__file__)
 
 
-class TestTaskObject(unittest.TestCase):
+class TestTaskObject(UnittestPythonCompatibility):
     """
     Test creation and manipulation of Task objects using Task model API methods
     """
@@ -49,7 +49,7 @@ class TestTaskObject(unittest.TestCase):
         self.assertTrue(self.task.status.value, 'running')
 
         # Set number of options to choose from
-        self.assertRaises(GraphValidationError, self.task.status.set, 'value', 'unsupported')
+        self.assertRaises(GraphitValidationError, self.task.status.set, 'value', 'unsupported')
 
     def test_task_datetime(self):
         """
@@ -65,7 +65,7 @@ class TestTaskObject(unittest.TestCase):
         self.assertIsInstance(start_time.get(), str)
 
         # Date-time parsing from string validation
-        self.assertRaises(GraphValidationError, start_time.set, 'value', 'not a date-time string')
+        self.assertRaises(GraphitValidationError, start_time.set, 'value', 'not a date-time string')
 
     def test_task_taskid(self):
         """
@@ -78,7 +78,7 @@ class TestTaskObject(unittest.TestCase):
         self.assertEqual(self.task.task_id.value, uuid)
 
         # Basic UUID validation (regex)
-        self.assertRaises(GraphValidationError, self.task.task_id.set, 'value', '74cf20d9-417c-11z8-acbc32aebef5')
+        self.assertRaises(GraphitValidationError, self.task.task_id.set, 'value', '74cf20d9-417c-11z8-acbc32aebef5')
 
     def test_task_retrycount(self):
         """
