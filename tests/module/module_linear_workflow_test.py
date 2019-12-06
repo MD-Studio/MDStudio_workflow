@@ -13,6 +13,7 @@ import unittest
 import time
 
 from mdstudio_workflow import Workflow, WorkflowSpec
+from unittest_baseclass import UnittestPythonCompatibility
 
 currpath = os.path.dirname(__file__)
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-linear-workflow.jgf'))
@@ -39,6 +40,19 @@ class BaseWorkflowRunnerTests(object):
         self.assertFalse(self.wf.is_completed)
         self.assertFalse(self.wf.has_failed)
 
+    def test3_run_workflow(self):
+        """
+        Test running the workflow
+        """
+
+        # Run the workflow
+        tmp_project_dir = '{0}-{1}'.format(project_dir, int(time.time()))
+        self.wf.run(project_dir=tmp_project_dir)
+
+        # Blocking: wait until workflow is no longer running
+        while self.wf.is_running:
+            time.sleep(1)
+
     def test4_final_workflow_status(self):
         """
         Workflow should have been finished successfully
@@ -51,7 +65,7 @@ class BaseWorkflowRunnerTests(object):
         self.assertIsNotNone(self.wf.starttime)
         self.assertIsNotNone(self.wf.finishtime)
         self.assertIsNotNone(self.wf.updatetime)
-        self.assertLessEqual(self.wf.runtime, 8)
+        self.assertLessEqual(self.wf.runtime, 9)
         self.assertLessEqual(self.wf.updatetime, self.wf.finishtime)
 
     def test5_final_workflow_output(self):
@@ -67,7 +81,7 @@ class BaseWorkflowRunnerTests(object):
         self.assertDictEqual(result, self.expected_output)
 
 
-class TestBuildLinearWorkflow(unittest.TestCase):
+class TestBuildLinearWorkflow(UnittestPythonCompatibility):
     """
     Build the linear workflow a shown in the file header
     """
@@ -124,7 +138,7 @@ class TestBuildLinearWorkflow(unittest.TestCase):
         self.assertTrue(os.path.exists(workflow_file_path))
 
 
-class TestRunLinearWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestRunLinearWorkflowDefault(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Run the linear workflow build in TestBuildLinearWorkflow
     """
@@ -150,23 +164,11 @@ class TestRunLinearWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase):
 
         self.wf.input(self.wf.workflow.root, dummy=3)
         sleep_times = [1, 2, 1, 3, 1]
-        for i, task in enumerate(self.wf.get_tasks()):
+        for i, task in enumerate(sorted(self.wf.get_tasks(), key=lambda x: x.nid)):
             task.set_input(add_number=sleep_times[i], sleep=sleep_times[i])
 
-    def test3_run_workflow(self):
-        """
-        Test running the workflow
-        """
 
-        # Run the workflow
-        self.wf.run(project_dir=project_dir)
-
-        # Blocking: wait until workflow is no longer running
-        while self.wf.is_running:
-            time.sleep(1)
-
-
-class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to fail at task 'test3'
@@ -194,23 +196,11 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest.TestCase):
 
         self.wf.input(self.wf.workflow.root, dummy=3)
         sleep_times = [1, 2, 1, 3, 1]
-        for i, task in enumerate(self.wf.get_tasks()):
+        for i, task in enumerate(sorted(self.wf.get_tasks(), key=lambda x: x.nid)):
             task.set_input(add_number=sleep_times[i], sleep=sleep_times[i])
 
             if task.key == 'test3':
                 task.set_input(fail=True)
-
-    def test3_run_workflow(self):
-        """
-        Test running the workflow
-        """
-
-        # Run the workflow
-        self.wf.run(project_dir=project_dir)
-
-        # Blocking: wait until workflow is no longer running
-        while self.wf.is_running:
-            time.sleep(1)
 
     def test4_final_workflow_status(self):
         """
@@ -229,7 +219,7 @@ class TestRunLinearWorkflowFail(BaseWorkflowRunnerTests, unittest.TestCase):
         self.assertEqual(self.wf.failed_tasks, [self.wf.workflow.query_nodes(key='test3')])
 
 
-class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to crash at task 'test3'
@@ -257,23 +247,11 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest.TestCase):
 
         self.wf.input(self.wf.workflow.root, dummy=3)
         sleep_times = [1, 2, 1, 3, 1]
-        for i, task in enumerate(self.wf.get_tasks()):
+        for i, task in enumerate(sorted(self.wf.get_tasks(), key=lambda x: x.nid)):
             task.set_input(add_number=sleep_times[i], sleep=sleep_times[i])
 
             if task.key == 'test3':
                 task.set_input(crash=True)
-
-    def test3_run_workflow(self):
-        """
-        Test running the workflow
-        """
-
-        # Run the workflow
-        self.wf.run(project_dir=project_dir)
-
-        # Blocking: wait until workflow is no longer running
-        while self.wf.is_running:
-            time.sleep(1)
 
     def test4_final_workflow_status(self):
         """
@@ -292,7 +270,7 @@ class TestRunLinearWorkflowCrash(BaseWorkflowRunnerTests, unittest.TestCase):
         self.assertEqual(self.wf.failed_tasks, [self.wf.workflow.query_nodes(key='test3')])
 
 
-class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to pause at task 'test3' (breakpoint)
@@ -320,7 +298,7 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCase
 
         self.wf.input(self.wf.workflow.root, dummy=3)
         sleep_times = [1, 2, 1, 3, 1]
-        for i, task in enumerate(self.wf.get_tasks()):
+        for i, task in enumerate(sorted(self.wf.get_tasks(), key=lambda x: x.nid)):
             task.set_input(add_number=sleep_times[i], sleep=sleep_times[i])
 
             if task.key == 'test3':
@@ -328,11 +306,13 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCase
 
     def test3_run_workflow(self):
         """
-        Test running the workflow
+        Test running the workflow up to breakpoint, check results
+        and continue the run until finished
         """
 
         # Run the workflow
-        self.wf.run(project_dir=project_dir)
+        tmp_project_dir = '{0}-{1}'.format(project_dir, int(time.time()))
+        self.wf.run(project_dir=tmp_project_dir)
 
         # Blocking: wait until workflow hits breakpoint
         while self.wf.is_running:
@@ -341,37 +321,31 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCase
         self.assertFalse(self.wf.is_running)
         self.assertFalse(self.wf.is_completed)
 
+        # Expected results up to breakpoint
+        partial_result = {}
+        for task in self.wf.get_tasks():
+            o = task.get_output()
+            partial_result[task.key] = o.get('dummy')
+        breakpoints = [t.key for t in self.wf.active_breakpoints]
+
         # Step the breakpoint
         bp = self.wf.active_breakpoints
         self.assertEqual(bp, [self.wf.workflow.query_nodes(key='test3')])
         self.wf.step_breakpoint(bp[0].nid)
 
         # Run the workflow
-        self.wf.run(tid=bp[0].nid, project_dir=project_dir)
+        self.wf.run(tid=bp[0].nid)
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
             time.sleep(1)
 
-    def test4_final_workflow_status(self):
-        """
-        Workflow should have failed
-        """
-
-        self.assertFalse(self.wf.is_running)
-        self.assertTrue(self.wf.is_completed)
-        self.assertFalse(self.wf.has_failed)
-
-        self.assertIsNotNone(self.wf.starttime)
-        self.assertIsNotNone(self.wf.finishtime)
-        self.assertIsNotNone(self.wf.updatetime)
-        self.assertLessEqual(self.wf.runtime, 10)
-        self.assertLessEqual(self.wf.updatetime, self.wf.finishtime)
-
-        self.assertEqual(self.wf.active_breakpoints, [])
+        # Test partial results up to breakpoint
+        self.assertDictEqual(partial_result, {u'test1': 4, u'test2': 6, u'test3': 7, u'test4': None, u'test5': None})
+        self.assertEqual(breakpoints, ['test3'])
 
 
-class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but instruct
     the python function to fail at task 'test3' after trying 3 times
@@ -399,24 +373,12 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest.TestCase
 
         self.wf.input(self.wf.workflow.root, dummy=3)
         sleep_times = [1, 2, 1, 3, 1]
-        for i, task in enumerate(self.wf.get_tasks()):
+        for i, task in enumerate(sorted(self.wf.get_tasks(), key=lambda x: x.nid)):
             task.set_input(add_number=sleep_times[i], sleep=sleep_times[i])
 
             if task.key == 'test3':
                 task.task_metadata.retry_count.value = 3
                 task.set_input(fail=True)
-
-    def test3_run_workflow(self):
-        """
-        Test running the workflow
-        """
-
-        # Run the workflow
-        self.wf.run(project_dir=project_dir)
-
-        # Blocking: wait until workflow is no longer running
-        while self.wf.is_running:
-            time.sleep(1)
 
     def test4_final_workflow_status(self):
         """
@@ -438,10 +400,14 @@ class TestRunLinearWorkflowRetrycount(BaseWorkflowRunnerTests, unittest.TestCase
         self.assertEqual(self.wf.failed_tasks, [bp])
 
 
-class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Run the linear workflow build in TestBuildLinearWorkflow but cancel it
     at workflow task3
+
+    This workflow may result in working directory AssertionError that is a result of a
+    unittest race condition where the canceled tasks get the change to finish up in the
+    background while the unittest is already continuing.
     """
 
     expected_output = {u'test1': 4, u'test2': 6, u'test3': None, u'test4': None, u'test5': None}
@@ -466,7 +432,7 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest.TestCase):
 
         self.wf.input(self.wf.workflow.root, dummy=3)
         sleep_times = [1, 2, 10, 3, 1]
-        for i, task in enumerate(self.wf.get_tasks()):
+        for i, task in enumerate(sorted(self.wf.get_tasks(), key=lambda x: x.nid)):
             task.set_input(add_number=sleep_times[i], sleep=sleep_times[i])
 
     def test3_run_workflow(self):
@@ -475,7 +441,8 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest.TestCase):
         """
 
         # Run the workflow
-        self.wf.run(project_dir=project_dir)
+        tmp_project_dir = '{0}-{1}'.format(project_dir, int(time.time()))
+        self.wf.run(project_dir=tmp_project_dir)
 
         # Blocking: cancel workflow after 5 seconds
         while self.wf.is_running:
@@ -500,9 +467,10 @@ class TestRunLinearWorkflowCancel(BaseWorkflowRunnerTests, unittest.TestCase):
         self.assertTrue(bp.status == 'aborted')
 
 
-class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
-    Import a finished workflow and run it. Should check all steps but not rerun
+    Import a finished workflow and run it. Should check all steps but not rerun.
+    The finished project did not store any results locally.
     """
 
     expected_output = {u'test1': 4, u'test2': 6, u'test3': 7, u'test4': 10, u'test5': 11}
@@ -525,20 +493,8 @@ class TestImportFinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
         self.assertTrue(self.wf.is_completed)
         self.assertFalse(self.wf.has_failed)
 
-    def test3_run_workflow(self):
-        """
-        Test running the workflow
-        """
 
-        # Run the workflow
-        self.wf.run(project_dir=project_dir)
-
-        # Blocking: wait until workflow is no longer running
-        while self.wf.is_running:
-            time.sleep(1)
-
-
-class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Import unfinished workflow and continue
     """
@@ -554,20 +510,25 @@ class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, unittest.TestCase):
         cls.wf = Workflow()
         cls.wf.load(os.path.abspath(os.path.join(currpath, '../files/test-linear-unfinished.jgf')))
 
-    def test3_run_workflow(self):
+    def test4_final_workflow_status(self):
         """
-        Test running the workflow
+        Continue an unfinished workflow until completion.
+        The runtime however is much larger than the minimum time required to
+        run the workflow because of the 'brake' in between.
         """
 
-        # Run the workflow
-        self.wf.run(project_dir=project_dir)
+        self.assertFalse(self.wf.is_running)
+        self.assertTrue(self.wf.is_completed)
+        self.assertFalse(self.wf.has_failed)
 
-        # Blocking: wait until workflow is no longer running
-        while self.wf.is_running:
-            time.sleep(1)
+        self.assertIsNotNone(self.wf.starttime)
+        self.assertIsNotNone(self.wf.finishtime)
+        self.assertIsNotNone(self.wf.updatetime)
+        self.assertTrue(self.wf.runtime > 9)
+        self.assertLessEqual(self.wf.updatetime, self.wf.finishtime)
 
 
-class TestZcleanup(unittest.TestCase):
+class TestZcleanup(UnittestPythonCompatibility):
 
     @classmethod
     def setUpClass(cls):
