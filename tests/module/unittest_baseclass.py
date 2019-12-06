@@ -14,9 +14,9 @@ MAJOR_PY_VERSION = sys.version_info.major
 PY_VERSION = '{0}.{1}'.format(version.major, version.minor)
 
 # Unicode test
-UNICODE_TYPE = str
+STRING_TYPES = str
 if MAJOR_PY_VERSION == 2:
-    UNICODE_TYPE = unicode
+    STRING_TYPES = (str, unicode)
 
 
 class UnittestPythonCompatibility(unittest.TestCase):
