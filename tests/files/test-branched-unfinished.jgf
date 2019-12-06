@@ -1,208 +1,171 @@
 {
   "graph": {
-    "node_key_tag": "key",
-    "node_value_tag": "value",
-    "is_directed": true,
-    "edge_key_tag": "label",
-    "is_masked": false,
-    "root": 11,
-    "auto_nid": true
+    "directed": true,
+    "masked": false,
+    "root": 11
+  },
+  "data": {
+    "key_tag": "key",
+    "value_tag": "value",
+    "directed": false,
+    "auto_nid": true,
+    "nodeid": 171,
+    "graphit_version": "0.2"
   },
   "nodes": {
     "1": {
+      "key": "project_metadata",
       "_id": 1,
-      "type": "object",
-      "key": "project_metadata"
+      "type": "object"
     },
     "2": {
+      "key": "create_time",
       "_id": 2,
+      "format": "date-time",
       "type": "string",
-      "key": "update_time",
-      "value": "2018-04-30T12:18:06.476000+00:00",
-      "format": "date-time"
+      "value": "2019-12-02T12:21:32.166000+00:00"
     },
     "3": {
+      "key": "start_time",
       "_id": 3,
+      "format": "date-time",
       "type": "string",
-      "key": "description",
-      "value": "Test a simple branched workflow of 10 blocking python tasks"
+      "value": "2019-12-02T12:21:32.544000+00:00"
     },
     "4": {
-      "default": "MDStudio workflow",
+      "key": "update_time",
       "_id": 4,
+      "format": "date-time",
       "type": "string",
-      "value": "Simple branched workflow",
-      "key": "title"
+      "value": "2019-12-02T12:21:41.879000+00:00"
     },
     "5": {
-      "_id": 5,
-      "type": "string",
       "key": "finish_time",
-      "format": "date-time"
+      "_id": 5,
+      "format": "date-time",
+      "type": "string"
     },
     "6": {
+      "key": "title",
       "_id": 6,
       "type": "string",
-      "value": "2018-04-30T12:17:57.437000+00:00",
-      "key": "start_time",
-      "format": "date-time"
+      "default": "MDStudio workflow",
+      "value": "Simple branched workflow"
     },
     "7": {
+      "key": "description",
       "_id": 7,
       "type": "string",
-      "key": "create_time",
-      "value": "2018-04-30T12:17:07.045000+00:00",
-      "format": "date-time"
+      "value": "Test a simple branched workflow of 10 threaded python tasks"
     },
     "8": {
+      "key": "user",
       "_id": 8,
       "type": "string",
-      "key": "user",
-      "value": "mvdijk"
+      "value": null
     },
     "9": {
+      "key": "version",
       "_id": 9,
       "type": "string",
-      "key": "version",
       "value": "1.0"
     },
     "10": {
+      "key": "project_dir",
       "_id": 10,
       "type": "string",
-      "key": "project_dir"
+      "value": null
     },
     "11": {
-      "_id": 11,
-      "task_type": "PythonTask",
       "key": "test1",
-      "format": "task"
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 11
     },
     "12": {
-      "_id": 12,
       "key": "task_metadata",
+      "_id": 12,
       "$ref": "../resources/task_template.json/#root"
     },
     "13": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "key": "custom_func",
       "_id": 13,
       "type": "string",
-      "key": "custom_func",
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
       "value": "dummy_task_runners.task_runner"
     },
     "14": {
-      "default": "ready",
-      "enum": [
-        "ready",
-        "submitted",
-        "running",
-        "failed",
-        "aborted",
-        "completed",
-        "disabled"
-      ],
-      "value": "completed",
-      "key": "status",
+      "key": "active",
       "_id": 14,
-      "type": "string"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "15": {
+      "key": "breakpoint",
       "_id": 15,
-      "type": "string",
-      "key": "workdir"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "16": {
+      "key": "checks",
       "_id": 16,
-      "type": "string",
-      "key": "task_id",
-      "value": "66442823-4c70-11e8-9f72-acbc32aebef5",
-      "format": "uuid"
+      "type": "integer",
+      "default": 0,
+      "value": 1
     },
     "17": {
+      "key": "endedAtTime",
       "_id": 17,
+      "format": "date-time",
+      "type": "string",
+      "value": "2019-12-02T12:21:33.592000+00:00"
+    },
+    "18": {
+      "key": "external_task_id",
+      "_id": 18,
+      "type": "string"
+    },
+    "19": {
+      "key": "input_data",
+      "_id": 19,
       "type": "object",
       "value": {
         "dummy": 3,
-        "sleep": 1,
-        "add_number": 1
-      },
-      "key": "input_data"
+        "add_number": 1,
+        "sleep": 1
+      }
     },
-    "18": {
-      "_id": 18,
+    "20": {
+      "key": "output_data",
+      "_id": 20,
       "type": "object",
       "value": {
         "dummy": 4
-      },
-      "key": "output_data"
-    },
-    "19": {
-      "_id": 19,
-      "type": "string",
-      "value": "2018-04-30T12:17:58.467000+00:00",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "20": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 20,
-      "type": "string",
-      "key": "uri"
+      }
     },
     "21": {
+      "key": "retry_count",
       "_id": 21,
-      "type": "string",
-      "value": "2018-04-30T12:17:57.448000+00:00",
-      "key": "startedAtTime",
-      "format": "date-time"
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
     },
     "22": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
+      "key": "startedAtTime",
       "_id": 22,
-      "type": "integer"
+      "format": "date-time",
+      "type": "string"
     },
     "23": {
-      "default": false,
+      "key": "status",
       "_id": 23,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
-    },
-    "24": {
-      "default": false,
-      "_id": 24,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
-    },
-    "25": {
-      "default": false,
-      "_id": 25,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    },
-    "26": {
-      "_id": 26,
-      "task_type": "PythonTask",
-      "key": "test2",
-      "format": "task"
-    },
-    "27": {
-      "_id": 27,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
-    },
-    "28": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 28,
       "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
-    },
-    "29": {
       "default": "ready",
       "enum": [
         "ready",
@@ -213,109 +176,117 @@
         "completed",
         "disabled"
       ],
-      "value": "completed",
-      "key": "status",
-      "_id": 29,
+      "required": true,
+      "value": "completed"
+    },
+    "24": {
+      "key": "store_output",
+      "_id": 24,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "25": {
+      "key": "task_id",
+      "_id": 25,
+      "format": "uuid",
+      "type": "string",
+      "value": "464b62f8-14fe-11ea-878f-acbc32aebef5"
+    },
+    "26": {
+      "key": "workdir",
+      "_id": 26,
       "type": "string"
     },
-    "30": {
-      "_id": 30,
+    "27": {
+      "key": "test2",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 27
+    },
+    "28": {
+      "key": "task_metadata",
+      "_id": 28,
+      "$ref": "../resources/task_template.json/#root"
+    },
+    "29": {
+      "key": "custom_func",
+      "_id": 29,
       "type": "string",
-      "key": "workdir"
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "value": "dummy_task_runners.task_runner"
+    },
+    "30": {
+      "key": "active",
+      "_id": 30,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "31": {
+      "key": "breakpoint",
       "_id": 31,
-      "type": "string",
-      "key": "task_id",
-      "value": "6646e042-4c70-11e8-9ced-acbc32aebef5",
-      "format": "uuid"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "32": {
+      "key": "checks",
       "_id": 32,
-      "type": "object",
-      "value": {
-        "dummy": "$11.dummy",
-        "sleep": 2,
-        "add_number": 2
-      },
-      "key": "input_data"
+      "type": "integer",
+      "default": 0,
+      "value": 1
     },
     "33": {
+      "key": "endedAtTime",
       "_id": 33,
+      "format": "date-time",
+      "type": "string",
+      "value": "2019-12-02T12:21:35.650000+00:00"
+    },
+    "34": {
+      "key": "external_task_id",
+      "_id": 34,
+      "type": "string"
+    },
+    "35": {
+      "key": "input_data",
+      "_id": 35,
+      "type": "object",
+      "value": {
+        "add_number": 2,
+        "sleep": 2
+      }
+    },
+    "36": {
+      "key": "output_data",
+      "_id": 36,
       "type": "object",
       "value": {
         "dummy": 6
-      },
-      "key": "output_data"
-    },
-    "34": {
-      "_id": 34,
-      "type": "string",
-      "value": "2018-04-30T12:18:00.506000+00:00",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "35": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 35,
-      "type": "string",
-      "key": "uri"
-    },
-    "36": {
-      "_id": 36,
-      "type": "string",
-      "value": "2018-04-30T12:17:58.490000+00:00",
-      "key": "startedAtTime",
-      "format": "date-time"
+      }
     },
     "37": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
       "key": "retry_count",
       "_id": 37,
-      "type": "integer"
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
     },
     "38": {
-      "default": false,
+      "key": "startedAtTime",
       "_id": 38,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
+      "format": "date-time",
+      "type": "string"
     },
     "39": {
-      "default": false,
+      "key": "status",
       "_id": 39,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
-    },
-    "40": {
-      "default": false,
-      "_id": 40,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    },
-    "41": {
-      "_id": 41,
-      "task_type": "PythonTask",
-      "key": "test3",
-      "format": "task"
-    },
-    "42": {
-      "_id": 42,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
-    },
-    "43": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 43,
       "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
-    },
-    "44": {
       "default": "ready",
       "enum": [
         "ready",
@@ -326,218 +297,117 @@
         "completed",
         "disabled"
       ],
-      "value": "completed",
-      "key": "status",
-      "_id": 44,
+      "required": true,
+      "value": "completed"
+    },
+    "40": {
+      "key": "store_output",
+      "_id": 40,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "41": {
+      "key": "task_id",
+      "_id": 41,
+      "format": "uuid",
+      "type": "string",
+      "value": "464e1f7a-14fe-11ea-b3f0-acbc32aebef5"
+    },
+    "42": {
+      "key": "workdir",
+      "_id": 42,
       "type": "string"
     },
+    "43": {
+      "key": "test3",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 43
+    },
+    "44": {
+      "key": "task_metadata",
+      "_id": 44,
+      "$ref": "../resources/task_template.json/#root"
+    },
     "45": {
+      "key": "custom_func",
       "_id": 45,
       "type": "string",
-      "key": "workdir"
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "value": "dummy_task_runners.task_runner"
     },
     "46": {
+      "key": "active",
       "_id": 46,
-      "type": "string",
-      "key": "task_id",
-      "value": "6648c7d9-4c70-11e8-bd8f-acbc32aebef5",
-      "format": "uuid"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "47": {
+      "key": "breakpoint",
       "_id": 47,
-      "type": "object",
-      "value": {
-        "dummy": "$26.dummy",
-        "sleep": 1,
-        "add_number": 1
-      },
-      "key": "input_data"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "48": {
+      "key": "checks",
       "_id": 48,
+      "type": "integer",
+      "default": 0,
+      "value": 1
+    },
+    "49": {
+      "key": "endedAtTime",
+      "_id": 49,
+      "format": "date-time",
+      "type": "string",
+      "value": "2019-12-02T12:21:36.707000+00:00"
+    },
+    "50": {
+      "key": "external_task_id",
+      "_id": 50,
+      "type": "string"
+    },
+    "51": {
+      "key": "input_data",
+      "_id": 51,
+      "type": "object",
+      "value": {
+        "add_number": 1,
+        "sleep": 1
+      }
+    },
+    "52": {
+      "key": "output_data",
+      "_id": 52,
       "type": "object",
       "value": {
         "dummy": 7
-      },
-      "key": "output_data"
-    },
-    "49": {
-      "_id": 49,
-      "type": "string",
-      "value": "2018-04-30T12:18:01.549000+00:00",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "50": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 50,
-      "type": "string",
-      "key": "uri"
-    },
-    "51": {
-      "_id": 51,
-      "type": "string",
-      "value": "2018-04-30T12:18:00.532000+00:00",
-      "key": "startedAtTime",
-      "format": "date-time"
-    },
-    "52": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
-      "_id": 52,
-      "type": "integer"
+      }
     },
     "53": {
-      "default": false,
+      "key": "retry_count",
       "_id": 53,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
     },
     "54": {
-      "default": false,
+      "key": "startedAtTime",
       "_id": 54,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
-    },
-    "55": {
-      "default": false,
-      "_id": 55,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    },
-    "56": {
-      "_id": 56,
-      "task_type": "PythonTask",
-      "key": "test4",
-      "format": "task"
-    },
-    "57": {
-      "_id": 57,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
-    },
-    "58": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 58,
-      "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
-    },
-    "59": {
-      "default": "ready",
-      "enum": [
-        "ready",
-        "submitted",
-        "running",
-        "failed",
-        "aborted",
-        "completed",
-        "disabled"
-      ],
-      "value": "ready",
-      "key": "status",
-      "_id": 59,
+      "format": "date-time",
       "type": "string"
     },
-    "60": {
-      "_id": 60,
+    "55": {
+      "key": "status",
+      "_id": 55,
       "type": "string",
-      "key": "workdir"
-    },
-    "61": {
-      "_id": 61,
-      "type": "string",
-      "key": "task_id",
-      "value": "664a6e26-4c70-11e8-b578-acbc32aebef5",
-      "format": "uuid"
-    },
-    "62": {
-      "_id": 62,
-      "type": "object",
-      "value": {
-        "dummy": "$41.dummy",
-        "sleep": 3,
-        "add_number": 3
-      },
-      "key": "input_data"
-    },
-    "63": {
-      "_id": 63,
-      "type": "object",
-      "key": "output_data"
-    },
-    "64": {
-      "_id": 64,
-      "type": "string",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "65": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 65,
-      "type": "string",
-      "key": "uri"
-    },
-    "66": {
-      "_id": 66,
-      "type": "string",
-      "value": "2018-04-30T12:18:01.591000+00:00",
-      "key": "startedAtTime",
-      "format": "date-time"
-    },
-    "67": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
-      "_id": 67,
-      "type": "integer"
-    },
-    "68": {
-      "default": false,
-      "_id": 68,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
-    },
-    "69": {
-      "default": false,
-      "_id": 69,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
-    },
-    "70": {
-      "default": false,
-      "_id": 70,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    },
-    "71": {
-      "_id": 71,
-      "task_type": "PythonTask",
-      "key": "test5",
-      "format": "task"
-    },
-    "72": {
-      "_id": 72,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
-    },
-    "73": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 73,
-      "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
-    },
-    "74": {
       "default": "ready",
       "enum": [
         "ready",
@@ -548,442 +418,468 @@
         "completed",
         "disabled"
       ],
-      "value": "ready",
+      "required": true,
+      "value": "completed"
+    },
+    "56": {
+      "key": "store_output",
+      "_id": 56,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "57": {
+      "key": "task_id",
+      "_id": 57,
+      "format": "uuid",
+      "type": "string",
+      "value": "464fdd4c-14fe-11ea-839c-acbc32aebef5"
+    },
+    "58": {
+      "key": "workdir",
+      "_id": 58,
+      "type": "string"
+    },
+    "59": {
+      "key": "test4",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 59
+    },
+    "60": {
+      "key": "task_metadata",
+      "_id": 60,
+      "$ref": "../resources/task_template.json/#root"
+    },
+    "61": {
+      "key": "custom_func",
+      "_id": 61,
+      "type": "string",
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "value": "dummy_task_runners.task_runner"
+    },
+    "62": {
+      "key": "active",
+      "_id": 62,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "63": {
+      "key": "breakpoint",
+      "_id": 63,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "64": {
+      "key": "checks",
+      "_id": 64,
+      "type": "integer",
+      "default": 0,
+      "value": 1
+    },
+    "65": {
+      "key": "endedAtTime",
+      "_id": 65,
+      "format": "date-time",
+      "type": "string",
+      "value": "2019-12-02T12:21:39.778000+00:00"
+    },
+    "66": {
+      "key": "external_task_id",
+      "_id": 66,
+      "type": "string"
+    },
+    "67": {
+      "key": "input_data",
+      "_id": 67,
+      "type": "object",
+      "value": {
+        "add_number": 3,
+        "sleep": 3
+      }
+    },
+    "68": {
+      "key": "output_data",
+      "_id": 68,
+      "type": "object",
+      "value": {
+        "dummy": 10
+      }
+    },
+    "69": {
+      "key": "retry_count",
+      "_id": 69,
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
+    },
+    "70": {
+      "key": "startedAtTime",
+      "_id": 70,
+      "format": "date-time",
+      "type": "string"
+    },
+    "71": {
       "key": "status",
+      "_id": 71,
+      "type": "string",
+      "default": "ready",
+      "enum": [
+        "ready",
+        "submitted",
+        "running",
+        "failed",
+        "aborted",
+        "completed",
+        "disabled"
+      ],
+      "required": true,
+      "value": "completed"
+    },
+    "72": {
+      "key": "store_output",
+      "_id": 72,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "73": {
+      "key": "task_id",
+      "_id": 73,
+      "format": "uuid",
+      "type": "string",
+      "value": "46518408-14fe-11ea-bbc4-acbc32aebef5"
+    },
+    "74": {
+      "key": "workdir",
       "_id": 74,
       "type": "string"
     },
     "75": {
-      "_id": 75,
-      "type": "string",
-      "key": "workdir"
+      "key": "test5",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 75
     },
     "76": {
+      "key": "task_metadata",
       "_id": 76,
-      "type": "string",
-      "key": "task_id",
-      "value": "664c4ba6-4c70-11e8-a787-acbc32aebef5",
-      "format": "uuid"
+      "$ref": "../resources/task_template.json/#root"
     },
     "77": {
+      "key": "custom_func",
       "_id": 77,
-      "type": "object",
-      "value": {
-        "sleep": 1,
-        "add_number": 1
-      },
-      "key": "input_data"
+      "type": "string",
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "value": "dummy_task_runners.task_runner"
     },
     "78": {
+      "key": "active",
       "_id": 78,
-      "type": "object",
-      "key": "output_data"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "79": {
+      "key": "breakpoint",
       "_id": 79,
-      "type": "string",
-      "key": "endedAtTime",
-      "format": "date-time"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "80": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "key": "checks",
       "_id": 80,
-      "type": "string",
-      "key": "uri"
+      "type": "integer",
+      "default": 0,
+      "value": 1
     },
     "81": {
+      "key": "endedAtTime",
       "_id": 81,
-      "type": "string",
-      "key": "startedAtTime",
-      "format": "date-time"
+      "format": "date-time",
+      "type": "string"
     },
     "82": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
+      "key": "external_task_id",
       "_id": 82,
-      "type": "integer"
+      "type": "string"
     },
     "83": {
-      "default": false,
+      "key": "input_data",
       "_id": 83,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
+      "type": "object",
+      "value": {
+        "add_number": 1,
+        "sleep": 1
+      }
     },
     "84": {
-      "default": false,
+      "key": "output_data",
       "_id": 84,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
+      "type": "object"
     },
     "85": {
-      "default": false,
+      "key": "retry_count",
       "_id": 85,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
     },
     "86": {
+      "key": "startedAtTime",
       "_id": 86,
-      "task_type": "PythonTask",
-      "key": "test6",
-      "format": "task"
+      "format": "date-time",
+      "type": "string"
     },
     "87": {
+      "key": "status",
       "_id": 87,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
+      "type": "string",
+      "default": "ready",
+      "enum": [
+        "ready",
+        "submitted",
+        "running",
+        "failed",
+        "aborted",
+        "completed",
+        "disabled"
+      ],
+      "required": true,
+      "value": "ready"
     },
     "88": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "key": "store_output",
       "_id": 88,
-      "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
+      "type": "boolean",
+      "default": true,
+      "value": false
     },
     "89": {
-      "default": "ready",
-      "enum": [
-        "ready",
-        "submitted",
-        "running",
-        "failed",
-        "aborted",
-        "completed",
-        "disabled"
-      ],
-      "value": "completed",
-      "key": "status",
+      "key": "task_id",
       "_id": 89,
-      "type": "string"
+      "format": "uuid",
+      "type": "string",
+      "value": "46539388-14fe-11ea-9ebe-acbc32aebef5"
     },
     "90": {
+      "key": "workdir",
       "_id": 90,
-      "type": "string",
-      "key": "workdir"
+      "type": "string"
     },
     "91": {
-      "_id": 91,
-      "type": "string",
-      "key": "task_id",
-      "value": "664e0266-4c70-11e8-8e43-acbc32aebef5",
-      "format": "uuid"
+      "key": "test6",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 91
     },
     "92": {
+      "key": "task_metadata",
       "_id": 92,
-      "type": "object",
-      "value": {
-        "dummy": "$41.dummy",
-        "sleep": 2,
-        "add_number": 2
-      },
-      "key": "input_data"
+      "$ref": "../resources/task_template.json/#root"
     },
     "93": {
+      "key": "custom_func",
       "_id": 93,
-      "type": "object",
-      "value": {
-        "dummy": 9
-      },
-      "key": "output_data"
+      "type": "string",
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "value": "dummy_task_runners.task_runner"
     },
     "94": {
+      "key": "active",
       "_id": 94,
-      "type": "string",
-      "value": "2018-04-30T12:18:03.637000+00:00",
-      "key": "endedAtTime",
-      "format": "date-time"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "95": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "key": "breakpoint",
       "_id": 95,
-      "type": "string",
-      "key": "uri"
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
     },
     "96": {
+      "key": "checks",
       "_id": 96,
-      "type": "string",
-      "value": "2018-04-30T12:18:01.613000+00:00",
-      "key": "startedAtTime",
-      "format": "date-time"
+      "type": "integer",
+      "default": 0,
+      "value": 1
     },
     "97": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
+      "key": "endedAtTime",
       "_id": 97,
-      "type": "integer"
+      "format": "date-time",
+      "type": "string"
     },
     "98": {
-      "default": false,
+      "key": "external_task_id",
       "_id": 98,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
+      "type": "string"
     },
     "99": {
-      "default": false,
+      "key": "input_data",
       "_id": 99,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
+      "type": "object",
+      "value": {
+        "add_number": 2,
+        "sleep": 2
+      }
     },
     "100": {
-      "default": false,
+      "key": "output_data",
       "_id": 100,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
+      "type": "object"
     },
     "101": {
+      "key": "retry_count",
       "_id": 101,
-      "task_type": "PythonTask",
-      "key": "test7",
-      "format": "task"
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
     },
     "102": {
+      "key": "startedAtTime",
       "_id": 102,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
+      "format": "date-time",
+      "type": "string"
     },
     "103": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "key": "status",
       "_id": 103,
       "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
+      "default": "ready",
+      "enum": [
+        "ready",
+        "submitted",
+        "running",
+        "failed",
+        "aborted",
+        "completed",
+        "disabled"
+      ],
+      "required": true,
+      "value": "ready"
     },
     "104": {
-      "default": "ready",
-      "enum": [
-        "ready",
-        "submitted",
-        "running",
-        "failed",
-        "aborted",
-        "completed",
-        "disabled"
-      ],
-      "value": "completed",
-      "key": "status",
+      "key": "store_output",
       "_id": 104,
-      "type": "string"
+      "type": "boolean",
+      "default": true,
+      "value": false
     },
     "105": {
+      "key": "task_id",
       "_id": 105,
+      "format": "uuid",
       "type": "string",
-      "key": "workdir"
+      "value": "46555a24-14fe-11ea-a4a7-acbc32aebef5"
     },
     "106": {
+      "key": "workdir",
       "_id": 106,
-      "type": "string",
-      "key": "task_id",
-      "value": "66504f80-4c70-11e8-a946-acbc32aebef5",
-      "format": "uuid"
-    },
-    "107": {
-      "_id": 107,
-      "type": "object",
-      "value": {
-        "dummy": "$86.dummy",
-        "sleep": 1,
-        "add_number": 1
-      },
-      "key": "input_data"
-    },
-    "108": {
-      "_id": 108,
-      "type": "object",
-      "value": {
-        "dummy": 10
-      },
-      "key": "output_data"
-    },
-    "109": {
-      "_id": 109,
-      "type": "string",
-      "value": "2018-04-30T12:18:04.703000+00:00",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "110": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 110,
-      "type": "string",
-      "key": "uri"
-    },
-    "111": {
-      "_id": 111,
-      "type": "string",
-      "value": "2018-04-30T12:18:03.677000+00:00",
-      "key": "startedAtTime",
-      "format": "date-time"
-    },
-    "112": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
-      "_id": 112,
-      "type": "integer"
-    },
-    "113": {
-      "default": false,
-      "_id": 113,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
-    },
-    "114": {
-      "default": false,
-      "_id": 114,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
-    },
-    "115": {
-      "default": false,
-      "_id": 115,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    },
-    "116": {
-      "_id": 116,
-      "task_type": "PythonTask",
-      "key": "test8",
-      "format": "task"
-    },
-    "117": {
-      "_id": 117,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
-    },
-    "118": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 118,
-      "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
-    },
-    "119": {
-      "default": "ready",
-      "enum": [
-        "ready",
-        "submitted",
-        "running",
-        "failed",
-        "aborted",
-        "completed",
-        "disabled"
-      ],
-      "value": "completed",
-      "key": "status",
-      "_id": 119,
       "type": "string"
     },
-    "120": {
-      "_id": 120,
-      "type": "string",
-      "key": "workdir"
-    },
-    "121": {
-      "_id": 121,
-      "type": "string",
-      "key": "task_id",
-      "value": "665227eb-4c70-11e8-abec-acbc32aebef5",
-      "format": "uuid"
-    },
-    "122": {
-      "_id": 122,
-      "type": "object",
-      "value": {
-        "dummy": "$101.dummy",
-        "sleep": 1,
-        "add_number": 1
-      },
-      "key": "input_data"
-    },
-    "123": {
-      "_id": 123,
-      "type": "object",
-      "value": {
-        "dummy": 11
-      },
-      "key": "output_data"
-    },
-    "124": {
-      "_id": 124,
-      "type": "string",
-      "value": "2018-04-30T12:18:05.769000+00:00",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "125": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 125,
-      "type": "string",
-      "key": "uri"
-    },
-    "126": {
-      "_id": 126,
-      "type": "string",
-      "value": "2018-04-30T12:18:04.742000+00:00",
-      "key": "startedAtTime",
-      "format": "date-time"
-    },
-    "127": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
-      "_id": 127,
-      "type": "integer"
-    },
-    "128": {
-      "default": false,
-      "_id": 128,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
-    },
-    "129": {
-      "default": false,
-      "_id": 129,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
-    },
-    "130": {
-      "default": false,
-      "_id": 130,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    },
-    "131": {
-      "_id": 131,
+    "107": {
+      "key": "test7",
       "task_type": "PythonTask",
-      "key": "test9",
-      "format": "task"
+      "format": "task",
+      "_id": 107
     },
-    "132": {
-      "_id": 132,
+    "108": {
       "key": "task_metadata",
+      "_id": 108,
       "$ref": "../resources/task_template.json/#root"
     },
-    "133": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 133,
-      "type": "string",
+    "109": {
       "key": "custom_func",
+      "_id": 109,
+      "type": "string",
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
       "value": "dummy_task_runners.task_runner"
     },
-    "134": {
+    "110": {
+      "key": "active",
+      "_id": 110,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "111": {
+      "key": "breakpoint",
+      "_id": 111,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "112": {
+      "key": "checks",
+      "_id": 112,
+      "type": "integer",
+      "default": 0,
+      "value": 1
+    },
+    "113": {
+      "key": "endedAtTime",
+      "_id": 113,
+      "format": "date-time",
+      "type": "string"
+    },
+    "114": {
+      "key": "external_task_id",
+      "_id": 114,
+      "type": "string"
+    },
+    "115": {
+      "key": "input_data",
+      "_id": 115,
+      "type": "object",
+      "value": {
+        "add_number": 1,
+        "sleep": 1
+      }
+    },
+    "116": {
+      "key": "output_data",
+      "_id": 116,
+      "type": "object"
+    },
+    "117": {
+      "key": "retry_count",
+      "_id": 117,
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
+    },
+    "118": {
+      "key": "startedAtTime",
+      "_id": 118,
+      "format": "date-time",
+      "type": "string"
+    },
+    "119": {
+      "key": "status",
+      "_id": 119,
+      "type": "string",
       "default": "ready",
       "enum": [
         "ready",
@@ -994,103 +890,114 @@
         "completed",
         "disabled"
       ],
-      "value": "ready",
-      "key": "status",
+      "required": true,
+      "value": "ready"
+    },
+    "120": {
+      "key": "store_output",
+      "_id": 120,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "121": {
+      "key": "task_id",
+      "_id": 121,
+      "format": "uuid",
+      "type": "string",
+      "value": "46573c36-14fe-11ea-9c93-acbc32aebef5"
+    },
+    "122": {
+      "key": "workdir",
+      "_id": 122,
+      "type": "string"
+    },
+    "123": {
+      "key": "test8",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 123
+    },
+    "124": {
+      "key": "task_metadata",
+      "_id": 124,
+      "$ref": "../resources/task_template.json/#root"
+    },
+    "125": {
+      "key": "custom_func",
+      "_id": 125,
+      "type": "string",
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "value": "dummy_task_runners.task_runner"
+    },
+    "126": {
+      "key": "active",
+      "_id": 126,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "127": {
+      "key": "breakpoint",
+      "_id": 127,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "128": {
+      "key": "checks",
+      "_id": 128,
+      "type": "integer",
+      "default": 0,
+      "value": 1
+    },
+    "129": {
+      "key": "endedAtTime",
+      "_id": 129,
+      "format": "date-time",
+      "type": "string",
+      "value": "2019-12-02T12:21:40.980000+00:00"
+    },
+    "130": {
+      "key": "external_task_id",
+      "_id": 130,
+      "type": "string"
+    },
+    "131": {
+      "key": "input_data",
+      "_id": 131,
+      "type": "object",
+      "value": {
+        "add_number": 1,
+        "sleep": 1
+      }
+    },
+    "132": {
+      "key": "output_data",
+      "_id": 132,
+      "type": "object"
+    },
+    "133": {
+      "key": "retry_count",
+      "_id": 133,
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
+    },
+    "134": {
+      "key": "startedAtTime",
       "_id": 134,
+      "format": "date-time",
       "type": "string"
     },
     "135": {
+      "key": "status",
       "_id": 135,
       "type": "string",
-      "key": "workdir"
-    },
-    "136": {
-      "_id": 136,
-      "type": "string",
-      "key": "task_id",
-      "value": "6653ebb8-4c70-11e8-ad5d-acbc32aebef5",
-      "format": "uuid"
-    },
-    "137": {
-      "_id": 137,
-      "type": "object",
-      "value": {
-        "sleep": 2,
-        "add_number": 2
-      },
-      "key": "input_data"
-    },
-    "138": {
-      "_id": 138,
-      "type": "object",
-      "key": "output_data"
-    },
-    "139": {
-      "_id": 139,
-      "type": "string",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "140": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 140,
-      "type": "string",
-      "key": "uri"
-    },
-    "141": {
-      "_id": 141,
-      "type": "string",
-      "key": "startedAtTime",
-      "format": "date-time"
-    },
-    "142": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
-      "_id": 142,
-      "type": "integer"
-    },
-    "143": {
-      "default": false,
-      "_id": 143,
-      "type": "boolean",
-      "value": false,
-      "key": "store_output"
-    },
-    "144": {
-      "default": false,
-      "_id": 144,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
-    },
-    "145": {
-      "default": false,
-      "_id": 145,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    },
-    "146": {
-      "_id": 146,
-      "task_type": "PythonTask",
-      "key": "test10",
-      "format": "task"
-    },
-    "147": {
-      "_id": 147,
-      "key": "task_metadata",
-      "$ref": "../resources/task_template.json/#root"
-    },
-    "148": {
-      "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 148,
-      "type": "string",
-      "key": "custom_func",
-      "value": "dummy_task_runners.task_runner"
-    },
-    "149": {
       "default": "ready",
       "enum": [
         "ready",
@@ -1101,1272 +1008,964 @@
         "completed",
         "disabled"
       ],
-      "value": "ready",
-      "key": "status",
-      "_id": 149,
+      "required": true,
+      "value": "ready"
+    },
+    "136": {
+      "key": "store_output",
+      "_id": 136,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "137": {
+      "key": "task_id",
+      "_id": 137,
+      "format": "uuid",
+      "type": "string",
+      "value": "4658f210-14fe-11ea-b8fa-acbc32aebef5"
+    },
+    "138": {
+      "key": "workdir",
+      "_id": 138,
       "type": "string"
     },
-    "150": {
-      "_id": 150,
+    "139": {
+      "key": "test9",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 139
+    },
+    "140": {
+      "key": "task_metadata",
+      "_id": 140,
+      "$ref": "../resources/task_template.json/#root"
+    },
+    "141": {
+      "key": "custom_func",
+      "_id": 141,
       "type": "string",
-      "key": "workdir"
-    },
-    "151": {
-      "_id": 151,
-      "type": "string",
-      "key": "task_id",
-      "value": "66561ba3-4c70-11e8-8de7-acbc32aebef5",
-      "format": "uuid"
-    },
-    "152": {
-      "_id": 152,
-      "type": "object",
-      "value": {
-        "sleep": 1,
-        "add_number": 1
-      },
-      "key": "input_data"
-    },
-    "153": {
-      "_id": 153,
-      "type": "object",
-      "key": "output_data"
-    },
-    "154": {
-      "_id": 154,
-      "type": "string",
-      "key": "endedAtTime",
-      "format": "date-time"
-    },
-    "155": {
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "_id": 155,
-      "type": "string",
-      "key": "uri"
+      "value": "dummy_task_runners.task_runner"
     },
-    "156": {
-      "_id": 156,
-      "type": "string",
-      "key": "startedAtTime",
-      "format": "date-time"
-    },
-    "157": {
-      "default": 0,
-      "value": 0,
-      "minimum": 0,
-      "key": "retry_count",
-      "_id": 157,
-      "type": "integer"
-    },
-    "158": {
-      "default": false,
-      "_id": 158,
+    "142": {
+      "key": "active",
+      "_id": 142,
       "type": "boolean",
-      "value": false,
-      "key": "store_output"
-    },
-    "159": {
       "default": false,
-      "_id": 159,
-      "type": "boolean",
-      "value": false,
-      "key": "breakpoint"
+      "required": true,
+      "value": false
     },
-    "160": {
+    "143": {
+      "key": "breakpoint",
+      "_id": 143,
+      "type": "boolean",
       "default": false,
-      "_id": 160,
-      "type": "boolean",
-      "value": false,
-      "key": "active"
-    }
-  },
-  "graphit_version": "1.0",
-  "edge_attr": {
-    "256": {
-      "data_mapping": {},
-      "label": "task_link"
-    },
-    "130": {
-      "data_mapping": {},
-      "label": "task_link"
-    },
-    "99": {
-      "data_mapping": {},
-      "label": "task_link"
-    },
-    "166": {
-      "data_mapping": {},
-      "label": "task_link"
-    },
-    "12": {
-      "data_mapping": {},
-      "label": "task_link"
-    },
-    "202": {
-      "data_mapping": {},
-      "label": "task_link"
-    },
-    "108": {
-      "data_mapping": {},
-      "label": "task_link"
-    },
-    "15": {
-      "data_mapping": {},
-      "label": "task_link"
+      "required": true,
+      "value": false
     },
     "144": {
-      "data_mapping": {},
-      "label": "task_link"
+      "key": "checks",
+      "_id": 144,
+      "type": "integer",
+      "default": 0,
+      "value": 1
+    },
+    "145": {
+      "key": "endedAtTime",
+      "_id": 145,
+      "format": "date-time",
+      "type": "string"
+    },
+    "146": {
+      "key": "external_task_id",
+      "_id": 146,
+      "type": "string"
+    },
+    "147": {
+      "key": "input_data",
+      "_id": 147,
+      "type": "object",
+      "value": {
+        "add_number": 2,
+        "sleep": 2
+      }
+    },
+    "148": {
+      "key": "output_data",
+      "_id": 148,
+      "type": "object"
+    },
+    "149": {
+      "key": "retry_count",
+      "_id": 149,
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
+    },
+    "150": {
+      "key": "startedAtTime",
+      "_id": 150,
+      "format": "date-time",
+      "type": "string"
+    },
+    "151": {
+      "key": "status",
+      "_id": 151,
+      "type": "string",
+      "default": "ready",
+      "enum": [
+        "ready",
+        "submitted",
+        "running",
+        "failed",
+        "aborted",
+        "completed",
+        "disabled"
+      ],
+      "required": true,
+      "value": "ready"
+    },
+    "152": {
+      "key": "store_output",
+      "_id": 152,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "153": {
+      "key": "task_id",
+      "_id": 153,
+      "format": "uuid",
+      "type": "string",
+      "value": "465ac93a-14fe-11ea-b0f1-acbc32aebef5"
+    },
+    "154": {
+      "key": "workdir",
+      "_id": 154,
+      "type": "string"
+    },
+    "155": {
+      "key": "test10",
+      "task_type": "PythonTask",
+      "format": "task",
+      "_id": 155
+    },
+    "156": {
+      "key": "task_metadata",
+      "_id": 156,
+      "$ref": "../resources/task_template.json/#root"
+    },
+    "157": {
+      "key": "custom_func",
+      "_id": 157,
+      "type": "string",
+      "pattern": "^\\w+(\\w+\\.)+\\w+$",
+      "value": "dummy_task_runners.task_runner"
+    },
+    "158": {
+      "key": "active",
+      "_id": 158,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "159": {
+      "key": "breakpoint",
+      "_id": 159,
+      "type": "boolean",
+      "default": false,
+      "required": true,
+      "value": false
+    },
+    "160": {
+      "key": "checks",
+      "_id": 160,
+      "type": "integer",
+      "default": 0,
+      "value": 1
+    },
+    "161": {
+      "key": "endedAtTime",
+      "_id": 161,
+      "format": "date-time",
+      "type": "string"
+    },
+    "162": {
+      "key": "external_task_id",
+      "_id": 162,
+      "type": "string"
+    },
+    "163": {
+      "key": "input_data",
+      "_id": 163,
+      "type": "object",
+      "value": {
+        "add_number": 1,
+        "sleep": 1
+      }
+    },
+    "164": {
+      "key": "output_data",
+      "_id": 164,
+      "type": "object"
+    },
+    "165": {
+      "key": "retry_count",
+      "_id": 165,
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "required": true,
+      "value": 0
+    },
+    "166": {
+      "key": "startedAtTime",
+      "_id": 166,
+      "format": "date-time",
+      "type": "string"
+    },
+    "167": {
+      "key": "status",
+      "_id": 167,
+      "type": "string",
+      "default": "ready",
+      "enum": [
+        "ready",
+        "submitted",
+        "running",
+        "failed",
+        "aborted",
+        "completed",
+        "disabled"
+      ],
+      "required": true,
+      "value": "ready"
+    },
+    "168": {
+      "key": "store_output",
+      "_id": 168,
+      "type": "boolean",
+      "default": true,
+      "value": false
+    },
+    "169": {
+      "key": "task_id",
+      "_id": 169,
+      "format": "uuid",
+      "type": "string",
+      "value": "465cc87a-14fe-11ea-9012-acbc32aebef5"
+    },
+    "170": {
+      "key": "workdir",
+      "_id": 170,
+      "type": "string"
     }
   },
   "edges": {
     "0": [
-      57,
-      61
-    ],
-    "1": [
-      122,
-      117
-    ],
-    "2": [
-      46,
-      42
-    ],
-    "3": [
-      86,
-      87
-    ],
-    "4": [
-      87,
-      95
-    ],
-    "5": [
-      157,
-      147
-    ],
-    "6": [
-      49,
-      42
-    ],
-    "7": [
-      142,
-      132
-    ],
-    "8": [
-      141,
-      132
-    ],
-    "9": [
-      81,
-      72
-    ],
-    "10": [
-      25,
-      12
-    ],
-    "11": [
-      150,
-      147
-    ],
-    "12": [
-      56,
-      131
-    ],
-    "13": [
-      93,
-      87
-    ],
-    "14": [
-      146,
-      147
-    ],
-    "15": [
-      26,
-      41
-    ],
-    "16": [
-      147,
-      150
-    ],
-    "17": [
-      38,
-      27
-    ],
-    "18": [
-      61,
-      57
-    ],
-    "19": [
-      127,
-      117
-    ],
-    "20": [
-      29,
-      27
-    ],
-    "21": [
-      87,
-      100
-    ],
-    "22": [
-      67,
-      57
-    ],
-    "23": [
-      117,
-      124
-    ],
-    "24": [
-      92,
-      87
-    ],
-    "25": [
-      132,
-      136
-    ],
-    "26": [
-      36,
-      27
-    ],
-    "27": [
-      124,
-      117
-    ],
-    "28": [
-      117,
-      127
-    ],
-    "29": [
-      12,
-      17
-    ],
-    "30": [
-      102,
-      109
-    ],
-    "31": [
-      159,
-      147
-    ],
-    "32": [
-      147,
-      160
-    ],
-    "33": [
-      21,
-      12
-    ],
-    "34": [
-      139,
-      132
-    ],
-    "35": [
-      60,
-      57
-    ],
-    "36": [
-      102,
-      112
-    ],
-    "37": [
-      147,
-      149
-    ],
-    "38": [
-      112,
-      102
-    ],
-    "39": [
-      152,
-      147
-    ],
-    "40": [
-      116,
-      118
-    ],
-    "41": [
-      123,
-      117
-    ],
-    "42": [
-      42,
-      51
-    ],
-    "43": [
-      56,
-      58
-    ],
-    "44": [
-      26,
-      28
-    ],
-    "45": [
-      69,
-      57
-    ],
-    "46": [
-      57,
-      59
-    ],
-    "47": [
-      104,
-      102
-    ],
-    "48": [
-      27,
-      40
-    ],
-    "49": [
-      117,
-      120
-    ],
-    "50": [
-      57,
-      69
-    ],
-    "51": [
-      12,
-      22
-    ],
-    "52": [
-      102,
-      110
-    ],
-    "53": [
-      117,
-      121
-    ],
-    "54": [
-      113,
-      102
-    ],
-    "55": [
-      72,
-      76
-    ],
-    "56": [
-      75,
-      72
-    ],
-    "57": [
-      22,
-      12
-    ],
-    "58": [
-      80,
-      72
-    ],
-    "59": [
-      117,
-      130
-    ],
-    "60": [
-      42,
-      53
-    ],
-    "61": [
-      1,
-      6
-    ],
-    "62": [
-      137,
-      132
-    ],
-    "63": [
-      68,
-      57
-    ],
-    "64": [
-      42,
-      52
-    ],
-    "65": [
-      63,
-      57
-    ],
-    "66": [
-      87,
-      91
-    ],
-    "67": [
-      27,
-      34
-    ],
-    "68": [
-      109,
-      102
-    ],
-    "69": [
-      131,
-      132
-    ],
-    "70": [
-      147,
-      153
-    ],
-    "71": [
-      107,
-      102
-    ],
-    "72": [
-      136,
-      132
-    ],
-    "73": [
-      99,
-      87
-    ],
-    "74": [
-      132,
-      135
-    ],
-    "75": [
-      3,
-      1
-    ],
-    "76": [
-      72,
-      77
-    ],
-    "77": [
-      66,
-      57
-    ],
-    "78": [
-      39,
-      27
-    ],
-    "79": [
-      102,
-      107
-    ],
-    "80": [
-      147,
-      154
-    ],
-    "81": [
-      84,
-      72
-    ],
-    "82": [
-      45,
-      42
-    ],
-    "83": [
-      2,
-      1
-    ],
-    "84": [
-      110,
-      102
-    ],
-    "85": [
-      42,
-      47
-    ],
-    "86": [
-      72,
-      83
-    ],
-    "87": [
-      79,
-      72
-    ],
-    "88": [
-      77,
-      72
-    ],
-    "89": [
-      121,
-      117
-    ],
-    "90": [
-      23,
-      12
-    ],
-    "91": [
-      147,
-      156
-    ],
-    "92": [
-      62,
-      57
-    ],
-    "93": [
-      57,
-      60
-    ],
-    "94": [
-      89,
-      87
-    ],
-    "95": [
-      30,
-      27
-    ],
-    "96": [
-      87,
-      94
-    ],
-    "97": [
-      120,
-      117
-    ],
-    "98": [
-      132,
-      137
-    ],
-    "99": [
-      56,
-      71
-    ],
-    "100": [
-      147,
-      159
-    ],
-    "101": [
-      57,
-      63
-    ],
-    "102": [
-      72,
-      74
-    ],
-    "103": [
-      12,
-      24
-    ],
-    "104": [
-      1,
-      5
-    ],
-    "105": [
-      41,
-      43
-    ],
-    "106": [
-      37,
-      27
-    ],
-    "107": [
-      1,
-      10
-    ],
-    "108": [
-      41,
-      56
-    ],
-    "109": [
-      72,
-      80
-    ],
-    "110": [
-      4,
-      1
-    ],
-    "111": [
-      132,
-      141
-    ],
-    "112": [
-      57,
-      65
-    ],
-    "113": [
-      134,
-      132
-    ],
-    "114": [
-      138,
-      132
-    ],
-    "115": [
-      7,
-      1
-    ],
-    "116": [
-      87,
-      93
-    ],
-    "117": [
-      132,
-      142
-    ],
-    "118": [
-      98,
-      87
-    ],
-    "119": [
-      12,
-      18
-    ],
-    "120": [
-      70,
-      57
-    ],
-    "121": [
-      12,
-      20
-    ],
-    "122": [
-      27,
-      31
-    ],
-    "123": [
-      102,
-      113
-    ],
-    "124": [
-      145,
-      132
-    ],
-    "125": [
-      71,
-      73
-    ],
-    "126": [
-      57,
-      68
-    ],
-    "127": [
-      42,
-      48
-    ],
-    "128": [
-      6,
-      1
-    ],
-    "129": [
-      117,
-      123
-    ],
-    "130": [
-      11,
-      26
-    ],
-    "131": [
-      27,
-      38
-    ],
-    "132": [
-      31,
-      27
-    ],
-    "133": [
-      53,
-      42
-    ],
-    "134": [
-      17,
-      12
-    ],
-    "135": [
-      24,
-      12
-    ],
-    "136": [
-      12,
-      23
-    ],
-    "137": [
-      154,
-      147
-    ],
-    "138": [
-      147,
-      158
-    ],
-    "139": [
-      35,
-      27
-    ],
-    "140": [
-      1,
-      3
-    ],
-    "141": [
-      102,
-      114
-    ],
-    "142": [
-      117,
-      129
-    ],
-    "143": [
-      33,
-      27
-    ],
-    "144": [
-      86,
-      101
-    ],
-    "145": [
-      42,
-      44
-    ],
-    "146": [
-      42,
-      55
-    ],
-    "147": [
-      57,
-      64
-    ],
-    "148": [
-      114,
-      102
-    ],
-    "149": [
-      95,
-      87
-    ],
-    "150": [
-      87,
-      90
-    ],
-    "151": [
-      27,
-      37
-    ],
-    "152": [
-      82,
-      72
-    ],
-    "153": [
-      40,
-      27
-    ],
-    "154": [
-      50,
-      42
-    ],
-    "155": [
-      15,
-      12
-    ],
-    "156": [
-      72,
-      78
-    ],
-    "157": [
-      20,
-      12
-    ],
-    "158": [
-      18,
-      12
-    ],
-    "159": [
-      147,
-      157
-    ],
-    "160": [
-      11,
-      12
-    ],
-    "161": [
-      101,
-      103
-    ],
-    "162": [
-      94,
-      87
-    ],
-    "163": [
-      108,
-      102
-    ],
-    "164": [
-      72,
-      84
-    ],
-    "165": [
-      87,
-      99
-    ],
-    "166": [
-      101,
-      116
-    ],
-    "167": [
-      119,
-      117
-    ],
-    "168": [
-      144,
-      132
-    ],
-    "169": [
-      143,
-      132
-    ],
-    "170": [
-      44,
-      42
-    ],
-    "171": [
-      51,
-      42
-    ],
-    "172": [
-      131,
-      133
-    ],
-    "173": [
-      130,
-      117
-    ],
-    "174": [
-      87,
-      89
-    ],
-    "175": [
-      27,
-      32
-    ],
-    "176": [
-      132,
-      138
-    ],
-    "177": [
-      106,
-      102
-    ],
-    "178": [
-      128,
-      117
-    ],
-    "179": [
-      86,
-      88
-    ],
-    "180": [
-      12,
-      14
-    ],
-    "181": [
-      102,
-      104
-    ],
-    "182": [
-      12,
-      25
-    ],
-    "183": [
-      155,
-      147
-    ],
-    "184": [
-      1,
-      4
-    ],
-    "185": [
-      132,
-      144
-    ],
-    "186": [
-      147,
-      152
-    ],
-    "187": [
-      87,
-      96
-    ],
-    "188": [
-      1,
-      9
-    ],
-    "189": [
-      72,
-      81
-    ],
-    "190": [
-      34,
-      27
-    ],
-    "191": [
-      132,
-      134
-    ],
-    "192": [
-      151,
-      147
-    ],
-    "193": [
-      57,
-      67
-    ],
-    "194": [
-      57,
-      62
-    ],
-    "195": [
-      48,
-      42
-    ],
-    "196": [
-      87,
-      92
-    ],
-    "197": [
-      132,
-      143
-    ],
-    "198": [
-      97,
-      87
-    ],
-    "199": [
-      12,
-      19
-    ],
-    "200": [
-      146,
-      148
-    ],
-    "201": [
-      117,
-      126
-    ],
-    "202": [
-      131,
-      146
-    ],
-    "203": [
-      27,
-      30
-    ],
-    "204": [
-      1,
-      7
-    ],
-    "205": [
-      147,
-      151
-    ],
-    "206": [
-      11,
-      13
-    ],
-    "207": [
-      71,
-      72
-    ],
-    "208": [
-      83,
-      72
-    ],
-    "209": [
-      102,
-      106
-    ],
-    "210": [
-      9,
-      1
-    ],
-    "211": [
-      42,
-      49
-    ],
-    "212": [
-      91,
-      87
-    ],
-    "213": [
-      90,
-      87
-    ],
-    "214": [
-      42,
-      54
-    ],
-    "215": [
-      160,
-      147
-    ],
-    "216": [
-      12,
-      16
-    ],
-    "217": [
-      125,
-      117
-    ],
-    "218": [
-      47,
-      42
-    ],
-    "219": [
-      147,
-      155
-    ],
-    "220": [
-      132,
-      140
-    ],
-    "221": [
-      5,
-      1
-    ],
-    "222": [
-      102,
-      108
-    ],
-    "223": [
-      55,
-      42
-    ],
-    "224": [
-      27,
-      29
-    ],
-    "225": [
-      102,
-      115
-    ],
-    "226": [
-      74,
-      72
-    ],
-    "227": [
-      32,
-      27
-    ],
-    "228": [
-      126,
-      117
-    ],
-    "229": [
-      14,
-      12
-    ],
-    "230": [
-      8,
-      1
-    ],
-    "231": [
-      153,
-      147
-    ],
-    "232": [
-      85,
-      72
-    ],
-    "233": [
-      42,
-      50
-    ],
-    "234": [
-      56,
-      57
-    ],
-    "235": [
-      111,
-      102
-    ],
-    "236": [
-      42,
-      46
-    ],
-    "237": [
-      27,
-      36
-    ],
-    "238": [
-      156,
-      147
-    ],
-    "239": [
-      158,
-      147
-    ],
-    "240": [
-      19,
-      12
-    ],
-    "241": [
-      72,
-      75
-    ],
-    "242": [
-      72,
-      79
-    ],
-    "243": [
-      149,
-      147
-    ],
-    "244": [
-      12,
-      21
-    ],
-    "245": [
       1,
       2
     ],
-    "246": [
-      102,
-      105
+    "1": [
+      1,
+      3
     ],
-    "247": [
-      117,
-      122
+    "2": [
+      1,
+      4
     ],
-    "248": [
-      65,
-      57
+    "3": [
+      1,
+      5
     ],
-    "249": [
-      115,
-      102
+    "4": [
+      1,
+      6
     ],
-    "250": [
-      129,
-      117
+    "5": [
+      1,
+      7
     ],
-    "251": [
-      101,
-      102
-    ],
-    "252": [
-      57,
-      70
-    ],
-    "253": [
-      42,
-      45
-    ],
-    "254": [
-      117,
-      119
-    ],
-    "255": [
-      72,
-      85
-    ],
-    "256": [
-      41,
-      86
-    ],
-    "257": [
-      87,
-      98
-    ],
-    "258": [
-      100,
-      87
-    ],
-    "259": [
-      27,
-      33
-    ],
-    "260": [
-      10,
-      1
-    ],
-    "261": [
-      57,
-      66
-    ],
-    "262": [
-      54,
-      42
-    ],
-    "263": [
-      105,
-      102
-    ],
-    "264": [
-      27,
-      35
-    ],
-    "265": [
-      132,
-      139
-    ],
-    "266": [
-      16,
-      12
-    ],
-    "267": [
-      41,
-      42
-    ],
-    "268": [
-      12,
-      15
-    ],
-    "269": [
-      26,
-      27
-    ],
-    "270": [
-      117,
-      128
-    ],
-    "271": [
-      52,
-      42
-    ],
-    "272": [
-      27,
-      39
-    ],
-    "273": [
-      64,
-      57
-    ],
-    "274": [
-      102,
-      111
-    ],
-    "275": [
-      59,
-      57
-    ],
-    "276": [
-      132,
-      145
-    ],
-    "277": [
-      117,
-      125
-    ],
-    "278": [
-      135,
-      132
-    ],
-    "279": [
-      116,
-      117
-    ],
-    "280": [
+    "6": [
       1,
       8
     ],
-    "281": [
-      140,
-      132
+    "7": [
+      1,
+      9
     ],
-    "282": [
-      72,
+    "8": [
+      1,
+      10
+    ],
+    "9": [
+      12,
+      14
+    ],
+    "10": [
+      12,
+      15
+    ],
+    "11": [
+      12,
+      16
+    ],
+    "12": [
+      12,
+      17
+    ],
+    "13": [
+      12,
+      18
+    ],
+    "14": [
+      12,
+      19
+    ],
+    "15": [
+      12,
+      20
+    ],
+    "16": [
+      12,
+      21
+    ],
+    "17": [
+      12,
+      22
+    ],
+    "18": [
+      12,
+      23
+    ],
+    "19": [
+      12,
+      24
+    ],
+    "20": [
+      12,
+      25
+    ],
+    "21": [
+      12,
+      26
+    ],
+    "22": [
+      11,
+      12
+    ],
+    "23": [
+      11,
+      13
+    ],
+    "24": [
+      28,
+      30
+    ],
+    "25": [
+      28,
+      31
+    ],
+    "26": [
+      28,
+      32
+    ],
+    "27": [
+      28,
+      33
+    ],
+    "28": [
+      28,
+      34
+    ],
+    "29": [
+      28,
+      35
+    ],
+    "30": [
+      28,
+      36
+    ],
+    "31": [
+      28,
+      37
+    ],
+    "32": [
+      28,
+      38
+    ],
+    "33": [
+      28,
+      39
+    ],
+    "34": [
+      28,
+      40
+    ],
+    "35": [
+      28,
+      41
+    ],
+    "36": [
+      28,
+      42
+    ],
+    "37": [
+      27,
+      28
+    ],
+    "38": [
+      27,
+      29
+    ],
+    "39": [
+      44,
+      46
+    ],
+    "40": [
+      44,
+      47
+    ],
+    "41": [
+      44,
+      48
+    ],
+    "42": [
+      44,
+      49
+    ],
+    "43": [
+      44,
+      50
+    ],
+    "44": [
+      44,
+      51
+    ],
+    "45": [
+      44,
+      52
+    ],
+    "46": [
+      44,
+      53
+    ],
+    "47": [
+      44,
+      54
+    ],
+    "48": [
+      44,
+      55
+    ],
+    "49": [
+      44,
+      56
+    ],
+    "50": [
+      44,
+      57
+    ],
+    "51": [
+      44,
+      58
+    ],
+    "52": [
+      43,
+      44
+    ],
+    "53": [
+      43,
+      45
+    ],
+    "54": [
+      60,
+      62
+    ],
+    "55": [
+      60,
+      63
+    ],
+    "56": [
+      60,
+      64
+    ],
+    "57": [
+      60,
+      65
+    ],
+    "58": [
+      60,
+      66
+    ],
+    "59": [
+      60,
+      67
+    ],
+    "60": [
+      60,
+      68
+    ],
+    "61": [
+      60,
+      69
+    ],
+    "62": [
+      60,
+      70
+    ],
+    "63": [
+      60,
+      71
+    ],
+    "64": [
+      60,
+      72
+    ],
+    "65": [
+      60,
+      73
+    ],
+    "66": [
+      60,
+      74
+    ],
+    "67": [
+      59,
+      60
+    ],
+    "68": [
+      59,
+      61
+    ],
+    "69": [
+      76,
+      78
+    ],
+    "70": [
+      76,
+      79
+    ],
+    "71": [
+      76,
+      80
+    ],
+    "72": [
+      76,
+      81
+    ],
+    "73": [
+      76,
       82
     ],
-    "283": [
-      87,
-      97
+    "74": [
+      76,
+      83
     ],
-    "284": [
-      78,
-      72
+    "75": [
+      76,
+      84
     ],
-    "285": [
-      96,
+    "76": [
+      76,
+      85
+    ],
+    "77": [
+      76,
+      86
+    ],
+    "78": [
+      76,
       87
     ],
-    "286": [
+    "79": [
       76,
-      72
+      88
+    ],
+    "80": [
+      76,
+      89
+    ],
+    "81": [
+      76,
+      90
+    ],
+    "82": [
+      75,
+      76
+    ],
+    "83": [
+      75,
+      77
+    ],
+    "84": [
+      92,
+      94
+    ],
+    "85": [
+      92,
+      95
+    ],
+    "86": [
+      92,
+      96
+    ],
+    "87": [
+      92,
+      97
+    ],
+    "88": [
+      92,
+      98
+    ],
+    "89": [
+      92,
+      99
+    ],
+    "90": [
+      92,
+      100
+    ],
+    "91": [
+      92,
+      101
+    ],
+    "92": [
+      92,
+      102
+    ],
+    "93": [
+      92,
+      103
+    ],
+    "94": [
+      92,
+      104
+    ],
+    "95": [
+      92,
+      105
+    ],
+    "96": [
+      92,
+      106
+    ],
+    "97": [
+      91,
+      92
+    ],
+    "98": [
+      91,
+      93
+    ],
+    "99": [
+      108,
+      110
+    ],
+    "100": [
+      108,
+      111
+    ],
+    "101": [
+      108,
+      112
+    ],
+    "102": [
+      108,
+      113
+    ],
+    "103": [
+      108,
+      114
+    ],
+    "104": [
+      108,
+      115
+    ],
+    "105": [
+      108,
+      116
+    ],
+    "106": [
+      108,
+      117
+    ],
+    "107": [
+      108,
+      118
+    ],
+    "108": [
+      108,
+      119
+    ],
+    "109": [
+      108,
+      120
+    ],
+    "110": [
+      108,
+      121
+    ],
+    "111": [
+      108,
+      122
+    ],
+    "112": [
+      107,
+      108
+    ],
+    "113": [
+      107,
+      109
+    ],
+    "114": [
+      124,
+      126
+    ],
+    "115": [
+      124,
+      127
+    ],
+    "116": [
+      124,
+      128
+    ],
+    "117": [
+      124,
+      129
+    ],
+    "118": [
+      124,
+      130
+    ],
+    "119": [
+      124,
+      131
+    ],
+    "120": [
+      124,
+      132
+    ],
+    "121": [
+      124,
+      133
+    ],
+    "122": [
+      124,
+      134
+    ],
+    "123": [
+      124,
+      135
+    ],
+    "124": [
+      124,
+      136
+    ],
+    "125": [
+      124,
+      137
+    ],
+    "126": [
+      124,
+      138
+    ],
+    "127": [
+      123,
+      124
+    ],
+    "128": [
+      123,
+      125
+    ],
+    "129": [
+      140,
+      142
+    ],
+    "130": [
+      140,
+      143
+    ],
+    "131": [
+      140,
+      144
+    ],
+    "132": [
+      140,
+      145
+    ],
+    "133": [
+      140,
+      146
+    ],
+    "134": [
+      140,
+      147
+    ],
+    "135": [
+      140,
+      148
+    ],
+    "136": [
+      140,
+      149
+    ],
+    "137": [
+      140,
+      150
+    ],
+    "138": [
+      140,
+      151
+    ],
+    "139": [
+      140,
+      152
+    ],
+    "140": [
+      140,
+      153
+    ],
+    "141": [
+      140,
+      154
+    ],
+    "142": [
+      139,
+      140
+    ],
+    "143": [
+      139,
+      141
+    ],
+    "144": [
+      156,
+      158
+    ],
+    "145": [
+      156,
+      159
+    ],
+    "146": [
+      156,
+      160
+    ],
+    "147": [
+      156,
+      161
+    ],
+    "148": [
+      156,
+      162
+    ],
+    "149": [
+      156,
+      163
+    ],
+    "150": [
+      156,
+      164
+    ],
+    "151": [
+      156,
+      165
+    ],
+    "152": [
+      156,
+      166
+    ],
+    "153": [
+      156,
+      167
+    ],
+    "154": [
+      156,
+      168
+    ],
+    "155": [
+      156,
+      169
+    ],
+    "156": [
+      156,
+      170
+    ],
+    "157": [
+      155,
+      156
+    ],
+    "158": [
+      155,
+      157
+    ],
+    "159": [
+      11,
+      27
+    ],
+    "160": [
+      27,
+      43
+    ],
+    "161": [
+      43,
+      59
+    ],
+    "162": [
+      59,
+      75
+    ],
+    "163": [
+      43,
+      91
+    ],
+    "164": [
+      91,
+      107
+    ],
+    "165": [
+      107,
+      123
+    ],
+    "166": [
+      59,
+      139
+    ],
+    "167": [
+      139,
+      155
     ]
+  },
+  "edge_attr": {
+    "159": {
+      "key": "task_link"
+    },
+    "160": {
+      "key": "task_link"
+    },
+    "161": {
+      "key": "task_link"
+    },
+    "162": {
+      "key": "task_link"
+    },
+    "163": {
+      "key": "task_link"
+    },
+    "164": {
+      "key": "task_link"
+    },
+    "165": {
+      "key": "task_link"
+    },
+    "166": {
+      "key": "task_link"
+    },
+    "167": {
+      "key": "task_link"
+    }
   }
 }
