@@ -7,17 +7,17 @@ Unit tests the local directory structure for saving the output of tasks
 """
 
 import os
-import unittest
 import time
 import shutil
 
 from mdstudio_workflow import Workflow
+from unittest_baseclass import UnittestPythonCompatibility
 
 currpath = os.path.dirname(__file__)
 tmp_project_dir = os.path.abspath(os.path.join(currpath, '../files/test_project'))
 
 
-class TestLocalWorkdir(unittest.TestCase):
+class TestLocalWorkdir(UnittestPythonCompatibility):
 
     def setUp(self):
         """
@@ -44,7 +44,7 @@ class TestLocalWorkdir(unittest.TestCase):
 
     def test_store_output_all(self):
         """
-        Test run workflow storing output of all tasks
+        Test run workflow storing output of all tasks (default)
         """
 
         # Run the workflow
@@ -60,9 +60,9 @@ class TestLocalWorkdir(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(tmp_project_dir, 'workflow.jgf')))
 
         # Check output
-        expected = {11:12, 25:20}
+        expected = {'test1': 12, 'test2': 20}
         for task in self.wf.get_tasks():
-            self.assertEqual(task.get_output().get('dummy'), expected[task.nid])
+            self.assertEqual(task.get_output().get('dummy'), expected[task.key])
 
     def test_store_output_partial(self):
         """
@@ -85,6 +85,6 @@ class TestLocalWorkdir(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(tmp_project_dir, 'workflow.jgf')))
 
         # Check output
-        expected = {11: 12, 25: 20}
+        expected = {'test1': 12, 'test2': 20}
         for task in self.wf.get_tasks():
-            self.assertEqual(task.get_output().get('dummy'), expected[task.nid])
+            self.assertEqual(task.get_output().get('dummy'), expected[task.key])
