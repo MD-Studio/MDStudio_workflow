@@ -11,7 +11,7 @@ import json
 import jsonschema
 
 from graphit.graph_io.io_pydata_format import write_pydata
-from unittest_baseclass import UnittestPythonCompatibility
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 from mdstudio_workflow import WorkflowSpec
 from mdstudio_workflow.workflow_common import WorkflowError

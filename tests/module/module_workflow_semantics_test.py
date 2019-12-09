@@ -12,7 +12,7 @@ import time
 from mdstudio_workflow import Workflow
 from mdstudio_workflow.workflow_task_types.task_base_type import edge_select_transform
 
-from unittest_baseclass import UnittestPythonCompatibility
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 currpath = os.path.dirname(__file__)
 

@@ -16,7 +16,7 @@ import os
 import time
 import unittest
 
-from unittest_baseclass import UnittestPythonCompatibility
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 from mdstudio_workflow import Workflow, WorkflowSpec
 
 currpath = os.path.dirname(__file__)

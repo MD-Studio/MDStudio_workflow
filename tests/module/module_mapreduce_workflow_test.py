@@ -18,8 +18,10 @@ Run it using the following scenarios:
 """
 
 import os
-import unittest
 import time
+import unittest
+
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 from mdstudio_workflow import Workflow, WorkflowSpec
 
@@ -66,7 +68,7 @@ class BaseWorkflowRunnerTests(object):
         self.assertDictEqual(result, self.expected_output)
 
 
-class TestBuildMapreduceWorkflow(unittest.TestCase):
+class TestBuildMapreduceWorkflow(UnittestPythonCompatibility):
     """
     Build the map-reduce workflow a shown in the file header using the default
     threader PythonTask runner
@@ -127,7 +129,7 @@ class TestBuildMapreduceWorkflow(unittest.TestCase):
         self.assertTrue(os.path.exists(workflow_file_path))
 
 
-class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase):
+class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, UnittestPythonCompatibility):
     """
     Run the branched workflow build in TestBuildBranchedWorkflow
     """
@@ -174,7 +176,7 @@ class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, unittest.TestCase
             time.sleep(1)
 
 
-class TestZcleanup(unittest.TestCase):
+class TestZcleanup(UnittestPythonCompatibility):
 
     @classmethod
     def setUpClass(cls):

@@ -13,7 +13,7 @@ import unittest
 import time
 
 from mdstudio_workflow import Workflow, WorkflowSpec
-from unittest_baseclass import UnittestPythonCompatibility
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 currpath = os.path.dirname(__file__)
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-linear-workflow.jgf'))

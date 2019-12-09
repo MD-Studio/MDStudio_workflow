@@ -11,7 +11,7 @@ import time
 import shutil
 
 from mdstudio_workflow import Workflow
-from unittest_baseclass import UnittestPythonCompatibility
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 currpath = os.path.dirname(__file__)
 tmp_project_dir = os.path.abspath(os.path.join(currpath, '../files/test_project'))

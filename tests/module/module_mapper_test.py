@@ -14,8 +14,9 @@ Unit tests construction and running the mapreduce workflow:
 """
 
 import os
-import unittest
 import time
+
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 from mdstudio_workflow import Workflow, WorkflowSpec
 
@@ -23,7 +24,7 @@ currpath = os.path.dirname(__file__)
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-mapreduce-workflow.jgf'))
 
 
-class TestBuildMapperWorkflow(unittest.TestCase):
+class TestBuildMapperWorkflow(UnittestPythonCompatibility):
     """
     Build the map-reduce workflow a shown in the file header using the default
     threader PythonTask runner

@@ -16,8 +16,8 @@ from graphit.graph_exceptions import GraphitValidationError
 
 from mdstudio_workflow import WorkflowSpec
 
-from dummy_task_runners import task_runner
-from unittest_baseclass import UnittestPythonCompatibility, STRING_TYPES
+from tests.module.dummy_task_runners import task_runner
+from tests.module.unittest_baseclass import UnittestPythonCompatibility, STRING_TYPES
 
 currpath = os.path.dirname(__file__)
 

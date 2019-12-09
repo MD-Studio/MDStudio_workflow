@@ -14,7 +14,7 @@ from datetime import datetime
 
 from graphit.graph_io.io_jsonschema_format import read_json_schema
 from graphit.graph_exceptions import GraphitValidationError
-from unittest_baseclass import UnittestPythonCompatibility
+from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 from mdstudio_workflow.workflow_task_types import WORKFLOW_ORM
 
