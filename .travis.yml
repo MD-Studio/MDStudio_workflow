@@ -5,22 +5,22 @@ os:
  - linux
 
 python:
-  - "2.7"
-  - "3.6"
+ - "2.7"
+ - "3.6"
 
 install:
-  - (git clone git://github.com/MD-Studio/MDStudio.git --branch master --single-branch && pip install -e MDStudio/mdstudio)
+ - (git clone git://github.com/MD-Studio/MDStudio.git --branch master --single-branch && pip install -e MDStudio/mdstudio)
 
-  # install library
-  - pip install codecov
-  - pip install -e .
+ # install library
+ - pip install codecov
+ - pip install -e .
 
 script:
-  - coverage run tests
+ - coverage run tests
 
 branches:
   only:
     - master
 
 after_success:
-  - codecov
+ - codecov
