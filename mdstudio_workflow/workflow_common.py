@@ -11,7 +11,13 @@ from collections import Counter
 from graphit.graph_io.io_pydata_format import read_pydata, write_pydata
 from graphit.graph_py2to3 import PY_STRING
 
-from mdstudio_workflow import logging
+from mdstudio_workflow import __twisted_logger__
+
+if __twisted_logger__:
+    from twisted.logger import Logger
+    logging = Logger()
+else:
+    import logging
 
 
 class WorkflowError(Exception):

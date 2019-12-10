@@ -12,8 +12,14 @@ from twisted.internet import reactor, threads
 from graphit.graph_mixin import NodeTools
 from graphit.graph_combinatorial.graph_split_join_operations import graph_join
 
-from mdstudio_workflow import logging
+from mdstudio_workflow import __twisted_logger__
 from mdstudio_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
+
+if __twisted_logger__:
+    from twisted.logger import Logger
+    logging = Logger()
+else:
+    import logging
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = 'workflow_python_task.v1.json'

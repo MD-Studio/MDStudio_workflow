@@ -4,9 +4,15 @@ import os
 import threading
 import random
 
-from mdstudio_workflow import logging
+from mdstudio_workflow import __twisted_logger__
 from mdstudio_workflow.workflow_common import WorkflowError, validate_workflow
 from mdstudio_workflow.workflow_spec import WorkflowSpec
+
+if __twisted_logger__:
+    from twisted.logger import Logger
+    logging = Logger()
+else:
+    import logging
 
 
 class WorkflowRunner(WorkflowSpec):

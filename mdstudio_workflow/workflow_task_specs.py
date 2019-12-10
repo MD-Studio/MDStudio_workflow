@@ -11,7 +11,13 @@ import itertools
 from graphit.graph_algorithms.path_traversal import dfs_paths
 from graphit.graph_helpers import renumber_id
 
-from mdstudio_workflow import logging
+from mdstudio_workflow import __twisted_logger__
+
+if __twisted_logger__:
+    from twisted.logger import Logger
+    logging = Logger()
+else:
+    import logging
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = {'workflow_python_task.v1.json': None, 'workflow_wamp_task.v1.json': None}

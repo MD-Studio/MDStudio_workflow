@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import logging
 
 __module__ = 'mdstudio_workflow'
 __docformat__ = 'restructuredtext'
@@ -13,7 +12,7 @@ __licence__ = 'Apache Software License 2.0'
 __url__ = 'https://github.com/MD-Studio/MDStudio_structures'
 __copyright__ = "Copyright (c) VU University, Amsterdam"
 __rootpath__ = os.path.dirname(__file__)
+__twisted_logger__ = False
 
-# Init logger
-#from twisted.logger import Logger
-#logging = Logger()
+from .workflow_runner import WorkflowRunner as Workflow
+from .workflow_spec import WorkflowSpec

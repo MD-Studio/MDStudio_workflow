@@ -17,9 +17,15 @@ from graphit.graph_io.io_jsonschema_format import read_json_schema
 from graphit.graph_py2to3 import to_unicode, prepaire_data_dict
 from graphit.graph_helpers import renumber_id
 
-from mdstudio_workflow import __version__, logging
+from mdstudio_workflow import __version__, __twisted_logger__
 from mdstudio_workflow.workflow_common import WorkflowError
 from mdstudio_workflow.workflow_task_types import task_types, WORKFLOW_ORM
+
+if __twisted_logger__:
+    from twisted.logger import Logger
+    logging = Logger()
+else:
+    import logging
 
 # Path to default workflow JSON schema part of the module
 workflow_metadata_template = pkg_resources.resource_filename('mdstudio_workflow',
