@@ -39,7 +39,7 @@ setup(
     keywords='MDStudio WAMP workflow',
     platforms=['Any'],
     packages=find_packages(),
-    #package_data={distribution_name: ['schemas/endpoints/*', 'schemas/resources/*']},
+    package_data={distribution_name: ['schemas/endpoints/*', 'schemas/resources/*']},
     py_modules=[distribution_name],
     install_requires=["py-graphit", "mdstudio"],
     include_package_data=True,
