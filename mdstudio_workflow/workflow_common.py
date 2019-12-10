@@ -2,7 +2,6 @@
 
 import os
 import re
-import logging
 import itertools
 import shutil
 import stat
@@ -11,6 +10,8 @@ from collections import Counter
 
 from graphit.graph_io.io_pydata_format import read_pydata, write_pydata
 from graphit.graph_py2to3 import PY_STRING
+
+from mdstudio_workflow import logging
 
 
 class WorkflowError(Exception):

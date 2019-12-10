@@ -8,7 +8,6 @@ that can be run using the `Workflow` runner class
 """
 
 import os
-import logging
 import pkg_resources
 
 from graphit import GraphAxis
@@ -18,7 +17,7 @@ from graphit.graph_io.io_jsonschema_format import read_json_schema
 from graphit.graph_py2to3 import to_unicode, prepaire_data_dict
 from graphit.graph_helpers import renumber_id
 
-from mdstudio_workflow import __version__
+from mdstudio_workflow import __version__, logging
 from mdstudio_workflow.workflow_common import WorkflowError
 from mdstudio_workflow.workflow_task_types import task_types, WORKFLOW_ORM
 

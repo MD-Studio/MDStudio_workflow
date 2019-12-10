@@ -12,17 +12,14 @@ import pkg_resources
 import json
 import os
 
+from twisted.python.failure import Failure
 from graphit import GraphAxis
 from graphit.graph_mixin import NodeTools
 from graphit.graph_py2to3 import prepaire_data_dict
 from graphit.graph_io.io_jsonschema_format import read_json_schema
 
+from mdstudio_workflow import logging
 from mdstudio_workflow.workflow_common import WorkflowError, collect_data, concat_dict
-
-# Set twisted logger
-from twisted.python.failure import Failure
-from twisted.logger import Logger
-logging = Logger()
 
 
 def load_task_schema(schema_name):

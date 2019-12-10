@@ -12,7 +12,6 @@ import re
 import json
 
 from tempfile import mktemp
-from twisted.logger import Logger
 from mdstudio.component.session import ComponentSession
 from mdstudio.deferred.chainable import chainable
 from mdstudio.deferred.return_value import return_value
@@ -22,11 +21,9 @@ from graphit.graph_axis.graph_axis_mixin import NodeAxisTools
 from graphit.graph_io.io_jsonschema_format import read_json_schema
 from graphit.graph_io.io_pydata_format import write_pydata
 
+from mdstudio_workflow import logging
 from mdstudio_workflow.workflow_task_types.task_base_type import TaskBase, load_task_schema
 from mdstudio_workflow.workflow_common import is_file, WorkflowError
-
-# Set twisted logger
-logging = Logger()
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = 'workflow_wamp_task.v1.json'

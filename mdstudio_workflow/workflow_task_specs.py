@@ -7,10 +7,11 @@ Graph node task classes
 """
 
 import itertools
-import logging
 
 from graphit.graph_algorithms.path_traversal import dfs_paths
 from graphit.graph_helpers import renumber_id
+
+from mdstudio_workflow import logging
 
 # Preload Task definitions from JSON schema in the package schema/endpoints/
 TASK_SCHEMA = {'workflow_python_task.v1.json': None, 'workflow_wamp_task.v1.json': None}
