@@ -97,8 +97,3 @@ class TestBuildMapperWorkflow(UnittestPythonCompatibility):
         # Blocking: wait until workflow is no longer running
         while self.spec.is_running:
             time.sleep(1)
-
-        for task in self.spec.get_tasks():
-            print(task.status)
-            print(task.get_input())
-            print(task.get_output())
