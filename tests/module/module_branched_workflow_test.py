@@ -601,6 +601,23 @@ class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, UnittestPythonCompat
         cls.wf = Workflow()
         cls.wf.load(os.path.abspath(os.path.join(currpath, '../files/test-branched-unfinished.jgf')))
 
+    def test4_final_workflow_status(self):
+        """
+        Continue an unfinished workflow until completion.
+        The runtime however is much larger than the minimum time required to
+        run the workflow because of the 'brake' in between.
+        """
+
+        self.assertFalse(self.wf.is_running)
+        self.assertTrue(self.wf.is_completed)
+        self.assertFalse(self.wf.has_failed)
+
+        self.assertIsNotNone(self.wf.starttime)
+        self.assertIsNotNone(self.wf.finishtime)
+        self.assertIsNotNone(self.wf.updatetime)
+        self.assertTrue(self.wf.runtime > 12)
+        self.assertLessEqual(self.wf.updatetime, self.wf.finishtime)
+
 
 class TestZcleanup(UnittestPythonCompatibility):
 
