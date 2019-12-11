@@ -504,7 +504,8 @@ class TestImportUnfinishedWorkflow(BaseWorkflowRunnerTests, UnittestPythonCompat
     @classmethod
     def setUpClass(cls):
         """
-        Load previously created linear workflow spec file
+        Load previously created linear workflow spec file.
+        Task test1, test2 already finished. No output stored locally.
         """
 
         cls.wf = Workflow()

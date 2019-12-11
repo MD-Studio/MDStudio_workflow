@@ -74,7 +74,7 @@
       "key": "project_dir",
       "_id": 10,
       "type": "string",
-      "value": "/Users/mvdijk/Documents/WorkProjects/liestudio-master/MDStudio_workflow/tests/files/md_workflow"
+      "value": null
     },
     "11": {
       "key": "test1",
@@ -184,7 +184,7 @@
       "_id": 24,
       "type": "boolean",
       "default": true,
-      "value": true
+      "value": false
     },
     "25": {
       "key": "task_id",
@@ -196,8 +196,7 @@
     "26": {
       "key": "workdir",
       "_id": 26,
-      "type": "string",
-      "value": "/Users/mvdijk/Documents/WorkProjects/liestudio-master/MDStudio_workflow/tests/files/md_workflow/task-11-test1"
+      "type": "string"
     },
     "27": {
       "key": "test2",
@@ -306,7 +305,7 @@
       "_id": 40,
       "type": "boolean",
       "default": true,
-      "value": true
+      "value": false
     },
     "41": {
       "key": "task_id",
@@ -318,8 +317,7 @@
     "42": {
       "key": "workdir",
       "_id": 42,
-      "type": "string",
-      "value": "/Users/mvdijk/Documents/WorkProjects/liestudio-master/MDStudio_workflow/tests/files/md_workflow/task-27-test2"
+      "type": "string"
     },
     "43": {
       "key": "test3",
@@ -388,7 +386,7 @@
       "_id": 52,
       "type": "object",
       "value": {
-        "$ref": "task-43-test3/output.json"
+        "dummy": 7
       }
     },
     "53": {
@@ -428,7 +426,7 @@
       "_id": 56,
       "type": "boolean",
       "default": true,
-      "value": true
+      "value": false
     },
     "57": {
       "key": "task_id",
@@ -440,8 +438,7 @@
     "58": {
       "key": "workdir",
       "_id": 58,
-      "type": "string",
-      "value": "/Users/mvdijk/Documents/WorkProjects/liestudio-master/MDStudio_workflow/tests/files/md_workflow/task-43-test3"
+      "type": "string"
     },
     "59": {
       "key": "test4",
@@ -546,7 +543,7 @@
       "_id": 72,
       "type": "boolean",
       "default": true,
-      "value": true
+      "value": false
     },
     "73": {
       "key": "task_id",
@@ -663,7 +660,7 @@
       "_id": 88,
       "type": "boolean",
       "default": true,
-      "value": true
+      "value": false
     },
     "89": {
       "key": "task_id",
