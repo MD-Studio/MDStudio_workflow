@@ -74,7 +74,7 @@ class WorkflowRunner(WorkflowSpec):
         logging.info('Task {0} ({1}): {2} check {3} next after {4} sec.'.format(task.status, task.nid, task.key,
                                                                             task.task_metadata.checks(), delta_t))
 
-    def output_callback(self, output, tid, update=False):
+    def output_callback(self, output, tid, update=True):
         """
         Process the output of a task and stage the next task(s) to run.
 
@@ -232,7 +232,7 @@ class WorkflowRunner(WorkflowSpec):
         # In all other cases, pass None and have the task output update
         # method decide what to do next.
         else:
-            logging.info('Task {0} ({1}), status: {0}'.format(task.nid, task.key, task.status))
+            logging.info('Task {0} ({1}), status: {2}'.format(task.nid, task.key, task.status))
             self.output_callback(None, tid, update=False)
 
     @property
