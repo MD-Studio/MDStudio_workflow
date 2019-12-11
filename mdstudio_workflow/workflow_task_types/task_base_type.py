@@ -522,13 +522,14 @@ class TaskBase(NodeTools):
         # Output or not
         status = 'failed'
         if output is None:
-            logging.error('Task {0} ({1}) returned no output'.format(self.nid, self.key))
 
             # If task successfully run before, use output.
             prev_output = self.get_output()
             if prev_output and isinstance(prev_output, dict) and self.status == 'completed':
                 logging.info('Task {0} ({1}) successfully run before. Use output'.format(self.nid, self.key))
                 return 'completed', prev_output
+
+            logging.error('Task {0} ({1}) returned no output'.format(self.nid, self.key))
 
         elif isinstance(output, Failure):
             logging.error('Task {0} ({1}) returned a failure: {2}'.format(self.nid, self.key, output.printTraceback()))
