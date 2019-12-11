@@ -111,14 +111,14 @@ class TestBuildMapreduceWorkflow(UnittestPythonCompatibility):
         Test connecting 9 tasks in a branched fashion
         """
 
-        edges = ((1, 2), (2, 3), (2, 6), (2, 8), (3, 4), (4, 5), (6, 7), (7, 4), (8, 9), (9, 4))
-        tasks = dict([(i, t.nid) for i, t in enumerate(self.spec.get_tasks(), start=1)])
-
+        edges = (('test1', 'test2'), ('test2', 'test3'), ('test3', 'test4'), ('test4', 'test5'), ('test2', 'test6'),
+                 ('test6', 'test7'), ('test7', 'test4'), ('test2', 'test8'), ('test8', 'test9'), ('test9', 'test4'))
+        tasks = dict([(t.key, t.nid) for t in self.spec.get_tasks()])
         for edge in edges:
             self.spec.connect_task(tasks[edge[0]], tasks[edge[1]])
 
-        self.assertTrue(len(self.spec.workflow.adjacency[tasks[2]]), 4)
-        self.assertTrue(len(self.spec.workflow.adjacency[tasks[4]]), 4)
+        self.assertTrue(len(self.spec.workflow.adjacency[tasks['test2']]), 4)
+        self.assertTrue(len(self.spec.workflow.adjacency[tasks['test4']]), 4)
 
     def test4_save_workflow(self):
         """
@@ -134,8 +134,8 @@ class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, UnittestPythonCom
     Run the branched workflow build in TestBuildBranchedWorkflow
     """
 
-    expected_output = {u'test1': 4, u'test3': 7, u'test2': 6, u'test5': 26, u'test4': 25, u'test7': 9, u'test6': 8,
-                       u'test9': 9, u'test8': 7}
+    expected_output = {u'test7': 9, u'test1': 5, u'test8': 7, u'test9': 10, u'test2': 6, u'test3': 8,
+                       u'test4': 27, u'test5': 28, u'test6': 8}
 
     @classmethod
     def setUpClass(cls):
