@@ -25,7 +25,7 @@ from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 from mdstudio_workflow import Workflow, WorkflowSpec
 
-currpath = os.path.dirname(__file__)
+currpath = os.path.abspath(os.path.dirname(__file__))
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-mapreduce-workflow.jgf'))
 
 
@@ -101,7 +101,7 @@ class TestBuildMapreduceWorkflow(UnittestPythonCompatibility):
         """
 
         for task in range(9):
-            self.spec.add_task('test{0}'.format(task+1), custom_func="dummy_task_runners.task_runner",
+            self.spec.add_task('test{0}'.format(task+1), custom_func="module.dummy_task_runners.task_runner",
                                store_output=False)
 
         self.assertEqual(len(self.spec), 9)
@@ -161,7 +161,7 @@ class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, UnittestPythonCom
             task.set_input(add_number=sleep_times[i], sleep=sleep_times[i])
 
             if task.key == 'test4':
-                task.custom_func.value = 'dummy_task_runners.reduce_function'
+                task.custom_func.value = 'module.dummy_task_runners.reduce_function'
 
     def test3_run_workflow(self):
         """

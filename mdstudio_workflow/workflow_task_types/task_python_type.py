@@ -5,7 +5,7 @@ file: task_python_type.py
 
 Task for running a Python function in threaded or blocking mode
 """
-import sys
+
 from importlib import import_module
 from twisted.internet import reactor, threads
 
@@ -51,7 +51,7 @@ class LoadCustomFunc(NodeTools):
 
         func = None
         python_uri = self.get()
-        print(sys.path)
+
         if python_uri:
             module_name = '.'.join(python_uri.split('.')[:-1])
             function_name = python_uri.split('.')[-1]

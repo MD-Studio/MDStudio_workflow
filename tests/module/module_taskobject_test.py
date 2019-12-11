@@ -18,7 +18,7 @@ from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
 from mdstudio_workflow.workflow_task_types import WORKFLOW_ORM
 
-currpath = os.path.dirname(__file__)
+currpath = os.path.abspath(os.path.dirname(__file__))
 
 
 class TestTaskObject(UnittestPythonCompatibility):

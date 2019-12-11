@@ -13,7 +13,7 @@ import shutil
 from mdstudio_workflow import Workflow
 from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
-currpath = os.path.dirname(__file__)
+currpath = os.path.abspath(os.path.dirname(__file__))
 tmp_project_dir = os.path.abspath(os.path.join(currpath, '../files/test_project'))
 
 
@@ -26,10 +26,10 @@ class TestLocalWorkdir(UnittestPythonCompatibility):
 
         self.wf = Workflow(project_dir=tmp_project_dir)
 
-        tid1 = self.wf.add_task('test1', custom_func="dummy_task_runners.task_runner")
+        tid1 = self.wf.add_task('test1', custom_func="module.dummy_task_runners.task_runner")
         tid1.set_input(add_number=10, dummy=2)
 
-        tid2 = self.wf.add_task('test2', custom_func="dummy_task_runners.task_runner")
+        tid2 = self.wf.add_task('test2', custom_func="module.dummy_task_runners.task_runner")
         tid2.set_input(add_number=8, output_to_disk=True)
         self.wf.connect_task(tid1.nid, tid2.nid)
 

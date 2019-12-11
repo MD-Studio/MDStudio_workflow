@@ -6,15 +6,12 @@ file: module_workflow_semantics_test.py
 Unit tests naming and renaming of task parameters between tasks
 """
 
-import os
 import time
 
 from mdstudio_workflow import Workflow
 from mdstudio_workflow.workflow_task_types.task_base_type import edge_select_transform
 
 from tests.module.unittest_baseclass import UnittestPythonCompatibility
-
-currpath = os.path.dirname(__file__)
 
 
 class TestEdgeSelectTransform(UnittestPythonCompatibility):
@@ -159,10 +156,10 @@ class TestInputOutputMapping(UnittestPythonCompatibility):
 
         self.wf = Workflow()
 
-        self.tid1 = self.wf.add_task('test1', custom_func="dummy_task_runners.task_runner", store_output=False)
+        self.tid1 = self.wf.add_task('test1', custom_func="module.dummy_task_runners.task_runner", store_output=False)
         self.tid1.set_input(add_number=10, dummy=2, return_more=True)
 
-        self.tid2 = self.wf.add_task('test2', custom_func="dummy_task_runners.task_runner", store_output=False)
+        self.tid2 = self.wf.add_task('test2', custom_func="module.dummy_task_runners.task_runner", store_output=False)
         self.tid2.set_input(add_number=8, return_more=True)
 
     def test_run_default(self):

@@ -17,7 +17,7 @@ from mdstudio_workflow import WorkflowSpec
 from mdstudio_workflow.workflow_common import WorkflowError
 from mdstudio_workflow.workflow_spec import workflow_metadata_template
 
-currpath = os.path.dirname(__file__)
+currpath = os.path.abspath(os.path.dirname(__file__))
 
 
 class TestWorkflowSpec(UnittestPythonCompatibility):
@@ -117,7 +117,7 @@ class TestWorkflowSpec(UnittestPythonCompatibility):
         """
 
         spec = WorkflowSpec()
-        spec.load(os.path.join(currpath, '../files/test-linear-finished.jgf'))
+        spec.load(os.path.abspath(os.path.join(currpath, '../files/test-linear-finished.jgf')))
 
         self.assertEqual(spec.workflow.root, 11)
         self.assertEqual(spec.workflow[spec.workflow.root]['task_type'], 'BlockingPythonTask')

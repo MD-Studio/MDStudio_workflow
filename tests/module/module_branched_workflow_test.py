@@ -19,7 +19,7 @@ import unittest
 from tests.module.unittest_baseclass import UnittestPythonCompatibility
 from mdstudio_workflow import Workflow, WorkflowSpec
 
-currpath = os.path.dirname(__file__)
+currpath = os.path.abspath(os.path.dirname(__file__))
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-branched-workflow.jgf'))
 project_dir = os.path.abspath(os.path.join(currpath, '../files/md_workflow'))
 
@@ -119,7 +119,7 @@ class TestBuildBranchedWorkflow(UnittestPythonCompatibility):
 
         for task in range(10):
             self.spec.add_task('test{0}'.format(task+1), task_type='PythonTask',
-                               custom_func="dummy_task_runners.task_runner")
+                               custom_func="module.dummy_task_runners.task_runner")
 
         self.assertEqual(len(self.spec), 10)
 

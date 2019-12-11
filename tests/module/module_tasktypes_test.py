@@ -17,10 +17,10 @@ from graphit.graph_exceptions import GraphitValidationError
 
 from mdstudio_workflow import WorkflowSpec
 
-from tests.module.dummy_task_runners import task_runner
-from tests.module.unittest_baseclass import UnittestPythonCompatibility, STRING_TYPES
+from module.dummy_task_runners import task_runner
+from module.unittest_baseclass import UnittestPythonCompatibility, STRING_TYPES
 
-currpath = os.path.dirname(__file__)
+currpath = os.path.abspath(os.path.dirname(__file__))
 
 
 class TestTaskBaseClass(object):
@@ -90,7 +90,7 @@ class TestWorkflowSpecPythonTask(TestTaskBaseClass, UnittestPythonCompatibility)
         Test loading custom Python functions or classes
         """
 
-        self.task.custom_func.set('value', 'dummy_task_runners.task_runner')
+        self.task.custom_func.set('value', 'module.dummy_task_runners.task_runner')
         self.assertEqual(inspect.getsource(self.task.custom_func.load()), inspect.getsource(task_runner))
 
         # Basic dot-separated path validation (regex)

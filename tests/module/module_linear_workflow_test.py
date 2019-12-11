@@ -15,7 +15,7 @@ import time
 from mdstudio_workflow import Workflow, WorkflowSpec
 from tests.module.unittest_baseclass import UnittestPythonCompatibility
 
-currpath = os.path.dirname(__file__)
+currpath = os.path.abspath(os.path.dirname(__file__))
 workflow_file_path = os.path.abspath(os.path.join(currpath, '../files/test-linear-workflow.jgf'))
 project_dir = os.path.abspath(os.path.join(currpath, '../files/md_workflow'))
 
@@ -65,7 +65,7 @@ class BaseWorkflowRunnerTests(object):
         self.assertIsNotNone(self.wf.starttime)
         self.assertIsNotNone(self.wf.finishtime)
         self.assertIsNotNone(self.wf.updatetime)
-        self.assertLessEqual(self.wf.runtime, 9)
+        self.assertLessEqual(self.wf.runtime, 10)
         self.assertLessEqual(self.wf.updatetime, self.wf.finishtime)
 
     def test5_final_workflow_output(self):
@@ -114,7 +114,7 @@ class TestBuildLinearWorkflow(UnittestPythonCompatibility):
 
         for task in range(5):
             self.spec.add_task('test{0}'.format(task+1), task_type='BlockingPythonTask',
-                               custom_func="dummy_task_runners.task_runner")
+                               custom_func="module.dummy_task_runners.task_runner")
 
         self.assertEqual(len(self.spec), 5)
 

@@ -93,7 +93,7 @@
       "_id": 13,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "14": {
       "key": "active",
@@ -215,7 +215,7 @@
       "_id": 29,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "30": {
       "key": "active",
@@ -336,7 +336,7 @@
       "_id": 45,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "46": {
       "key": "active",
@@ -457,7 +457,7 @@
       "_id": 61,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "62": {
       "key": "active",
@@ -578,7 +578,7 @@
       "_id": 77,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "78": {
       "key": "active",
@@ -699,7 +699,7 @@
       "_id": 93,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "94": {
       "key": "active",
@@ -820,7 +820,7 @@
       "_id": 109,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "110": {
       "key": "active",
@@ -941,7 +941,7 @@
       "_id": 125,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "126": {
       "key": "active",
@@ -1062,7 +1062,7 @@
       "_id": 141,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "142": {
       "key": "active",
@@ -1183,7 +1183,7 @@
       "_id": 157,
       "type": "string",
       "pattern": "^\\w+(\\w+\\.)+\\w+$",
-      "value": "dummy_task_runners.task_runner"
+      "value": "module.dummy_task_runners.task_runner"
     },
     "158": {
       "key": "active",
