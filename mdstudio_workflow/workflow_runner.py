@@ -113,8 +113,10 @@ class WorkflowRunner(WorkflowSpec):
         if status == 'completed':
 
             # Get next task(s) to run
-            next_task_nids.extend([ntask.nid for ntask in task.next_tasks()])
-            logging.info('{0} new tasks to run with output of {1} ({2})'.format(len(next_task_nids), task.nid, task.key))
+            next_tasks = task.next_tasks()
+            next_task_nids.extend([ntask.nid for ntask in next_tasks])
+            logging.info('{0} new tasks to run with output of {1} ({2}): {3}'.format(len(next_task_nids), task.nid,
+                                                                    task.key, ','.join([nt.key for nt in next_tasks])))
 
         # If the task failed, retry if allowed and reset status to "ready"
         if status == 'failed' and task.task_metadata.retry_count():
