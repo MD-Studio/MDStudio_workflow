@@ -8,6 +8,7 @@ Unit tests for the WorkflowSpec class
 
 import os
 import json
+import inspect
 import jsonschema
 import pkg_resources
 
@@ -90,7 +91,7 @@ class TestWorkflowSpecPythonTask(TestTaskBaseClass, UnittestPythonCompatibility)
         """
 
         self.task.custom_func.set('value', 'dummy_task_runners.task_runner')
-        self.assertEqual(self.task.custom_func.load(), task_runner)
+        self.assertEqual(inspect.getsource(self.task.custom_func.load()), inspect.getsource(task_runner))
 
         # Basic dot-separated path validation (regex)
         self.assertRaises(GraphitValidationError, self.task.custom_func.set, 'value', 'dummy_task_runners')
