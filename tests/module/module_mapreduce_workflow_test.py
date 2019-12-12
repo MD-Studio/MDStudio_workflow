@@ -173,7 +173,7 @@ class TestRunMapreduceWorkflowDefault(BaseWorkflowRunnerTests, UnittestPythonCom
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
 
 class TestZcleanup(UnittestPythonCompatibility):

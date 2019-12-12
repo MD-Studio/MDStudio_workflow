@@ -55,7 +55,7 @@ class BaseWorkflowRunnerTests(object):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
     def test4_final_workflow_status(self):
         """
@@ -388,7 +388,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCa
 
         # Blocking: wait until workflow hits breakpoint
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
         self.assertFalse(self.wf.is_running)
         self.assertFalse(self.wf.is_completed)
@@ -406,7 +406,7 @@ class TestRunBranchedWorkflowBreakpoint(BaseWorkflowRunnerTests, unittest.TestCa
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
     def test4_final_workflow_status(self):
         """

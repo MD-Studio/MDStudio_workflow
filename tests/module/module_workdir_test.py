@@ -52,7 +52,7 @@ class TestLocalWorkdir(UnittestPythonCompatibility):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
         # Check existence of project dir, tasks dirs and workflow graph file.
         self.assertTrue(os.path.exists(tmp_project_dir))
@@ -77,7 +77,7 @@ class TestLocalWorkdir(UnittestPythonCompatibility):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
         # Check existence of project dir, tasks dirs and workflow graph file.
         self.assertTrue(os.path.exists(tmp_project_dir))

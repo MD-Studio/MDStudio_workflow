@@ -176,7 +176,7 @@ class TestInputOutputMapping(UnittestPythonCompatibility):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
         # Check expected output. All output should be returned
         expected = {'test1': 12, 'test2': 20}
@@ -197,7 +197,7 @@ class TestInputOutputMapping(UnittestPythonCompatibility):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
         # Check expected output.
         expected = {'test1': 12, 'test2': 20}
@@ -218,7 +218,7 @@ class TestInputOutputMapping(UnittestPythonCompatibility):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
         # Check expected output.
         expected = {'test1': 12, 'test2': 13}
@@ -240,7 +240,7 @@ class TestInputOutputMapping(UnittestPythonCompatibility):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(1)
+            time.sleep(2)
 
         # Check expected output.
         expected = {'test1': 12, 'test2': 13}
