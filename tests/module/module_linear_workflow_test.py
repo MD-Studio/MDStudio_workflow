@@ -51,7 +51,7 @@ class BaseWorkflowRunnerTests(object):
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(2)
+            time.sleep(1)
 
     def test4_final_workflow_status(self):
         """
@@ -316,7 +316,7 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, UnittestPythonCom
 
         # Blocking: wait until workflow hits breakpoint
         while self.wf.is_running:
-            time.sleep(2)
+            time.sleep(1)
 
         self.assertFalse(self.wf.is_running)
         self.assertFalse(self.wf.is_completed)
@@ -338,7 +338,7 @@ class TestRunLinearWorkflowBreakpoint(BaseWorkflowRunnerTests, UnittestPythonCom
 
         # Blocking: wait until workflow is no longer running
         while self.wf.is_running:
-            time.sleep(2)
+            time.sleep(1)
 
         # Test partial results up to breakpoint
         self.assertDictEqual(partial_result, {u'test1': 4, u'test2': 6, u'test3': 7, u'test4': None, u'test5': None})
