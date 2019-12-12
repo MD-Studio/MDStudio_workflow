@@ -48,7 +48,7 @@ def copytree(src, dst, symlinks=False, ignore=None):
                 st = os.lstat(s)
                 mode = stat.S_IMODE(st.st_mode)
                 os.lchmod(d, mode)
-            except:
+            except Exception:
                 pass  # lchmod not available
         elif os.path.isdir(s):
             copytree(s, d, symlinks, ignore)
@@ -125,7 +125,7 @@ def is_file(param):
     if os.path.isdir(param):
         return False
 
-    if re.match('^(.+)/([^/]+)$', param) and not '(' in param:
+    if re.match('^(.+)/([^/]+)$', param) and '(' not in param:
         return True
 
     return False

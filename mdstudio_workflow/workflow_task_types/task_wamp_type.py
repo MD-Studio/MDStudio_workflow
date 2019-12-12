@@ -11,7 +11,7 @@ import os
 import re
 import json
 
-from tempfile import mktemp
+from tempfile import mkstemp
 from mdstudio.component.session import ComponentSession
 from mdstudio.deferred.chainable import chainable
 from mdstudio.deferred.return_value import return_value
@@ -112,7 +112,7 @@ class FileType(NodeAxisTools):
 
             # No path, make one using a unique filename.
             else:
-                tmpfilename = os.path.basename(mktemp())
+                tmpfilename = os.path.basename(mkstemp())
                 newfile = os.path.join(workdir, '{0}.{1}'.format(tmpfilename, new_file_obj[u'extension'] or 'txt'))
                 with open(newfile, 'w') as outfile:
                     outfile.write(new_file_obj[u'content'])
@@ -178,7 +178,7 @@ class FileArrayType(NodeAxisTools):
 
                 # No path, make one using a unique filename.
                 else:
-                    tmpfilename = os.path.basename(mktemp())
+                    tmpfilename = os.path.basename(mkstemp())
                     newfile = os.path.join(workdir,'{0}.{1}'.format(tmpfilename, new_file_obj[u'extension'] or 'txt'))
                     with open(newfile, 'w') as outfile:
                         outfile.write(new_file_obj[u'content'])
@@ -321,7 +321,7 @@ class SchemaParser(object):
                     self.session.component_config.static.vendor).call(
                     self.schema_endpoint, uri_dict,
                     claims={u'vendor': self.session.component_config.static.vendor})
-            except:
+            except Exception:
                 logging.error('Unable to call endpoint: {0}'.format(uri))
 
             self._schema_cache[uri] = response

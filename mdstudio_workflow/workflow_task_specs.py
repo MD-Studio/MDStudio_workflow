@@ -57,7 +57,7 @@ class Choice(_TaskBase):
         disabled = []
         choice_nids = output.get('choice', [])
         for task in self.children():
-            if not task.nid in choice_nids:
+            if task.nid not in choice_nids:
                 task.status = 'disabled'
                 disabled.append(str(task.nid))
         logging.info('Disabled tasks: {0}'.format(','.join(disabled)))

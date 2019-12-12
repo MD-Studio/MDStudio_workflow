@@ -239,7 +239,8 @@ class WorkflowSpec(object):
         self.workflow.node_tools = NodeAxisTools
         self.workflow.orm = WORKFLOW_ORM
 
-        assert self.workflow.root is not None, WorkflowError('Workflow does not have a root node defined')
+        if self.workflow.root is None:
+            WorkflowError('Workflow does not have a root node defined')
 
         # Get metadata
         metadata = self.workflow.query_nodes(key='project_metadata')
@@ -266,7 +267,6 @@ class WorkflowSpec(object):
             path = os.path.abspath(path)
             pred = os.path.exists(os.path.dirname(path))
             msg = 'Directory does not exist: {0}'.format(os.path.dirname(path))
-            assert pred, msg
             try:
                 with open(path, 'w') as json_to_file:
                     json_to_file.write(json_string)

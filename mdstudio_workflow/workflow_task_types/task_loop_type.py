@@ -47,7 +47,7 @@ class LoopTask(TaskBase):
             # Set unique task uuid
             self.task_metadata.task_id.set(self.data.value_tag, self.task_metadata.task_id.create())
 
-    def cancel(self):
+    def cancel(self, **kwargs):
 
         self.status = 'aborted'
 
@@ -98,19 +98,19 @@ class LoopTask(TaskBase):
             return prep
 
         # Check if mapper argument defined in input
-        input = self.get_input()
+        mapinput = self.get_input()
         mapper_arg = self.mapper_arg()
-        if mapper_arg is None or not mapper_arg in input:
+        if mapper_arg is None or mapper_arg not in mapinput:
             logging.error('Mapper argument {0} not in task input'.format(mapper_arg))
             return False
 
         # Mapper should be mappable
-        if not isinstance(input[mapper_arg], (list, tuple, set)):
+        if not isinstance(mapinput[mapper_arg], (list, tuple, set)):
             logging.error('Mapper argument {0} is not a container of items'.format(mapper_arg))
             return False
 
         # Mapper should contain more than one item
-        if len(input[mapper_arg]) <= 1:
+        if len(mapinput[mapper_arg]) <= 1:
             logging.error('Mapper argument {0} should contain more then one item'.format(mapper_arg))
             return False
 
@@ -127,7 +127,7 @@ class LoopTask(TaskBase):
         subgraph = self.origin.getnodes(ds.nodes.difference(df.nodes))
         connecting_edges = edges_parent_to_subgraph(subgraph)
 
-        for x in range(len(input[mapper_arg])-1):
+        for x in range(len(mapinput[mapper_arg])-1):
 
             mapping = graph_join(self.origin, subgraph, run_node_new=False, run_edge_new=False)
             for ledge in connecting_edges:
@@ -136,7 +136,7 @@ class LoopTask(TaskBase):
                                           run_edge_new=False, directed=self.origin.directed, **attr)
 
         logging.info('Copied sub-workflow of {0} tasks, {1} times'.format(len(subgraph.query_nodes(format='task')),
-                                                                          len(input[mapper_arg])-1))
+                                                                          len(mapinput[mapper_arg])-1))
 
         return True
 
