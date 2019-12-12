@@ -1,7 +1,7 @@
 # MDStudio workflow
 
 [![Build Status](https://travis-ci.com/MD-Studio/MDStudio_workflow.svg?branch=master)](https://travis-ci.com/MD-Studio/MDStudio_workflow)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d66db06e8cb041f4b1cd90ace5d6ce69)](https://www.codacy.com/manual/marcvdijk/MDStudio_workflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MD-Studio/MDStudio_workflow&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/423d531650af46b3a0909dc03246af66)](https://www.codacy.com/manual/marcvdijk/MDStudio_workflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MD-Studio/MDStudio_workflow&amp;utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/gh/MD-Studio/MDStudio_workflow/branch/master/graph/badge.svg)](https://codecov.io/gh/MD-Studio/MDStudio_workflow)
 
 ![Configuration settings](mdstudio-logo.png)
