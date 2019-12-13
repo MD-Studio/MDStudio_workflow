@@ -11,6 +11,8 @@ Unit tests construction and running the linear workflow:
 import os
 import unittest
 import time
+import glob
+import shutil
 
 from mdstudio_workflow import Workflow, WorkflowSpec
 from tests.module.unittest_baseclass import UnittestPythonCompatibility
@@ -21,15 +23,6 @@ project_dir = os.path.abspath(os.path.join(currpath, '../files/md_workflow'))
 
 
 class BaseWorkflowRunnerTests(object):
-
-    @classmethod
-    def tearDownClass(cls):
-        """
-        Remove workflow project directory
-        """
-
-        project_metadata = cls.wf.workflow.query_nodes(key='project_metadata')
-        project_metadata.project_dir.remove()
 
     def test1_initial_workflow_status(self):
         """
@@ -540,6 +533,13 @@ class TestZcleanup(UnittestPythonCompatibility):
         if os.path.exists(workflow_file_path):
             os.remove(workflow_file_path)
 
-    def test_dummy(self):
+    def test_remove_project_dirs(self):
+        """
+        Remove all the project directories created by previous tests
+        """
 
-        pass
+        for project in glob.glob('{0}-*'.format(project_dir)):
+
+            if os.path.isdir(project):
+                shutil.rmtree(project)
+
