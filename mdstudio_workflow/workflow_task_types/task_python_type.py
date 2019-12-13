@@ -61,9 +61,9 @@ class LoadCustomFunc(NodeTools):
                 func = getattr(imodule, function_name)
                 logging.debug(
                     'Load task runner function: {0} from module: {1}'.format(function_name, module_name))
-            except (ValueError, ImportError):
-                msg = 'Unable to load task runner function: "{0}" from module: "{1}"'
-                logging.error(msg.format(function_name, module_name))
+            except (ValueError, ImportError) as e:
+                msg = 'Unable to load task runner function: "{0}" from module: "{1}": {2}'
+                logging.error(msg.format(function_name, module_name, e))
         else:
             logging.error('No Python path to function or class defined')
 
