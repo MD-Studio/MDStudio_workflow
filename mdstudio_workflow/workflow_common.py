@@ -157,7 +157,7 @@ def collect_data(output, task_dir):
                     output_file = os.path.join(task_dir,
                                                'file_{0}.{1}'.format(node.get('key', key),
                                                                      node.get('extension', 'out').lstrip('.')))
-                    with file(output_file, 'w') as outf:
+                    with open(output_file, 'w') as outf:
                         outf.write(value)
 
                     node['path'] = output_file
