@@ -12,7 +12,7 @@ __licence__ = 'Apache Software License 2.0'
 __url__ = 'https://github.com/MD-Studio/MDStudio_structures'
 __copyright__ = "Copyright (c) VU University, Amsterdam"
 __rootpath__ = os.path.dirname(__file__)
-__twisted_logger__ = False
+__twisted_logger__ = True
 
 from .workflow_runner import WorkflowRunner as Workflow
 from .workflow_spec import WorkflowSpec
