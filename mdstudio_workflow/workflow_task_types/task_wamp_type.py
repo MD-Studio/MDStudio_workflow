@@ -274,11 +274,15 @@ class SchemaParser(object):
 
         self.session = session
         self.schema_endpoint = u'mdstudio.schema.endpoint.get'
+        self.vendor = self.session.component_config.static.get('vendor')
+
+        if self.vendor is None:
+            raise WorkflowError('MDStudio static.vendor not defined. "settings.yml" file may be missing')
 
         # Cache schema's to limit calls
         self._schema_cache = {}
 
-    def _get_refs(self, schema, refs=[]):
+    def _get_refs(self, schema, refs=None):
         """
         Get JSON Schema reference URI's ($ref) from a JSON Schema document.
 
@@ -288,6 +292,9 @@ class SchemaParser(object):
         :return:       list of refered JSON schema's
         :rtype:        :py:list
         """
+
+        if refs is None:
+            refs = []
 
         for key, value in schema.items():
             if key == u'$ref':
@@ -317,16 +324,17 @@ class SchemaParser(object):
 
             response = {}
             try:
-                response = yield self.session.group_context(
-                    self.session.component_config.static.vendor).call(
-                    self.schema_endpoint, uri_dict,
-                    claims={u'vendor': self.session.component_config.static.vendor})
+                response = yield self.session.group_context(self.vendor).call(self.schema_endpoint, uri_dict,
+                                                                              claims={u'vendor': self.vendor})
             except Exception:
-                logging.error('Unable to call endpoint: {0}'.format(uri))
+               logging.error('Unable to call endpoint: {0}'.format(uri))
 
             self._schema_cache[uri] = response
-            for refs in set(self._get_refs(response)):
-                yield self._recursive_schema_call(schema_uri_to_dict(refs))
+            refs = self._get_refs(response)
+
+            if refs:
+                for ref in set(refs):
+                    yield self._recursive_schema_call(schema_uri_to_dict(ref))
 
     def _build_schema(self, schema):
         """
