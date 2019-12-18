@@ -219,7 +219,7 @@ class WorkflowRunner(WorkflowSpec):
                 task.status = 'running'
 
                 if task.task_type == 'WampTask':
-                    wait = random.randint(5,15)
+                    wait = random.randint(5,10)
                     logging.info('Task {0} ({1}): start task in {2} sec.'.format(task.nid, task.key, wait))
                     threading.Timer(wait, task.run_task, (self.output_callback,),
                                     {'task_runner': self.task_runner}).start()
