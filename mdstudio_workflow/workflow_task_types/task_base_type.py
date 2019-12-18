@@ -136,8 +136,9 @@ def load_referenced_output(output_dict, base_path=None):
     :rtype:             :py:dict
     """
 
-    for key, value in output_dict.items():
+    for key in list(output_dict.keys()):
 
+        value = output_dict[key]
         if key == '$ref':
 
             if not os.path.isabs(value):

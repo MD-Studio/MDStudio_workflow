@@ -341,7 +341,9 @@ class SchemaParser(object):
         Build full JSON Schema from source and referenced schemas
         """
 
-        for key, value in schema.items():
+        for key in list(schema.keys()):
+
+            value = schema[key]
             if isinstance(value, dict):
                 if u'$ref' in value:
                     schema[key].update(self._schema_cache[value[u'$ref']])
