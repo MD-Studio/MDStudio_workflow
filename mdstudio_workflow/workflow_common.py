@@ -148,8 +148,9 @@ def collect_data(output, task_dir):
     graph = read_pydata(output, level=1)
     for node in graph.nodes.values():
 
-        for key, value in node.items():
+        for key in list(node.keys()):
 
+            value = node[key]
             if isinstance(value, PY_STRING) or is_file(value):
 
                 # Serialized file
